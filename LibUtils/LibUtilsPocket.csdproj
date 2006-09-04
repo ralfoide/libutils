@@ -1,0 +1,190 @@
+<VisualStudioProject>
+    <ECSHARP
+        ProjectType = "Local"
+        ProductVersion = "7.10.3077"
+        SchemaVersion = "1.0"
+        ProjectGuid = "{3B866218-8544-4FD9-B097-DCB4F0AE1D69}"
+    >
+        <Build>
+            <Settings
+                ApplicationIcon = ""
+                AssemblyKeyContainerName = ""
+                AssemblyName = "LibUtilsPocket"
+                AssemblyOriginatorKeyFile = ""
+                DelaySign = "false"
+                OutputType = "Library"
+                OutputFileFolder = "\Program Files\LibUtilsPocket"
+                RootNamespace = "LibUtilsPocket"
+                StartupObject = ""
+            >
+                <Platform Name = "Pocket PC" />
+                <Config
+                    Name = "Debug|Pocket PC"
+                    AllowUnsafeBlocks = "false"
+                    BaseAddress = "0"
+                    CheckForOverflowUnderflow = "false"
+                    ConfigurationOverrideFile = ""
+                    DefineConstants = "DEBUG;TRACE;LIBCF"
+                    DocumentationFile = ""
+                    DebugSymbols = "true"
+                    FileAlignment = "4096"
+                    IncrementalBuild = "false"
+                    Optimize = "false"
+                    OutputPath = "bin\Debug\"
+                    RegisterForComInterop = "false"
+                    RemoveIntegerChecks = "false"
+                    TreatWarningsAsErrors = "false"
+                    WarningLevel = "4"
+                />
+                <Config
+                    Name = "Release|Pocket PC"
+                    AllowUnsafeBlocks = "false"
+                    BaseAddress = "0"
+                    CheckForOverflowUnderflow = "false"
+                    ConfigurationOverrideFile = ""
+                    DefineConstants = "TRACE;LIBCF"
+                    DocumentationFile = ""
+                    DebugSymbols = "false"
+                    FileAlignment = "4096"
+                    IncrementalBuild = "false"
+                    Optimize = "true"
+                    OutputPath = "bin\Release\"
+                    RegisterForComInterop = "false"
+                    RemoveIntegerChecks = "false"
+                    TreatWarningsAsErrors = "false"
+                    WarningLevel = "4"
+                />
+            </Settings>
+            <References>
+                <Reference
+                    Platform = "Pocket PC"
+                    Name = "MSCorLib"
+                    AssemblyName = "mscorlib"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC"
+                    Name = "System"
+                    AssemblyName = "System"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC"
+                    Name = "System.XML"
+                    AssemblyName = "System.Xml"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC"
+                    Name = "System.Data"
+                    AssemblyName = "System.Data"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC"
+                    Name = "System.Windows.Forms"
+                    AssemblyName = "System.Windows.Forms"
+                />
+                <Reference
+                    Platform = "Pocket PC"
+                    Name = "System.Drawing"
+                    AssemblyName = "System.Drawing"
+                />
+                <Reference
+                    Platform = "Pocket PC-Designer"
+                    Name = "System.CF.Design"
+                    AssemblyName = "System.CF.Design"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC-Designer"
+                    Name = "System.CF.Design.UI"
+                    AssemblyName = "System.CF.Design.UI"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC-Designer"
+                    Name = "System.CF.Windows.Forms"
+                    AssemblyName = "System.CF.Windows.Forms"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC-Designer"
+                    Name = "System.CF.Drawing"
+                    AssemblyName = "System.CF.Drawing"
+                    Private = "False"
+                />
+                <Reference
+                    Platform = "Pocket PC-Designer"
+                    Name = "System"
+                    AssemblyName = "System"
+                    Private = "False"
+                />
+            </References>
+        </Build>
+        <Files>
+            <Include>
+                <File
+                    RelPath = "AssemblyInfoPocket.cs"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Buffers\RBuffer.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Buffers\RIBuffer.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Buffers\RIReceiver.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Buffers\RISender.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Buffers\RSenderBase.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Misc\RFreqCounter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Misc\RILog.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Misc\RPref.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Misc\RTraceTimer.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Misc\RUtils.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Misc\RVoidLog.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+            </Include>
+        </Files>
+    </ECSHARP>
+</VisualStudioProject>
+
