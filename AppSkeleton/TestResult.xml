@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="D:\RalfDev\csharp\AppSkeleton\TestsConsole.nunit" total="5" failures="0" not-run="0" date="2005/02/18" time="3:02 PM">
+  <test-suite name="D:\RalfDev\csharp\AppSkeleton\TestsConsole.nunit" success="True" time="0.71875">
+    <results>
+      <test-suite name="D:\RalfDev\csharp\AppSkeleton\TestsConsole\bin\Debug\TestsConsole.exe" success="True" time="0.703125">
+        <results>
+          <test-suite name="Alfray" success="True" time="0.703125">
+            <results>
+              <test-suite name="AppSkeletonNs" success="True" time="0.703125">
+                <results>
+                  <test-suite name="TestsConsole" success="True" time="0.6875">
+                    <results>
+                      <test-suite name="RTestPref" success="True" time="0.6875">
+                        <results>
+                          <test-case name="Alfray.AppSkeletonNs.TestsConsole.RTestPref.TestInit" executed="True" success="True" time="0.016" />
+                          <test-case name="Alfray.AppSkeletonNs.TestsConsole.RTestPref.TestSetRemoveKey" executed="True" success="True" time="0.000" />
+                          <test-case name="Alfray.AppSkeletonNs.TestsConsole.RTestPref.TestSettingFileName" executed="True" success="True" time="0.266" />
+                          <test-case name="Alfray.AppSkeletonNs.TestsConsole.RTestPref.TestLoad" executed="True" success="True" time="0.359" />
+                          <test-case name="Alfray.AppSkeletonNs.TestsConsole.RTestPref.TestSave" executed="True" success="True" time="0.047" />
+                        </results>
+                      </test-suite>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
