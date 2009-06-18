@@ -84,13 +84,3 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyFile("")]
 [assembly: AssemblyKeyName("")]
-
-//---------------------------------------------------------------
-//	$Log: AssemblyInfo.cs,v $
-//	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
-//	Moved AppSkeleton.Utils in a separate LibUtils project
-//	
-//	Revision 1.3  2005/03/20 19:48:40  ralf
-//	Added GPL headers.
-//	
-//---------------------------------------------------------------

@@ -536,33 +536,3 @@ namespace Alfray.LibUtils.Misc
 
 	} // class RPref
 } // namespace Alfray.LibUtils.Misc
-
-
-//---------------------------------------------------------------
-//	[C# Template RM 20041110]
-//	$Log: RPref.cs,v $
-//	Revision 1.3  2005/07/26 14:59:02  ralf
-//	Compact Framework version: LibUtilsPocket
-//	
-//	Revision 1.2  2005/05/25 03:52:22  ralf
-//	Added Get/SetEnumeration in prefs
-//	
-//	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
-//	Moved AppSkeleton.Utils in a separate LibUtils project
-//	
-//	Revision 1.5  2005/04/27 01:12:01  ralf
-//	Updated Utils with files from Xeres
-//	
-//	Revision 1.4  2005/03/20 19:55:22  ralf
-//	Updated Utils.RPrefs
-//	
-//	Revision 1.3  2005/03/20 19:48:40  ralf
-//	Added GPL headers.
-//	
-//	Revision 1.2  2005/02/21 03:35:01  ralf
-//	New Get/SetRect
-//	
-//	Revision 1.1.1.1  2005/02/18 22:54:53  ralf
-//	A skeleton application template, with NUnit testing
-//	
-//---------------------------------------------------------------

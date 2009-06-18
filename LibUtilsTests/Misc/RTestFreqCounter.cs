@@ -160,24 +160,3 @@ namespace Alfray.LibUtils.Tests.Misc
 	} // class RTestFreqCounter
 } // namespace Alfray.LibUtils.Tests.Misc
 
-
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RTestFreqCounter.cs,v $
-//	Revision 1.1  2005/07/22 14:51:13  ralf
-//	Reorganizes LibUtilsTests in subdirs.
-//	Added RUtil.AspectRatio.
-//	
-//	Revision 1.2  2005/05/30 20:44:35  ralf
-//	Using uniform variable "t" for tested object
-//	
-//	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
-//	Moved AppSkeleton.Utils in a separate LibUtils project
-//	
-//	Revision 1.1  2005/04/27 01:12:01  ralf
-//	Updated Utils with files from Xeres
-//	
-//	Revision 1.1  2005/03/28 00:24:29  ralf
-//	New tests
-//	
-//---------------------------------------------------------------

@@ -90,14 +90,3 @@ namespace Alfray.LibUtils.Misc
 	} // class RUtils
 } // namespace Alfray.LibUtils.Misc
 
-//*******************************************************************
-/*
- *	$Log: RUtils.cs,v $
- *	Revision 1.1  2005/07/22 14:51:13  ralf
- *	Reorganizes LibUtilsTests in subdirs.
- *	Added RUtil.AspectRatio.
- *	
- * 
- */
-//*******************************************************************
-

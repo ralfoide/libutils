@@ -119,15 +119,3 @@ namespace Alfray.LibUtils.Tests.Misc
 	} // class RTestVoidLog
 } // namespace Alfray.LibUtils.Tests.Misc
 
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RTestVoidLog.cs,v $
-//	Revision 1.1  2005/07/23 14:56:21  ralf
-//	Added RAsyncLog
-//	
-//	Revision 1.1  2005/07/22 14:51:13  ralf
-//	Reorganizes LibUtilsTests in subdirs.
-//	Added RUtil.AspectRatio.
-//	
-//	
-//---------------------------------------------------------------

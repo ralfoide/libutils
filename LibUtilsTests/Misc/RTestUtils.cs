@@ -82,12 +82,3 @@ namespace Alfray.LibUtils.Tests.Misc
 	} // class RTestUtils
 } // namespace Alfray.LibUtils.Tests.Misc
 
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RTestUtils.cs,v $
-//	Revision 1.1  2005/07/22 14:51:13  ralf
-//	Reorganizes LibUtilsTests in subdirs.
-//	Added RUtil.AspectRatio.
-//	
-//	
-//---------------------------------------------------------------

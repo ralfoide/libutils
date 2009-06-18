@@ -182,15 +182,3 @@ namespace Alfray.LibUtils.Misc
 
 	} // class RAsyncLog
 } // namespace Alfray.LibUtils.Misc
-
-
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RAsyncLog.cs,v $
-//	Revision 1.2  2005/07/26 14:59:02  ralf
-//	Compact Framework version: LibUtilsPocket
-//	
-//	Revision 1.1  2005/07/23 14:56:21  ralf
-//	Added RAsyncLog
-//	
-//---------------------------------------------------------------

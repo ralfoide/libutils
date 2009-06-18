@@ -249,18 +249,3 @@ namespace Alfray.LibUtils.Tests.Misc
 	} // class RTestAsyncLog
 } // namespace Alfray.LibUtils.Tests.Misc
 
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RTestAsyncLog.cs,v $
-//	Revision 1.2  2005/07/26 14:59:02  ralf
-//	Compact Framework version: LibUtilsPocket
-//	
-//	Revision 1.1  2005/07/23 14:56:21  ralf
-//	Added RAsyncLog
-//	
-//	Revision 1.1  2005/07/22 14:51:13  ralf
-//	Reorganizes LibUtilsTests in subdirs.
-//	Added RUtil.AspectRatio.
-//	
-//	
-//---------------------------------------------------------------

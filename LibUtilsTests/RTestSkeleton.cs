@@ -98,12 +98,3 @@ namespace Alfray.LibUtils.Tests.NAME
 
 */
 
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RTestSkeleton.cs,v $
-//	Revision 1.1  2005/07/22 14:51:13  ralf
-//	Reorganizes LibUtilsTests in subdirs.
-//	Added RUtil.AspectRatio.
-//	
-//	
-//---------------------------------------------------------------

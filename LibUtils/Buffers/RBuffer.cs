@@ -173,34 +173,3 @@ namespace Alfray.LibUtils.Buffers
 
 	} // class RBuffer
 } // namespace Alfray.LibUtils.Buffers
-
-
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RBuffer.cs,v $
-//	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
-//	Moved AppSkeleton.Utils in a separate LibUtils project
-//	
-//	Revision 1.1  2005/04/27 01:12:01  ralf
-//	Updated Utils with files from Xeres
-//	
-//	Revision 1.1  2005/03/23 06:30:04  ralf
-//	Moved RBuffer from Device to Utils. Using RIBuffer.
-//	
-//	Revision 1.5  2005/03/21 07:17:49  ralf
-//	Adding inline doc comments for all classes and public methods
-//	
-//	Revision 1.4  2005/03/10 22:10:20  ralf
-//	Quick test with JPEG encoding
-//	
-//	Revision 1.3  2005/03/09 20:02:39  ralf
-//	Added Format to RBufferVideo
-//	Added FromBitmap to RBufferVideo
-//	
-//	Revision 1.2  2005/02/28 01:15:49  ralf
-//	Added RBufferVideo
-//	
-//	Revision 1.1  2005/02/22 06:11:21  ralf
-//	Added Device.RBuffer
-//	
-//---------------------------------------------------------------

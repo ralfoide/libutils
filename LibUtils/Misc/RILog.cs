@@ -70,23 +70,3 @@ namespace Alfray.LibUtils.Misc
 		// ------- private properties ------- 
 	} // class RILog
 } // namespace Alfray.LibUtils.Misc
-
-//*******************************************************************
-/*
- *	$Log: RILog.cs,v $
- *	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
- *	Moved AppSkeleton.Utils in a separate LibUtils project
- *	
- *	Revision 1.3  2005/04/27 01:12:01  ralf
- *	Updated Utils with files from Xeres
- *	
- *	Revision 1.2  2005/03/20 19:48:40  ralf
- *	Added GPL headers.
- *	
- *	Revision 1.1.1.1  2005/02/18 22:54:53  ralf
- *	A skeleton application template, with NUnit testing
- *	
- * 
- */
-//*******************************************************************
-

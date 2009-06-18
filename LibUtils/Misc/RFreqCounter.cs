@@ -163,18 +163,3 @@ namespace Alfray.LibUtils.Misc
 
 	} // class RFreqCounter
 } // namespace Alfray.LibUtils.Misc
-
-
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RFreqCounter.cs,v $
-//	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
-//	Moved AppSkeleton.Utils in a separate LibUtils project
-//	
-//	Revision 1.1  2005/04/27 01:12:01  ralf
-//	Updated Utils with files from Xeres
-//	
-//	Revision 1.1  2005/03/28 00:24:42  ralf
-//	Added RFreqCounter
-//	
-//---------------------------------------------------------------

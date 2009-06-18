@@ -84,12 +84,3 @@ namespace Alfray.LibUtils.Tests
 
 	} // class LibVersion
 } // namespace Alfray.LibUtils.Tests
-
-
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: LibVersion.cs,v $
-//	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
-//	Moved AppSkeleton.Utils in a separate LibUtils project
-//	
-//---------------------------------------------------------------
