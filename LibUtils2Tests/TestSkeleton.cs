@@ -3,9 +3,9 @@
 
 	Solution:	LibUtils2
 	Project:	LibUtils2
-	File:		RTestVoidLog.cs
+	File:		TestSkeleton.cs
 
-	Copyright 2005, Raphael MOLL.
+	Copyright 2009, Raphael MOLL.
 
 	This file is part of Rivet.
 
@@ -26,22 +26,24 @@
 */
 //*******************************************************************
 
+/*
+
 using System;
 
 using NUnit.Framework;
 
-using Alfray.LibUtils2.Misc;
+using Alfray.LibUtils2.NAME;
 
 //*************************************
-namespace Alfray.LibUtils2.Tests.Misc
+namespace Alfray.LibUtils2.Tests.NAME
 {
 	//***************************************************
 	/// <summary>
-	/// RTestVoidLog tests RVoidLog.
+	/// TestSkeleton tests RSkeleton.
 	/// </summary>
 	[TestFixture]
 	//***************************************************
-	public class RTestVoidLog
+	public class TestSkeleton
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -62,7 +64,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		[SetUp]
 		public void SetUp()
 		{
-			t = new RVoidLog();
+			t = new RSkeleton();
 		}
 
 		//********************
@@ -78,31 +80,6 @@ namespace Alfray.LibUtils2.Tests.Misc
 			Assert.IsNotNull(t);
 		}
 
-		//****************
-		[Test]
-		public void TestLog()
-		{
-			Assert.IsNotNull(t);
-
-			// This call does nothing -- no log is written
-			t.Log("some string");
-
-			// This call does nothing -- no log is written
-			// Log(object) would call object's ToString otherwise.
-			t.Log(this);
-		}
-
-
-		//-------------------------------------------
-		//-------------------------------------------
-
-
-		//*******************************
-		public override string ToString()
-		{
-			return "RTestVoidLog";
-		}
-
 
 
 		//-------------------------------------------
@@ -114,20 +91,9 @@ namespace Alfray.LibUtils2.Tests.Misc
 		//----------- Private Attributes ------------
 		//-------------------------------------------
 
-		private RVoidLog t;
+		private RSkeleton t;
 
-	} // class RTestVoidLog
-} // namespace Alfray.LibUtils2.Tests.Misc
+	} // class TestSkeleton
+} // namespace Alfray.LibUtils2.Tests.NAME
 
-//---------------------------------------------------------------
-//	[C# Template RM 20040516]
-//	$Log: RTestVoidLog.cs,v $
-//	Revision 1.1  2005/07/23 14:56:21  ralf
-//	Added RAsyncLog
-//	
-//	Revision 1.1  2005/07/22 14:51:13  ralf
-//	Reorganizes LibUtilsTests in subdirs.
-//	Added RUtil.AspectRatio.
-//	
-//	
-//---------------------------------------------------------------
+*/

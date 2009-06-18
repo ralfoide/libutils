@@ -46,7 +46,7 @@ namespace Alfray.LibUtils2.Tests
 	/// </summary>
 	//***************************************************
 	[TestFixture]
-	public class RTestSenderBase: RSenderBase
+	public class TestSenderBase: SenderBase
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -64,12 +64,12 @@ namespace Alfray.LibUtils2.Tests
 
 
 		//******************************
-		public RTestSenderBase(): base()
+		public TestSenderBase(): base()
 		{	
 		}
 
 		//*************************************
-		public RTestSenderBase(int queueMaxLen): base(queueMaxLen)
+		public TestSenderBase(int queueMaxLen): base(queueMaxLen)
 		{	
 		}
 
@@ -78,7 +78,7 @@ namespace Alfray.LibUtils2.Tests
 		[SetUp]
 		public void SetUp()
 		{
-			t = new RSenderBase();
+			t = new SenderBase();
 		}
 
 		//********************
@@ -105,7 +105,7 @@ namespace Alfray.LibUtils2.Tests
 			// RSenderBase here we instanciate this test class
 			// to be able to access the protected member.
 
-			RTestSenderBase t = new RTestSenderBase();
+			TestSenderBase t = new TestSenderBase();
 
 			Assert.IsNotNull(t);
 			
@@ -117,7 +117,7 @@ namespace Alfray.LibUtils2.Tests
 
 			// create a buffer
 			byte [] data = new byte[5]{ 0, 1, 42, 3, 42 };
-			RBuffer b = new RBuffer(data);
+            DataBuffer b = new DataBuffer(data);
 
 			// check no buffer has been received yet
 			Assert.IsNull(mLastBuffer);
@@ -145,25 +145,25 @@ namespace Alfray.LibUtils2.Tests
 			// to be able to access the protected member.
 
 			// create a sender that hold 3 buffers max
-			RTestSenderBase t = new RTestSenderBase(3);
+			TestSenderBase t = new TestSenderBase(3);
 
 			// queue should be empty
 			Assert.AreEqual(0, t.BufferQueue.Count);
 
 			// create buffers
 			byte [] data = new byte[5]{ 0, 1, 42, 3, 42 };
-	
-			t.AddBuffer(new RBuffer(data));
+
+            t.AddBuffer(new DataBuffer(data));
 			Assert.AreEqual(1, t.BufferQueue.Count);
 
-			t.AddBuffer(new RBuffer(data));
+            t.AddBuffer(new DataBuffer(data));
 			Assert.AreEqual(2, t.BufferQueue.Count);
 
-			t.AddBuffer(new RBuffer(data));
+            t.AddBuffer(new DataBuffer(data));
 			Assert.AreEqual(3, t.BufferQueue.Count);
 		
 			// adding this buffer should remove the oldest one
-			t.AddBuffer(new RBuffer(data));
+            t.AddBuffer(new DataBuffer(data));
 			Assert.AreEqual(3, t.BufferQueue.Count);
 		}
 
@@ -173,7 +173,7 @@ namespace Alfray.LibUtils2.Tests
 
 
 		//************************************
-		private void callback(RISender sender)
+		private void callback(ISender sender)
 		{
 			// lock queue... always lock the queue (it may be
 			// useless here but this can also be used as a use case)
@@ -183,7 +183,7 @@ namespace Alfray.LibUtils2.Tests
 				Assert.AreEqual(1, sender.BufferQueue.Count);
 
 				// get buffer from the sender
-				mLastBuffer = sender.BufferQueue.Dequeue() as RIBuffer;
+				mLastBuffer = sender.BufferQueue.Dequeue() as IBuffer;
 
 				// check it is not null
 				Assert.IsNotNull(mLastBuffer);
@@ -195,9 +195,9 @@ namespace Alfray.LibUtils2.Tests
 		//----------- Private Attributes ------------
 		//-------------------------------------------
 
-		private RSenderBase t;
+		private SenderBase t;
 
-		private RIBuffer mLastBuffer = null;
+		private IBuffer mLastBuffer = null;
 
 	} // class RTestSenderBase
 } // namespace Alfray.LibUtils2.Tests

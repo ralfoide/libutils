@@ -22,7 +22,7 @@ namespace Alfray.LibUtils2.Misc
 	/// be instantiated.
 	/// </summary>
 	//****************************************************
-	public class RUtils
+	public class Utils
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -79,7 +79,7 @@ namespace Alfray.LibUtils2.Misc
 		/// be instantiated.
 		/// </summary>
 		//**************
-		private RUtils()
+		private Utils()
 		{
 		}
 

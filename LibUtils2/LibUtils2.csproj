@@ -1,16 +1,16 @@
-﻿<Project DefaultTargets="Build" ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{716453D0-DEB4-4FE7-AB7D-0F11D2E015C1}</ProjectGuid>
+    <ProjectGuid>{BB23CCE6-E98D-465C-B2EE-7556DB030394}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ApplicationIcon>
     </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>LibUtilsTests</AssemblyName>
+    <AssemblyName>LibUtils2</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
@@ -18,7 +18,7 @@
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
     <OutputType>Library</OutputType>
-    <RootNamespace>Alfray.LibUtils.Tests</RootNamespace>
+    <RootNamespace>Alfray.LibUtils2</RootNamespace>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
@@ -26,7 +26,7 @@
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <OldToolsVersion>0.0</OldToolsVersion>
+    <OldToolsVersion>2.0</OldToolsVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -76,16 +76,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.core">
-      <Name>nunit.core</Name>
-      <HintPath>C:\Program Files\NUnit 2.2\bin\nunit.core.dll</HintPath>
-      <AssemblyFolderKey>hklm\dn\nunit.framework</AssemblyFolderKey>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <Name>nunit.framework</Name>
-      <HintPath>C:\Program Files\NUnit 2.2\bin\nunit.framework.dll</HintPath>
-      <AssemblyFolderKey>hklm\dn\nunit.framework</AssemblyFolderKey>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -106,28 +96,43 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Buffers\RTestSenderBase.cs">
+    <Compile Include="Buffers\DataBuffer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Buffers\IBuffer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Buffers\IReceiver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Buffers\ISender.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Buffers\SenderBase.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="LibVersion.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Misc\RTestAsyncLog.cs">
+    <Compile Include="Misc\AsyncLog.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Misc\RTestFreqCounter.cs">
+    <Compile Include="Misc\FreqCounter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Misc\RTestPref.cs">
+    <Compile Include="Misc\ILog.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Misc\RTestUtils.cs">
+    <Compile Include="Misc\Pref.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Misc\RTestVoidLog.cs">
+    <Compile Include="Misc\TraceTimer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="RTestSkeleton.cs">
+    <Compile Include="Misc\Utils.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Misc\VoidLog.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

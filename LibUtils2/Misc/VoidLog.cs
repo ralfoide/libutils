@@ -3,7 +3,7 @@
 
 	Solution:	LibUtils2
 	Project:	LibUtils2
-	File:		RTraceTimer.cs
+	File:		RVoidLog.cs
 
 	Copyright 2005, Raphael MOLL.
 
@@ -35,13 +35,10 @@ namespace Alfray.LibUtils2.Misc
 {
 	//***************************************************
 	/// <summary>
-	/// RTraceTimer creates a simple timer utility for
-	/// measure performance. Create an instance to start
-	/// timing, then repeatedly call SetPoint(),
-	/// CheckPoint() and finally EndTotal().
+	/// A dummy RILog that does nothing.
 	/// </summary>
 	//***************************************************
-	public class RTraceTimer
+	public class VoidLog: ILog
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -58,68 +55,36 @@ namespace Alfray.LibUtils2.Misc
 		//-------------------------------------------
 
 		
-		//****************************************
+		//***************
 		/// <summary>
-		/// Creates a new instance of the timer
-		/// with the start date set to now.
+		/// Default constructor. Does nothing.
 		/// </summary>
-		/// <param name="log">Output log object</param>
-		/// <param name="name">Name displayed in output</param>
-		//****************************************
-		public RTraceTimer(RILog log, string name)
+		//***************
+		public VoidLog()
 		{
-			mLog = log;
-			mName = name;
-			mStart = DateTime.Now;
-			mPoint = mStart;
 		}
 
+		#region RILog Members
 
-		//********************
+		//***********************
 		/// <summary>
-		/// Force the next check point comparison time.
+		/// Logs a string. The dummy log drops the string.
 		/// </summary>
-		//********************
-		public void SetPoint()
+		//***********************
+		public void Log(string s)
 		{
-			mPoint = DateTime.Now;
 		}
 
-
-		//********************************
+		//***********************
 		/// <summary>
-		/// Display the time elapsed since the instance
-		/// creation (start time) and the last check point
-		/// time.
+		/// Logs an object as string. The dummy log drops the string.
 		/// </summary>
-		/// <param name="msg">Name displayed in output</param>
-		//********************************
-		public void CheckPoint(string msg)
+		//***********************
+		public void Log(object o)
 		{
-			DateTime now = DateTime.Now;
-			TimeSpan from_start = mStart - now;
-			TimeSpan from_point = mPoint - now;
-
-			mLog.Log(String.Format("[RT: {0}/{1}] - Last: {2} - Total: {3}",
-				mName, msg, from_point, from_start));
-
-			SetPoint();
 		}
 
-
-		//********************
-		/// <summary>
-		/// Display the time elapsed between when the
-		/// instance was created and now.
-		/// </summary>
-		//********************
-		public void EndTotal()
-		{
-			TimeSpan from_start = mStart - DateTime.Now;
-
-			mLog.Log(String.Format("[RT: {0}/End] - Total: {1}",
-				mName, from_start));
-		}
+		#endregion
 
 
 		//-------------------------------------------
@@ -131,21 +96,13 @@ namespace Alfray.LibUtils2.Misc
 		//----------- Private Attributes ------------
 		//-------------------------------------------
 
-
-		private DateTime	mStart;
-		private DateTime	mPoint;
-
-		private string		mName;
-		private RILog		mLog;
-
-
-	} // class RTraceTimer
+	} // class RVoidLog
 } // namespace Alfray.LibUtils2.Misc
 
 
 //---------------------------------------------------------------
 //	[C# Template RM 20040516]
-//	$Log: RTraceTimer.cs,v $
+//	$Log: RVoidLog.cs,v $
 //	Revision 1.1.1.1  2005/04/28 21:33:48  ralf
 //	Moved AppSkeleton.Utils in a separate LibUtils project
 //	

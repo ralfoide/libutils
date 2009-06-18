@@ -46,7 +46,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 	/// </summary>
 	//***************************************************
 	[TestFixture]
-	public class RTestPref: RPref
+	public class TestPref: Pref
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -67,7 +67,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		[SetUp]
 		public void SetUp()
 		{
-			t = new RPref();
+			t = new Pref();
 		}
 
 		//********************
@@ -249,7 +249,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 
 		private const string kTestKey = "reserved-test-key";
 
-		private RPref t;
+		private Pref t;
 
 	} // class RTestPref
 } // namespace Alfray.LibUtils2.Tests.Misc

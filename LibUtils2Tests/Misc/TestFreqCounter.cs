@@ -44,7 +44,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 	/// </summary>
 	//***************************************************
 	[TestFixture]
-	public class RTestFreqCounter
+	public class TestFreqCounter
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -66,7 +66,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		[SetUp]
 		public void SetUp()
 		{
-			t = new RFreqCounter();
+			t = new FreqCounter();
 		}
 
 		//********************
@@ -155,7 +155,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		//----------- Private Attributes ------------
 		//-------------------------------------------
 
-		private RFreqCounter t;
+		private FreqCounter t;
 
 	} // class RTestFreqCounter
 } // namespace Alfray.LibUtils2.Tests.Misc

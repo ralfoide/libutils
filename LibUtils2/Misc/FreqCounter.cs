@@ -42,7 +42,7 @@ namespace Alfray.LibUtils2.Misc
 	/// beginning or last reset.)
 	/// </summary>
 	//***************************************************
-	public class RFreqCounter
+	public class FreqCounter
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -114,7 +114,7 @@ namespace Alfray.LibUtils2.Misc
 		/// Average per seconds is zero at first (i.e. N/A)
 		/// </summary>
 		//*******************
-		public RFreqCounter()
+		public FreqCounter()
 		{
 		}
 

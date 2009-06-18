@@ -44,7 +44,7 @@ namespace Alfray.LibUtils2.Buffers
 	/// the event dispatch.
 	/// </summary>
 	//***************************************************
-	public class RSenderBase: RISender
+	public class SenderBase: ISender
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -101,7 +101,7 @@ namespace Alfray.LibUtils2.Buffers
 		/// Creates a new RSenderBase without a queue limit
 		/// </summary>
 		//******************
-		public RSenderBase()
+		public SenderBase()
 		{
 			mQueueMaxLen = 0;
 			mQueue = new Queue();
@@ -114,7 +114,7 @@ namespace Alfray.LibUtils2.Buffers
 		/// Creates a new RSenderBase with a queue limit
 		/// </summary>
 		//*********************************
-		public RSenderBase(int queueMaxLen): this()
+		public SenderBase(int queueMaxLen): this()
 		{
 			mQueueMaxLen = queueMaxLen;
 		}
@@ -146,7 +146,7 @@ namespace Alfray.LibUtils2.Buffers
 		/// </summary>
 		/// <param name="buffer">The buffer to add</param>
 		//***************************************
-		protected void AddBuffer(RIBuffer buffer)
+		protected void AddBuffer(IBuffer buffer)
 		{
 			lock (mQueue.SyncRoot)
 			{

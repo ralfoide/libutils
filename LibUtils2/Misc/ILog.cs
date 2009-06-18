@@ -39,7 +39,7 @@ namespace Alfray.LibUtils2.Misc
 	/// See RVoidLog for a dummy implementation.
 	/// </summary>
 	//****************************************************
-	public interface RILog
+	public interface ILog
 	{
 		// ------- public properties ------
 

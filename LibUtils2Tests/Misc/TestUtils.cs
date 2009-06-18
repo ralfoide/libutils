@@ -42,7 +42,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 	/// </summary>
 	[TestFixture]
 	//***************************************************
-	public class RTestUtils
+	public class TestUtils
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -63,9 +63,9 @@ namespace Alfray.LibUtils2.Tests.Misc
 		[Test]
 		public void TestAspectRatio()
 		{
-			Assert.AreEqual(new Size( 10,  20), RUtils.AspectRatio(new Size( 100,  200),  20));
-			Assert.AreEqual(new Size( 96,  72), RUtils.AspectRatio(new Size(1600, 1200),  96));
-			Assert.AreEqual(new Size(800, 600), RUtils.AspectRatio(new Size(1024,  768), 800));
+			Assert.AreEqual(new Size( 10,  20), Utils.AspectRatio(new Size( 100,  200),  20));
+			Assert.AreEqual(new Size( 96,  72), Utils.AspectRatio(new Size(1600, 1200),  96));
+			Assert.AreEqual(new Size(800, 600), Utils.AspectRatio(new Size(1024,  768), 800));
 		}
 
 

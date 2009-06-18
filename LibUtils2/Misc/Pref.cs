@@ -49,7 +49,7 @@ namespace Alfray.LibUtils2.Misc
 	/// - The file is located in the app's UserAppData, RPref.xml
 	/// </summary>
 	//***************************************************
-	public class RPref
+	public class Pref
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -121,7 +121,7 @@ namespace Alfray.LibUtils2.Misc
 		/// Creates a new RPref object with an empty dictionnary.
 		/// </summary>
 		//************
-		public RPref()
+		public Pref()
 		{
 			mSettings = new Hashtable();
 		}

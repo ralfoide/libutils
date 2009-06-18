@@ -49,7 +49,7 @@ namespace Alfray.LibUtils2.Buffers
 	/// to exclusive vs. concurrent usage.
 	/// </summary>
 	//***************************************************
-	public class RBuffer: RIBuffer
+	public class DataBuffer: IBuffer
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -137,7 +137,7 @@ namespace Alfray.LibUtils2.Buffers
 		/// no metadata.
 		/// </summary>
 		//**************************
-		public RBuffer(): this(null)
+		public DataBuffer(): this(null)
 		{
 		}
 
@@ -149,7 +149,7 @@ namespace Alfray.LibUtils2.Buffers
 		/// The buffer does not duplicate the data.</param>
 		/// </summary>
 		//*************************
-		public RBuffer(byte[] data)
+		public DataBuffer(byte[] data)
 		{
 			mMeta = new Hashtable();
 			mData = data;

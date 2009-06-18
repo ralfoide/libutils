@@ -41,7 +41,7 @@ namespace Alfray.LibUtils2.Buffers
 	/// when a new buffer is made available.
 	/// </summary>
 	//************
-	public delegate void BufferAvailableCallback(RISender sender);
+	public delegate void BufferAvailableCallback(ISender sender);
 
 
 	//***************************************************
@@ -74,7 +74,7 @@ namespace Alfray.LibUtils2.Buffers
 	/// obsolete queued buffers that have not be used yet.
 	/// </summary>
 	//***************************************************
-	public interface RISender
+	public interface ISender
 	{
 		//-------------------------------------------
 		//----------- Public Events -----------------

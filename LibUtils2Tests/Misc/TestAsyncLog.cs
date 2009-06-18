@@ -45,7 +45,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 	/// </summary>
 	[TestFixture]
 	//***************************************************
-	public class RTestAsyncLog
+	public class TestAsyncLog
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -67,7 +67,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		public void SetUp()
 		{
 			sl = new _StringLog();
-			t = new RAsyncLog(sl);
+			t = new AsyncLog(sl);
 		}
 
 		//********************
@@ -119,7 +119,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 
 		//****************
 		[Test]
-		public void TestAsyncLog()
+		public void TestAsyncLog_()
 		{
 			Assert.IsNotNull(t);
 
@@ -171,7 +171,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		/// Create a logger than logs into a string
 		/// </summary>
 		//*****************************
-		private class _StringLog: RILog
+		private class _StringLog: ILog
 		{
 			public string mString = "";
 
@@ -206,7 +206,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		/// use the Control.Invoke)
 		/// </summary>
 		//*****************************
-		private class _ControlLog: Control, RILog
+		private class _ControlLog: Control, ILog
 		{
 			public string mString = "";
 
@@ -243,7 +243,7 @@ namespace Alfray.LibUtils2.Tests.Misc
 		//----------- Private Attributes ------------
 		//-------------------------------------------
 
-		private RAsyncLog t;
+		private AsyncLog t;
 		private _StringLog sl;
 
 	} // class RTestAsyncLog

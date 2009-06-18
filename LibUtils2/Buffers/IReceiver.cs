@@ -71,7 +71,7 @@ namespace Alfray.LibUtils2.Buffers
 	///   one buffer.
 	/// </summary>
 	//***************************************************
-	public interface RIReceiver
+	public interface IReceiver
 	{
 		//-------------------------------------------
 		//----------- Public Properties -------------
@@ -92,7 +92,7 @@ namespace Alfray.LibUtils2.Buffers
 		/// </summary>
 		/// <param name="sender">The sender which holds the new buffer(s)</param>
 		//*************************************
-		void OnBufferAvailable(RISender sender);
+		void OnBufferAvailable(ISender sender);
 
 
 	} // class RIReceiver

@@ -47,7 +47,7 @@ namespace Alfray.LibUtils2.Misc
 	/// work thread, as those cannot directly access the UI.
 	/// </summary>
 	//***************************************************
-	public class RAsyncLog: RILog
+	public class AsyncLog: ILog
 	{
 		//-------------------------------------------
 		//----------- Public Constants --------------
@@ -65,7 +65,7 @@ namespace Alfray.LibUtils2.Misc
 		/// Gets or sets the target of the async logger
 		/// </summary>
 		//*****************
-		public RILog Logger
+		public ILog Logger
 		{
 			get
 			{
@@ -115,7 +115,7 @@ namespace Alfray.LibUtils2.Misc
 		/// Default constructor. Does nothing.
 		/// </summary>
 		//***************
-		public RAsyncLog(RILog logger)
+		public AsyncLog(ILog logger)
 		{
 			Logger = logger;
 		}
@@ -175,7 +175,7 @@ namespace Alfray.LibUtils2.Misc
 		//----------- Private Attributes ------------
 		//-------------------------------------------
 
-		private RILog			mLogger		 = null;
+		private ILog			mLogger		 = null;
 		private Control			mControl	 = null;
 		private IAsyncResult	mAsyncResult = null;
 
