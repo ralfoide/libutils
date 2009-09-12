@@ -27,9 +27,6 @@
 //*******************************************************************
 
 
-
-
-
 using System;
 using System.IO;
 using System.Xml;
@@ -39,8 +36,7 @@ using System.Text.RegularExpressions;
 
 
 //*********************************
-namespace Alfray.LibUtils2.Misc
-{
+namespace Alfray.LibUtils2.Misc {
 	//***************************************************
 	/// <summary>
 	/// RPref:
@@ -49,9 +45,9 @@ namespace Alfray.LibUtils2.Misc
 	/// - The file is located in the app's UserAppData, RPref.xml
 	/// </summary>
 	//***************************************************
-	public class Pref
-	{
-		//-------------------------------------------
+    public class Pref {
+
+        //-------------------------------------------
 		//----------- Public Constants --------------
 		//-------------------------------------------
 
@@ -70,30 +66,24 @@ namespace Alfray.LibUtils2.Misc
 		/// To unset a setting, affect null to it.
 		/// </summary>
 		//*****************************
-		public string this[string name]
-		{
-			get
-			{
-				if (mSettings.ContainsKey(name))
-					return (string) mSettings[name];
-				else
-					return null;
-			}
+        public string this[string name] {
+            get {
+                if (mSettings.ContainsKey(name))
+                    return (string)mSettings[name];
+                else
+                    return null;
+            }
 
-			set
-			{
-				// RM 20050129 setting an existing key to NULL removes it
-				if (value == null)
-				{
-					if (mSettings.ContainsKey(name))
-						mSettings.Remove(name);
-				}
-				else
-				{
-					mSettings[name] = value;
-				}
-			}
-		}
+            set {
+                // RM 20050129 setting an existing key to NULL removes it
+                if (value == null) {
+                    if (mSettings.ContainsKey(name))
+                        mSettings.Remove(name);
+                } else {
+                    mSettings[name] = value;
+                }
+            }
+        }
 
 
 
@@ -102,13 +92,11 @@ namespace Alfray.LibUtils2.Misc
 		/// Returns the setting dictionnary.
 		/// </summary>
 		//***********************
-		public Hashtable Settings
-		{
-			get
-			{
-				return mSettings;
-			}
-		}
+        public Hashtable Settings {
+            get {
+                return mSettings;
+            }
+        }
 
 
 		//-------------------------------------------
@@ -121,10 +109,9 @@ namespace Alfray.LibUtils2.Misc
 		/// Creates a new RPref object with an empty dictionnary.
 		/// </summary>
 		//************
-		public Pref()
-		{
-			mSettings = new Hashtable();
-		}
+        public Pref() {
+            mSettings = new Hashtable();
+        }
 
 
 
@@ -138,33 +125,29 @@ namespace Alfray.LibUtils2.Misc
 		/// <returns>False if an exception occured, true if the
 		/// setting file did not exits or was loaded properly.</returns>
 		//****************
-		public bool Load()
-		{
-			string f = settingFileName();
+        public bool Load() {
+            string f = settingFileName();
 
-			if (!File.Exists(f))
-				return true;
+            if (!File.Exists(f))
+                return true;
 
-			try
-			{
-				XmlDocument doc = new XmlDocument();
-				doc.Load(f);
+            try {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(f);
 
-				// not an XML?
-				if (doc.DocumentElement == null)
-					return true;
+                // not an XML?
+                if (doc.DocumentElement == null)
+                    return true;
 
 #if !LIBCF
-				foreach (XmlNode node in doc.SelectNodes("/r-prefs/pref"))
+                foreach (XmlNode node in doc.SelectNodes("/r-prefs/pref")) {
 #else
-				foreach (XmlNode node in doc.GetElementsByTagName("pref"))
+				foreach (XmlNode node in doc.GetElementsByTagName("pref")) {
 #endif
-				{
-					try
-					{
+                    try {
 #if !LIBCF
-						XmlNode key_node = node.SelectSingleNode("name");
-						XmlNode val_node = node.SelectSingleNode("value");
+                        XmlNode key_node = node.SelectSingleNode("name");
+                        XmlNode val_node = node.SelectSingleNode("value");
 #else
 						XmlNode key_node = null;
 						XmlNode val_node = null;
@@ -175,33 +158,28 @@ namespace Alfray.LibUtils2.Misc
 								val_node = n;
 #endif
 
-						System.Diagnostics.Debug.Assert(key_node != null && val_node != null);
+                        System.Diagnostics.Debug.Assert(key_node != null && val_node != null);
 
-						if (key_node != null && val_node != null)
-						{
-							string key = cleanup(key_node.InnerText.ToString());
-							string val = cleanup(val_node.InnerText.ToString());
+                        if (key_node != null && val_node != null) {
+                            string key = cleanup(key_node.InnerText.ToString());
+                            string val = cleanup(val_node.InnerText.ToString());
 
-							if (key != null && val != null)
-								mSettings[key] = val;
-						}
-					}
-					catch(Exception ex)
-					{
-						System.Diagnostics.Debug.WriteLine(ex.Message);
-					}
-				}
+                            if (key != null && val != null)
+                                mSettings[key] = val;
+                        }
+                    } catch (Exception ex) {
+                        System.Diagnostics.Debug.WriteLine(ex.Message);
+                    }
+                }
 
 
-				return true;
-			}
-			catch(Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-			}
+                return true;
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
 
-			return false;
-		}
+            return false;
+        }
 
 
 		//****************
@@ -211,47 +189,60 @@ namespace Alfray.LibUtils2.Misc
 		/// </summary>
 		/// <returns>Always true</returns>
 		//****************
-		public bool Save()
-		{
-			string f = settingFileName();
+        public bool Save() {
+            string f = settingFileName();
 
-			// Check if the directory exists, and if not create it
-			if (!File.Exists(f))
-			{
-				string dir = Path.GetDirectoryName(f);
-				if (!Directory.Exists(dir))
-					Directory.CreateDirectory(dir);
-			}
+            // Check if the directory exists, and if not create it
+            if (!File.Exists(f)) {
+                string dir = Path.GetDirectoryName(f);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+            }
 
-			XmlWriter w = new XmlTextWriter(f, System.Text.Encoding.UTF8);
+            XmlWriter w = new XmlTextWriter(f, System.Text.Encoding.UTF8);
 
-			w.WriteStartDocument();
-			w.WriteStartElement("r-prefs");
-			w.WriteAttributeString("version", "1.0");
-			
-			IDictionaryEnumerator de = mSettings.GetEnumerator();
-			while(de.MoveNext())
-			{
-				w.WriteStartElement("pref");
-				
-				w.WriteStartElement("name");
-				w.WriteString(de.Key.ToString());
-				w.WriteEndElement();	// name
+            w.WriteStartDocument();
+            w.WriteStartElement("r-prefs");
+            w.WriteAttributeString("version", "1.0");
 
-				w.WriteStartElement("value");
-				w.WriteString(de.Value.ToString());
-				w.WriteEndElement();	// value
+            IDictionaryEnumerator de = mSettings.GetEnumerator();
+            while (de.MoveNext()) {
+                w.WriteStartElement("pref");
 
-				w.WriteEndElement();	// pref
-			}
+                w.WriteStartElement("name");
+                w.WriteString(de.Key.ToString());
+                w.WriteEndElement();	// name
 
-			w.WriteEndElement(); // rprefs
-			w.WriteEndDocument();
-			w.Close();
+                w.WriteStartElement("value");
+                w.WriteString(de.Value.ToString());
+                w.WriteEndElement();	// value
 
-			return true;
-		}
+                w.WriteEndElement();	// pref
+            }
 
+            w.WriteEndElement(); // rprefs
+            w.WriteEndDocument();
+            w.Close();
+
+            return true;
+        }
+
+
+        //**************************************************
+        /// <summary>
+        /// Helper method to get a string from the dictionnary.
+        /// </summary>
+        /// <param name="name">The settings name</param>
+        /// <param name="defaultValue">The default value to return</param>
+        /// <returns>Either the dictionary value or the default value</returns>
+        //**************************************************
+        public string getString(string name, string defaultValue) {
+            if (mSettings.ContainsKey(name)) {
+                return (string)mSettings[name];
+            } else {
+                return defaultValue;
+            }
+        }
 
 		//**************************************************
 		/// <summary>
@@ -261,34 +252,29 @@ namespace Alfray.LibUtils2.Misc
 		/// <param name="rect">The rectangle to fill</param>
 		/// <returns>True if a rectangle was found, false otherwise</returns>
 		//**************************************************
-		public bool GetRect(string name, out Rectangle rect)
-		{
-			rect = Rectangle.Empty;
+        public bool GetRect(string name, out Rectangle rect) {
+            rect = Rectangle.Empty;
 
-			try
-			{
-				name = "rect_" + name + "_";
+            try {
+                name = "rect_" + name + "_";
 
-				string x = this[name + "x"];
-				string y = this[name + "y"];
-				string w = this[name + "w"];
-				string h = this[name + "h"];
+                string x = this[name + "x"];
+                string y = this[name + "y"];
+                string w = this[name + "w"];
+                string h = this[name + "h"];
 
-				if (x != null && y != null && w != null && h != null)
-				{
-					rect = new Rectangle(Convert.ToInt32(x),Convert.ToInt32(y), 
-						Convert.ToInt32(w), Convert.ToInt32(h));
+                if (x != null && y != null && w != null && h != null) {
+                    rect = new Rectangle(Convert.ToInt32(x), Convert.ToInt32(y),
+                        Convert.ToInt32(w), Convert.ToInt32(h));
 
-					return true;
-				}
-			}
-			catch(Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine(ex.ToString());
-			}
+                    return true;
+                }
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
 
-			return false;
-		}
+            return false;
+        }
 
 
 		//**********************************************
@@ -298,14 +284,13 @@ namespace Alfray.LibUtils2.Misc
 		/// <param name="name">The settings name</param>
 		/// <param name="rect">The rectangle to set</param>
 		//**********************************************
-		public void SetRect(string name, Rectangle rect)
-		{
-			name = "rect_" + name + "_";
-			this[name + "x"] = rect.Left.ToString();
-			this[name + "y"] = rect.Top.ToString();
-			this[name + "w"] = rect.Width.ToString();
-			this[name + "h"] = rect.Height.ToString();
-		}
+        public void SetRect(string name, Rectangle rect) {
+            name = "rect_" + name + "_";
+            this[name + "x"] = rect.Left.ToString();
+            this[name + "y"] = rect.Top.ToString();
+            this[name + "w"] = rect.Width.ToString();
+            this[name + "h"] = rect.Height.ToString();
+        }
 
 
 		//*******************************************
@@ -316,31 +301,26 @@ namespace Alfray.LibUtils2.Misc
 		/// <param name="rect">The size to fill</param>
 		/// <returns>True if a size was found, false otherwise</returns>
 		//*******************************************
-		public bool GetSize(string name, out Size sz)
-		{
-			sz = Size.Empty;
+        public bool GetSize(string name, out Size sz) {
+            sz = Size.Empty;
 
-			try
-			{
-				name = "size_" + name + "_";
+            try {
+                name = "size_" + name + "_";
 
-				string w = this[name + "w"];
-				string h = this[name + "h"];
+                string w = this[name + "w"];
+                string h = this[name + "h"];
 
-				if (w != null && h != null)
-				{
-					sz = new Size(Convert.ToInt32(w), Convert.ToInt32(h));
+                if (w != null && h != null) {
+                    sz = new Size(Convert.ToInt32(w), Convert.ToInt32(h));
 
-					return true;
-				}
-			}
-			catch(Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine(ex.ToString());
-			}
+                    return true;
+                }
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
 
-			return false;
-		}
+            return false;
+        }
 
 
 		//***************************************
@@ -350,12 +330,11 @@ namespace Alfray.LibUtils2.Misc
 		/// <param name="name">The settings name</param>
 		/// <param name="rect">The size to set</param>
 		//***************************************
-		public void SetSize(string name, Size sz)
-		{
-			name = "size_" + name + "_";
-			this[name + "w"] = sz.Width.ToString();
-			this[name + "h"] = sz.Height.ToString();
-		}
+        public void SetSize(string name, Size sz) {
+            name = "size_" + name + "_";
+            this[name + "w"] = sz.Width.ToString();
+            this[name + "h"] = sz.Height.ToString();
+        }
 
 
 		//*******************************************
@@ -376,37 +355,31 @@ namespace Alfray.LibUtils2.Misc
 		/// <param name="rect">The size to fill</param>
 		/// <returns>True if an enumeration was found (even empty), false otherwise</returns>
 		//*******************************************
-		public bool GetEnumeration(string name, out string[] output)
-		{
-			try
-			{
-				name = "enum_" + name + "_";
+        public bool GetEnumeration(string name, out string[] output) {
+            try {
+                name = "enum_" + name + "_";
 
-				// it exists if it has a count
-				string s_count = this[name + "count"];
-				if (s_count != null)
-				{
-					int n = Convert.ToInt32(s_count);
+                // it exists if it has a count
+                string s_count = this[name + "count"];
+                if (s_count != null) {
+                    int n = Convert.ToInt32(s_count);
 
-					output = new string[n];
+                    output = new string[n];
 
-					for(int i = 0; i < n; i++)
-					{
-						string s = this[name + i.ToString()];
-						output[i] = (s != null ? s : "");
-					}
+                    for (int i = 0; i < n; i++) {
+                        string s = this[name + i.ToString()];
+                        output[i] = (s != null ? s : "");
+                    }
 
-					return true;
-				}
-			}
-			catch(Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine(ex.ToString());
-			}
+                    return true;
+                }
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
 
-			output = new string[]{};
-			return false;
-		}
+            output = new string[] { };
+            return false;
+        }
 
 
 		//***************************************
@@ -424,54 +397,47 @@ namespace Alfray.LibUtils2.Misc
 		/// <param name="name">The settings name</param>
 		/// <param name="input">The IEnumerable to set</param>
 		//***************************************
-		public void SetEnumeration(string name, IEnumerable input)
-		{
-			// Remove any existing set first
+        public void SetEnumeration(string name, IEnumerable input) {
+            // Remove any existing set first
 
-			name = "enum_" + name + "_";
+            name = "enum_" + name + "_";
 
-			// it exists if it has a count
-			string s_count = this[name + "count"];
-			if (s_count != null)
-			{
-				this[name + "count"] = null;
+            // it exists if it has a count
+            string s_count = this[name + "count"];
+            if (s_count != null) {
+                this[name + "count"] = null;
 
-				int n = Convert.ToInt32(s_count);
-				for(int i = 0; i < n; i++)
-					this[name + i.ToString()] = null;
-			}
+                int n = Convert.ToInt32(s_count);
+                for (int i = 0; i < n; i++)
+                    this[name + i.ToString()] = null;
+            }
 
-			// Now add the new items
+            // Now add the new items
 
-			int nb = 0;
-			
-			try
-			{
-				IEnumerator en = input.GetEnumerator();
-				if (en != null)
-				{
-					en.Reset();
-					while(en.MoveNext())
-					{
-						string s = "";
-						if (en.Current != null)
-							s = en.Current.ToString();
+            int nb = 0;
 
-						this[name + nb.ToString()] = s;
-						
-						nb++;
-					}
-				}
-			}
-			catch(Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-			}
+            try {
+                IEnumerator en = input.GetEnumerator();
+                if (en != null) {
+                    en.Reset();
+                    while (en.MoveNext()) {
+                        string s = "";
+                        if (en.Current != null)
+                            s = en.Current.ToString();
 
-			// Add the count
+                        this[name + nb.ToString()] = s;
 
-			this[name + "count"] = nb.ToString();
-		}
+                        nb++;
+                    }
+                }
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+
+            // Add the count
+
+            this[name + "count"] = nb.ToString();
+        }
 
 
 		//-------------------------------------------
@@ -480,48 +446,48 @@ namespace Alfray.LibUtils2.Misc
 
 
 		//********************************
-		protected string settingFileName()
-		{
+        protected string settingFileName() {
 #if !LIBCF
-			// UserAppDataPath uses the version number (f.ex 1.0.42.1234)
-			// so let's just keep the major.minor numbers
-			string path = System.Windows.Forms.Application.UserAppDataPath;
+            // UserAppDataPath uses the version number (f.ex 1.0.42.1234)
+            // so let's just keep the major.minor numbers
+            string path = System.Windows.Forms.Application.UserAppDataPath;
 
-			Regex re = new Regex("^(.*[0-9]+\\.[0-9]+)\\.[0-9]+\\.[0-9]+$");
+            Regex re = new Regex("^(.*[0-9]+\\.[0-9]+)\\.[0-9]+\\.[0-9]+$");
 
-			Match m = re.Match(path);
-			if (m.Success)
-			{
-				CaptureCollection c1 = m.Groups[1].Captures;
-				if (c1 != null && c1[0] != null)
-					path = c1[0].Value;
-			}
+            Match m = re.Match(path);
+            if (m.Success) {
+                CaptureCollection c1 = m.Groups[1].Captures;
+                if (c1 != null && c1[0] != null)
+                    path = c1[0].Value;
+            }
 
 
-			return Path.Combine(path, kPrefFile);
+            return Path.Combine(path, kPrefFile);
 #else
 			return Path.Combine(Path.PathSeparator.ToString(), kPrefFile);
 #endif
-		}
+        }
 
 
 		//**********************************
-		protected string cleanup(string str)
-		// cleanup any trailing or leading space, \n \r \t
-		{
-			if (str == null || str.Length < 1)
-				return str;
+        /// <summary>
+        /// cleanup any trailing or leading space, \n \r \t
+        /// </summary>
+        protected string cleanup(string str) {
+            // 
+            if (str == null || str.Length < 1)
+                return str;
 
-			const string ws = " \n\r\t\f";
+            const string ws = " \n\r\t\f";
 
-			while(str.Length > 0 && ws.IndexOf(str[0]) >= 0)
-				str = str.Remove(0, 1);
+            while (str.Length > 0 && ws.IndexOf(str[0]) >= 0)
+                str = str.Remove(0, 1);
 
-			while(str.Length > 0 && ws.IndexOf(str[str.Length-1]) >= 0)
-				str = str.Remove(str.Length-1, 1);
+            while (str.Length > 0 && ws.IndexOf(str[str.Length - 1]) >= 0)
+                str = str.Remove(str.Length - 1, 1);
 
-			return str;
-		}
+            return str;
+        }
 
 
 
