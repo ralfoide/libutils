@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Project: AndroidAppLib
+ * Copyright (C) 2010 ralfoide gmail com,
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources>
+
+    <!-- Client Apps must redefine app_name. Do NOT translate. -->
+    <string name="app_name">DERIVED APPS MUST REDEFINE THIS</string>
+
+    <!-- Settings (Preferences) Activity title. Do not edit the "$APP". -->
+    <string name="prefs_title">$APP - Settings</string>
+    <!-- Menu/button to open the Settings. -->
+    <string name="settings">Settings</string>
+    <!-- Menu/button to open the Help (a.k.a introduction screen). -->
+    <string name="help">Help</string>
+
+
+    <!-- === Intro screen === -->
+
+    <!-- Introduction/help Activity title. Do not edit the "$APP". -->
+    <string name="intro_title">$APP %s - Introduction</string>
+    <string name="intro_button_continue">Continue</string>
+    <!-- I noticed in some languages (e.g. Korean) we need to set the minEms
+         of the continue button to 10 otherwise the layout doesn't make the
+         button wide enough to display its text. For most languages this
+         should stay empty, unless there's a strong need to specify it.
+         When we do use it, it should be an integer for Button.setMinEms(). -->
+    <string name="intro_button_minEms">0</string>
+    <string name="intro_checkbox_dont_display_again">Don\'t display again</string>
+
+    <!-- === Error Reporting === -->
+
+    <!-- Error Report UI: dialog title. -->
+    <string name="errorreport_title">$APP - Error Report</string>
+
+    <!-- Error Report UI: generate button. -->
+    <string name="errorreport_generate">Generate</string>
+
+    <!-- Error Report UI: sending fail because there's no mail app. -->
+    <string name="errorreport_nomailapp">No Email/Gmail app found to send the message. Please install one such as K9 from Market first.</string>
+
+    <!-- Error Report UI: header of generated email (the rest of the log is in English).
+         Formatting: Spacing matters. Use "/" to insert a new line.
+    -->
+    <string name="errorreport_emailheader">This is a bug report for $APP./
+In order to help you best, please describe:/
+- What were you doing with $APP?/
+- What did you expect?/
+- What actually happened?/
+Thanks a lot!/
+/
+There rest of the automated report starts here.
+    </string>
+
+
+    <!-- Preferences -->
+
+    <!-- Settings - Skip Intro: toggle title -->
+    <string name="prefs_dismiss_intro_label">Don\'t display introduction</string>
+    <!-- Settings - Skip Intro: help string when on -->
+    <string name="prefs_dismiss_intro_on">Introduction is skipped.</string>
+    <!-- Settings - Skip Intro: help string when off -->
+    <string name="prefs_dismiss_intro_off">Introduction is visible.</string>
+
+</resources>
