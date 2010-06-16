@@ -28,6 +28,8 @@
     <string name="settings">Settings</string>
     <!-- Menu/button to open the Help (a.k.a introduction screen). -->
     <string name="help">Help</string>
+    <!-- Menu - Report Error: display the error reporting screen. -->
+    <string name="report_error">Report Error</string>
 
 
     <!-- === Intro screen === -->
@@ -51,6 +53,22 @@
     <!-- Error Report UI: generate button. -->
     <string name="errorreport_generate">Generate</string>
 
+<!-- BEGIN - NEW TRANSLATE -->
+    <!-- Error Report UI: generate button. -->
+    <string name="errorreport_prev">&lt; Previous</string>
+
+    <!-- Error Report UI: generate button. -->
+    <string name="errorreport_next">Next &gt;</string>
+
+    <string name="errorreport_user1">Please indicate the kind of issue you would like to report:</string>
+    <string name="errorreport_program_err">Program Error</string>
+    <string name="errorreport_feat_req">Feature Request</string>
+
+    <string name="errorreport_user2">To help us understand the issue, please provide some comments:</string>
+    <string name="errorreport_user_hint">Before we can continue, please describe here your error or your feature request.</string>
+<!-- END - NEW TRANSLATE -->
+
+
     <!-- Error Report UI: sending fail because there's no mail app. -->
     <string name="errorreport_nomailapp">No Email/Gmail app found to send the message. Please install one such as K9 from Market first.</string>
 
@@ -58,13 +76,7 @@
          Formatting: Spacing matters. Use "/" to insert a new line.
     -->
     <string name="errorreport_emailheader">This is a bug report for $APP./
-In order to help you best, please describe:/
-- What were you doing with $APP?/
-- What did you expect?/
-- What actually happened?/
-Thanks a lot!/
-/
-There rest of the automated report starts here.
+The automated report starts here.
     </string>
 
 

@@ -198,6 +198,7 @@ public class ExceptionHandler {
         notif.defaults = Notification.DEFAULT_ALL;
 
         Intent i = new Intent(mAppContext, ErrorReporterUI.class);
+        i.putExtra(ErrorReporterUI.EXTRA_IS_EXCEPTION, true);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pi = PendingIntent.getActivity(mAppContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
