@@ -96,11 +96,15 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
     private WebView mWebView;
     private EditText mUserText;
 
-    private static String sLogcatTags =
-        IntroActivity.TAG + " " +
-        ErrorReporterUI.TAG + " " +
-        ExceptionHandler.TAG + " " +
-        AgentWrapper.TAG;
+    /** Access must be synchronized on sLogcatTags */
+    private static final ArrayList<String> sLogcatTags = new ArrayList<String>();
+
+    static {
+        sLogcatTags.add(IntroActivity.TAG);
+        sLogcatTags.add(ErrorReporterUI.TAG);
+        sLogcatTags.add(ExceptionHandler.TAG);
+        sLogcatTags.add(AgentWrapper.TAG);
+    }
 
     private class JSErrorInfo {
 
@@ -572,10 +576,12 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
             // dump log and exits
             cmd.add("-d");
 
-            for (String t : getLogcatTags().split("[ \t\n\r]")) {
-                if (t != null && t.length() > 0) {
-                    if (t.indexOf(':') == -1) t += ":D";
-                    cmd.add(t);
+            synchronized(sLogcatTags) {
+                for (String t : sLogcatTags) {
+                    if (t != null && t.length() > 0) {
+                        if (t.indexOf(':') == -1) t += ":D";
+                        cmd.add(t);
+                    }
                 }
             }
 
@@ -640,11 +646,11 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
      * The default value is to have:
      * IntroActivity.TAG + ErrorReporterUI.TAG+ ExceptionHandler.TAG + AgentWrapper.TAG
      */
-    public static void setLogcatTags(String logcatTags) {
-        sLogcatTags = logcatTags;
-    }
-
-    public static String getLogcatTags() {
-        return sLogcatTags;
+    public static void appendLogcatTag(String logcatTag) {
+        synchronized(sLogcatTags) {
+            if (!sLogcatTags.contains(logcatTag)) {
+                sLogcatTags.add(logcatTag);
+            }
+        }
     }
 }
