@@ -78,6 +78,7 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
     private static final String MAILTO = "r_dr_r . lab_s +report + %s";
     /** domain part of mailto. */
     private static final String DOMTO = "g_ma_il / c_om";
+    private static String sEmail = null;
 
     private static final int MSG_REPORT_COMPLETE = 1;
 
@@ -94,6 +95,7 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
     private RadioGroup mRadioGroup;
     private WebView mWebView;
     private EditText mUserText;
+
     private static String sLogcatTags =
         IntroActivity.TAG + " " +
         ErrorReporterUI.TAG + " " +
@@ -109,6 +111,10 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
         public String getAppName() {
             return mAppName;
         }
+    }
+
+    public static void setEmail(String email) {
+        sEmail = email;
     }
 
     /** Called when the activity is first created. */
@@ -336,10 +342,19 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
                         if (report != null) {
 
                             // Prepare mailto and subject.
-                            String to = String.format(MAILTO, mAppName).trim();
-                            to += "@";
-                            to += DOMTO.replace("/", ".");
-                            to = to.replaceAll("[ _]", "").toLowerCase();
+                            String to = sEmail;
+                            if (to == null || to.length() == 0) {
+                                to = MAILTO;
+                            }
+                            if (!to.contains("@")) {
+                                to = to + "@" + DOMTO;
+                            }
+                            if (to.contains("%s")) {
+                                to = String.format(to, mAppName);
+                            }
+                            to = to.trim().toLowerCase();
+                            to = to.replaceAll("/", ".");
+                            to = to.replaceAll("[ _]", "");
 
                             String sub = String.format("%s %s Report",
                                     mAppName,
