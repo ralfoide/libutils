@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -53,6 +54,7 @@ import android.widget.Toast;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 
 import com.alfray.app.AgentWrapper;
+import com.alfray.app.IntroActivity;
 import com.alfray.app.R;
 import com.alfray.prefs.BasePrefsValues;
 
@@ -92,6 +94,11 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
     private RadioGroup mRadioGroup;
     private WebView mWebView;
     private EditText mUserText;
+    private static String sLogcatTags =
+        IntroActivity.TAG + " " +
+        ErrorReporterUI.TAG + " " +
+        ExceptionHandler.TAG + " " +
+        AgentWrapper.TAG;
 
     private class JSErrorInfo {
 
@@ -113,7 +120,7 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
 
         Intent i = getIntent();
         mIsException = i == null ? false : i.getBooleanExtra(EXTRA_IS_EXCEPTION, false);
-        
+
         mButtonGen = (Button) findViewById(R.id.generate);
         mButtonPrev = (Button) findViewById(R.id.prev);
         mButtonNext = (Button) findViewById(R.id.next);
@@ -543,27 +550,25 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
         private void addLogcat(StringBuilder sb) {
             sb.append(String.format("\n## %s Logcat ##\n\n", mAppName));
 
-            String[] cmd = new String[] {
-                    "logcat",
-                    "-v", "time",   // we want timestamps
-                    "-d",           // dump log and exits
+            ArrayList<String> cmd = new ArrayList<String>();
+            cmd.add("logcat");
+            // we want timestamps
+            cmd.add("-v");    cmd.add("time");
+            // dump log and exits
+            cmd.add("-d");
 
-                    // we want our tags in debug mode
-                    /* TODO
-                    NerdActivity3.TAG + ":D",
-                    IntroActivity.TAG + ":D",
-                    ErrorReporterUI.TAG + ":D",
-                    ExceptionHandler.TAG + ":D",
-                    AgentWrapper.TAG + ":D",
-                    */
+            for (String t : getLogcatTags().split("[ \t\n\r]")) {
+                if (t != null && t.length() > 0) {
+                    if (t.indexOf(':') == -1) t += ":D";
+                    cmd.add(t);
+                }
+            }
 
-                    // all other tags in info mode or better
-                    "*:I",
-
-            };
+            // all other tags in silent mode
+            cmd.add("*:S");
 
             try {
-                Process p = Runtime.getRuntime().exec(cmd);
+                Process p = Runtime.getRuntime().exec(cmd.toArray(new String[cmd.size()]));
 
                 InputStreamReader isr = null;
                 BufferedReader br = null;
@@ -611,5 +616,20 @@ public class ErrorReporterUI extends ExceptionHandlerActivity {
             }
         }
 
+    }
+
+    /**
+     * Set logcat debug tags. Must be a list of tag names, separated by
+     * whitespace (space, /n /r /t). ":D" is appended in : is not present.
+     *
+     * The default value is to have:
+     * IntroActivity.TAG + ErrorReporterUI.TAG+ ExceptionHandler.TAG + AgentWrapper.TAG
+     */
+    public static void setLogcatTags(String logcatTags) {
+        sLogcatTags = logcatTags;
+    }
+
+    public static String getLogcatTags() {
+        return sLogcatTags;
     }
 }
