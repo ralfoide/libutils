@@ -18,18 +18,16 @@
 
 package com.alfray.app;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
 
 import android.content.Context;
-import android.util.Log;
 
 /**
  * Wrapper so that we don't depend directly on the agent lib.
  */
 public class AgentWrapper {
 
-    private static final boolean DEBUG = true;
+    //--private static final boolean DEBUG = true;
     public static final String TAG = "LIB-Agent";
 
     private static Class<?> mAgentClazz;
@@ -56,33 +54,16 @@ public class AgentWrapper {
             String ks[] = null;
 
             try {
-                InputStream is = null;
-                try {
-                    is = context.getResources().getAssets().open("Keyi.txt");
-                } catch (Exception e) {
-                    is = context.getResources().getAssets().open("Keyu.txt");
-                }
-                try {
-                    byte[] buf = new byte[255];
-                    is.read(buf);
-                    String k = new String(buf);
-                    ks = k.trim().split(" ");
-                } finally {
-                    if (is != null) is.close();
-                }
-
-                if (ks == null || ks.length != 2) {
-                    if (DEBUG) Log.d(TAG, "startk failed");
-                    return;
-                }
+                KeyLoader kl = new KeyLoader(context, "A");
 
                 ClassLoader cl = context.getClassLoader();
-                Class<?> clazz = cl.loadClass(ks[0]);
+                Class<?> clazz = cl.loadClass(kl.getValue("c"));
 
-                // start ok, keep the class
-                mAgentClazz = clazz;
-                mK = ks[1];
-
+                if (clazz != null) {
+                    // start ok, keep the class
+                    mAgentClazz = clazz;
+                    mK = kl.getValue("k");
+                }
             } catch (Exception e) {
                 // ignore silently
             }
