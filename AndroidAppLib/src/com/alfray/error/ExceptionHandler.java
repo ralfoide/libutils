@@ -152,7 +152,7 @@ public class ExceptionHandler {
                 // ignore
             }
         }
-    };
+    }
 
     public synchronized static void addToLog(BasePrefsValues pv, Throwable e) {
         // get a trace of the exception
