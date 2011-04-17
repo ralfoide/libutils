@@ -28,7 +28,7 @@ import android.view.MenuItem;
 /**
  * Activity delegate.
  */
-public abstract class ActivityDelegate<T extends IActivityDelegate<?>> extends Activity {
+public abstract class ActivityDelegate<T extends IActivityDelegate> extends Activity {
 
     private T mDelegate;
 

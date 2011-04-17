@@ -24,7 +24,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public interface IActivityDelegate<T> {
+public interface IActivityDelegate {
     public void onCreate(Bundle savedInstanceState);
     public void onResume();
     public void onPause();
