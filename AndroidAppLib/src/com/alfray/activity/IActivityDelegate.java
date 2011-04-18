@@ -18,6 +18,7 @@
 
 package com.alfray.activity;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,16 +26,63 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public interface IActivityDelegate {
+    /**
+     * @see Activity#onCreate
+     */
     public void onCreate(Bundle savedInstanceState);
+
+    /**
+     * @see Activity#onResume
+     */
     public void onResume();
+
+    /**
+     * @see Activity#onPause
+     */
     public void onPause();
+
+    /**
+     * @see Activity#onStop
+     */
     public void onStop();
+
+    /**
+     * @see Activity#onRestoreInstanceState
+     */
     public void onRestoreInstanceState(Bundle savedInstanceState);
+
+    /**
+     * @see Activity#onSaveInstanceState
+     */
     public void onSaveInstanceState(Bundle outState);
+
+    /**
+     * @see Activity#onDestroy
+     */
     public void onDestroy();
+
+    /**
+     * @see Activity#onActivityResult
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data);
+
+    /**
+     * @see Activity#onCreateDialog
+     */
     public Dialog onCreateDialog(int id);
+
+    /**
+     * @see Activity#onContextItemSelected
+     */
     public boolean onContextItemSelected(MenuItem item);
+
+    /**
+     * @see Activity#onCreateOptionsMenu
+     */
     public void onCreateOptionsMenu(Menu menu);
+
+    /**
+     * @see Activity#onOptionsItemSelected
+     */
     public boolean onOptionsItemSelected(MenuItem item);
 }
