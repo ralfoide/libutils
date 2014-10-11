@@ -1,0 +1,73 @@
+/*
+ * Project: AndroidAppLib
+ * Copyright (C) 2012 ralfoide gmail com.
+ */
+
+package com.alflabs.app;
+
+import com.alflabs.prefs.BasePrefsStorage;
+
+import android.content.Context;
+
+import java.util.Random;
+
+
+public class AppId {
+
+    private static final int ID_LEN = 8;
+    public static final String TAG = AppId.class.getSimpleName();
+
+    /**
+     * Returns an id specific to this instance of the app.
+     * The id is based on a random code generated once and stored in prefs.
+     */
+    public static String getIssueId(Context context, BasePrefsStorage storage) {
+        String id = storage.getString(BasePrefsStorage.ISSUE_ID, null);
+
+        if (id == null) {
+            // Generate a new installation-specific ID.
+
+            // We not longer use the device id from telephony. First
+            // because it's not relevant for non-telephone devices and
+            // second because there's just too many issues with it that
+            // it's not even funny. See this blog post for the details:
+            // http://android-developers.blogspot.com/2011/03/identifying-app-installations.html
+
+
+            // Generate a random code with 8 unique symbols out of 34
+            // (0-9 + A-Z). We avoid letter O and I which look like 0 and 1.
+            // We avoid repeating the same symbol twice in a row so
+            // the number of combinations is n*(n-1)*(n-1)*..*(n-1)
+            // or c = n * (n-1)^(k-1)
+            // k=6, n=34 => c=    1,330,603,362 ... 1 million is a bit low.
+            // k=8, n=34 => c=1,449,027,061,218 ... 1 trillion will do it.
+
+            Random r = new Random();
+            char c[] = new char[ID_LEN];
+
+            // Mark O and I (the letters) as used, to avoid using them.
+            int index_i = 10 + 'I' - 'A';
+            int index_o = 10 + 'O' - 'A';
+
+            for (int i = 0; i < c.length; i++) {
+                int j = r.nextInt(10+26-2);
+                if (j >= index_i) j++;
+                if (j >= index_o) j++;
+
+                if (j < 10) {
+                    c[i] = (char) ('0' + j);
+                } else {
+                    c[i] = (char) ('A' + j - 10);
+                }
+            }
+            id = new String(c);
+        }
+
+        if (id != null) {
+            storage.putString(BasePrefsStorage.ISSUE_ID, id);
+            storage.beginWriteAsync(context.getApplicationContext());
+        }
+
+        return id;
+    }
+}
