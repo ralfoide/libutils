@@ -33,7 +33,7 @@ public abstract class BusAdapter implements IBusListener {
     }
 
     @Override
-    public abstract void onBusMessage(int what, Object object);
+    public abstract void onBusMessage(int what, @Null Object object);
 }
 
 

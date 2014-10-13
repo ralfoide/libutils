@@ -146,7 +146,7 @@ public class Bus {
      * @param bus The {@link Bus} instance on which to register.
      * @return A new {@link Register} object; caller must call {@link Register#deregister()} later.
      */
-    public static <B extends IBusListener> Register<B> register(B receiver, Bus bus) {
+    public static Register register(IBusListener receiver, Bus bus) {
         return register(null, receiver, bus);
     }
 
@@ -160,8 +160,8 @@ public class Bus {
      * @param bus The {@link Bus} instance on which to register.
      * @return A new {@link Register} object; caller must call {@link Register#deregister()} later.
      */
-    public static <B extends IBusListener> Register<B> register(@Null Class<?> classFilter, B receiver, Bus bus) {
-        Register<B> m = new Register<B>(classFilter, receiver, bus);
+    public static Register register(@Null Class<?> classFilter, IBusListener receiver, Bus bus) {
+        Register m = new Register(classFilter, receiver, bus);
         bus.addListener(m);
         return m;
     }
@@ -171,7 +171,7 @@ public class Bus {
      * Usage:
      * <pre>
      * public class MyActivity extends Activity implements BusAdapter {
-     *   private Bus.Register<MyActivity> mBusReg;
+     *   private Bus.Register mBusReg;
      *   public void onCreate(...) {
      *     mBusReg = Bus.Register.register(this, globals.getBus());
      *   }
@@ -187,12 +187,12 @@ public class Bus {
      *
      * This class only keeps weak references on the listener (typically an activity) and the bus.
      */
-    public static class Register<T extends IBusListener> extends BusAdapter {
-        private WeakReference<Bus> mBusRef;
-        private WeakReference<T>   mReceiverRef;
+    public static class Register extends BusAdapter {
+        private WeakReference<Bus>          mBusRef;
+        private WeakReference<IBusListener> mReceiverRef;
 
-        private Register(@Null Class<?> classFilter, T receiver, Bus bus) {
-            mReceiverRef = new WeakReference<T>(receiver);
+        private Register(@Null Class<?> classFilter, IBusListener receiver, Bus bus) {
+            mReceiverRef = new WeakReference<IBusListener>(receiver);
             mBusRef = new WeakReference<Bus>(bus);
         }
 
@@ -220,7 +220,7 @@ public class Bus {
 
         @Override
         public void onBusMessage(int what, Object object) {
-            T receiver = null;
+            IBusListener receiver = null;
             synchronized (this) {
                 if (mReceiverRef != null) receiver = mReceiverRef.get();
             }
