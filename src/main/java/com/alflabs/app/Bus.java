@@ -7,6 +7,7 @@
 package com.alflabs.app;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,14 +26,18 @@ import com.alflabs.utils.Utils;
  * Listeners listen to the messages and are notified when a message is sent.
  * <p/>
  * Messages are objects (typically strings or integers).
- *
- * Messages are not queued like a Handler: posted messages are sent right away and deliver
+ * <p/>
+ * Messages are not queued like a Handler: posted messages are sent right away and delivered
  * to whoever is currently listening. There is no fancy thread handling like in a Handler
- * either: messages are posted and received on the sender's thread. If you want the facilities
- * of a Handler then use a Handler.
+ * either: messages are posted and received on the sender's thread.
+ * If you want the facilities of a Handler then use a Handler.
  * <p/>
  * Listeners can choose to listen to any kind of message, specific message
  * objects or just a given Class of message (e.g. Strings, or whatever custom type.)
+ * <p/>
+ * All created buses are collected in a weak reference list, with each a different id.
+ * At runtime it is thus possible to get an existing bus from its id, if the object is
+ * still alive.
  */
 public class Bus {
 
@@ -41,15 +46,37 @@ public class Bus {
 
     public static final int NO_WHAT = -1;
 
+    private static final List<WeakReference<Bus>> sBuses = new ArrayList<WeakReference<Bus>>();
+
+    private final int mBusId;
+
     /**
      * Listeners. A map filter-type => listener list.
      * Access to the map must synchronized on the map itself.
      * Access to the lists must synchronized on the lists themselves.
      */
-    private final HashMap<Class<?>, List<BusAdapter>> mListeners =
-        new HashMap<Class<?>, List<BusAdapter>>();
+    private final HashMap<Class<?>, List<BusAdapter>> mListeners = new HashMap<Class<?>, List<BusAdapter>>();
 
     public Bus() {
+        synchronized (sBuses) {
+            mBusId = sBuses.size();
+            sBuses.add(new WeakReference<Bus>(this));
+        }
+    }
+
+    public int getId() { return mBusId; }
+
+    public static Bus getById(int id) {
+        synchronized (sBuses) {
+            for (WeakReference<Bus> wb : sBuses) {
+                Bus b = wb.get();
+                if (b != null && b.getId() == id) {
+                    return b;
+                }
+            }
+        }
+
+        return null;
     }
 
     // -----
@@ -97,8 +124,9 @@ public class Bus {
 
     // -----
 
+    @Null
     public BusAdapter addListener(BusAdapter listener) {
-        if (listener == null) return listener;
+        if (listener == null) return null;
 
         Class<?> filter = listener.getClassFilter();
 
@@ -110,6 +138,7 @@ public class Bus {
                 mListeners.put(filter, list);
             }
         }
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (list) {
             if (!list.contains(listener)) {
                 list.add(listener);
@@ -119,8 +148,9 @@ public class Bus {
         return listener;
     }
 
+    @Null
     public BusAdapter removeListener(BusAdapter listener) {
-        if (listener == null) return listener;
+        if (listener == null) return null;
 
         Class<?> filter = listener.getClassFilter();
 
@@ -129,6 +159,7 @@ public class Bus {
             list = mListeners.get(filter);
         }
         if (list != null) {
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized (list) {
                 list.remove(listener);
             }
@@ -143,11 +174,10 @@ public class Bus {
      * Registers a BusListener with no class filter.
      *
      * @param receiver A receiver object implement {@link IBusListener}.
-     * @param bus The {@link Bus} instance on which to register.
-     * @return A new {@link Register} object; caller must call {@link Register#deregister()} later.
+     * @return A new {@link Reference} object; caller must call {@link Reference#unregister()} later.
      */
-    public static Register register(IBusListener receiver, Bus bus) {
-        return register(null, receiver, bus);
+    public Reference register(IBusListener receiver) {
+        return register(null, receiver);
     }
 
     /**
@@ -157,55 +187,65 @@ public class Bus {
      *      of object, including null) or the {@link Void} class to filter on message with null
      *      objects.
      * @param receiver A receiver object implement {@link IBusListener}.
-     * @param bus The {@link Bus} instance on which to register.
-     * @return A new {@link Register} object; caller must call {@link Register#deregister()} later.
+     * @return A new {@link Reference} object; caller must call {@link Reference#unregister()} later.
      */
-    public static Register register(@Null Class<?> classFilter, IBusListener receiver, Bus bus) {
-        Register m = new Register(classFilter, receiver, bus);
-        bus.addListener(m);
+    public Reference register(@Null Class<?> classFilter, IBusListener receiver) {
+        Reference m = new Reference(classFilter, receiver, this);
+        this.addListener(m);
         return m;
     }
 
     /**
-     * Helper to add/remove a bus listener on an existing class.
+     * Helper to use a weak bus reference.
      * Usage:
      * <pre>
      * public class MyActivity extends Activity implements BusAdapter {
-     *   private Bus.Register mBusReg;
+     *   private Bus.Reference mBusRef;
      *   public void onCreate(...) {
-     *     mBusReg = Bus.Register.register(this, globals.getBus());
+     *     mBusRef = globals.getBus().register(this);
      *   }
      *   public void onDestroy() {
-     *     mBusReg.deregister();
+     *     mBusRef.unregister();  // will NOT crash if bus no longer exists
      *   }
      *   public void onBusMessage(int what, Object object) { ... }
      *   public void foo() {
-     *      mBusReg.getBus().send(42);
+     *      mBusRef.getBus().send(42);  // will npe if bus no longer exists
+     *      mBusRef.safeSend(42);       // will NOT npe if bus no longer exists
      *   }
      * }
      * </pre>
      *
      * This class only keeps weak references on the listener (typically an activity) and the bus.
+     * That means the bus won't crash if the listener is gone and the caller won't crash
+     * if trying to send or received on a released bus either.
      */
-    public static class Register extends BusAdapter {
+    public static class Reference extends BusAdapter {
         private WeakReference<Bus>          mBusRef;
         private WeakReference<IBusListener> mReceiverRef;
 
-        private Register(@Null Class<?> classFilter, IBusListener receiver, Bus bus) {
+        private Reference(@Null Class<?> classFilter, IBusListener receiver, Bus bus) {
             mReceiverRef = new WeakReference<IBusListener>(receiver);
             mBusRef = new WeakReference<Bus>(bus);
         }
 
+        /** Returns the bus referenced. Might be null if the weak reference is gone. */
         @Null
         public Bus getBus() {
             return mBusRef.get();
         }
 
-        public void deregister() {
-            if (mBusRef == null) return;
+        /**
+         * Safely unregisters this reference.
+         * Will not thrown an exception if the underlying Bus has released. */
+        public void unregister() {
+            if (mBusRef == null) {
+                return;
+            }
 
             Bus bus = mBusRef.get();
-            if (bus != null) bus.removeListener(this);
+            if (bus != null) {
+                bus.removeListener(this);
+            }
 
             mBusRef.clear();
             mBusRef = null;
@@ -218,6 +258,26 @@ public class Bus {
             }
         }
 
+        public void safeSend(int what) {
+            this.safeSend(what, null);
+        }
+
+        public void safeSend(Object object) {
+            this.safeSend(NO_WHAT, null);
+        }
+
+        public void safeSend(int what, Object object) {
+            if (mBusRef == null) {
+                return;
+            }
+
+            Bus bus = mBusRef.get();
+            if (bus != null) {
+                bus.send(what, object);
+            }
+        }
+
+        /** Internal helper. Calls the receiver onBusMessage if it hasn't been released yet. */
         @Override
         public void onBusMessage(int what, Object object) {
             IBusListener receiver = null;
