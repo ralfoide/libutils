@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.util.Log;
+import com.alflabs.app.ICoreStrings;
 
 
 public class Utils {
@@ -70,17 +71,10 @@ public class Utils {
         return false;
     }
 
-    // My debug key signature is
-    //  30820255308201bea00302010202044a88ef41300d06092a864886f70d0101050500306f310b30090603550406130255533110300e06035504081307556e6b6e6f776e3110300e06035504071307556e6b6e6f776e310d300b060355040a130452616c663110300e060355040b1307556e6b6e6f776e311b301906035504031312416e64726f69642052616c66204465627567301e170d3039303831373035343834395a170d3337303130323035343834395a306f310b30090603550406130255533110300e06035504081307556e6b6e6f776e3110300e06035504071307556e6b6e6f776e310d300b060355040a130452616c663110300e060355040b1307556e6b6e6f776e311b301906035504031312416e64726f69642052616c6620446562756730819f300d06092a864886f70d010101050003818d0030818902818100aafbaa519b7a0cb0accb5cc37b6138b99bde072a952b291fb90cdb067e1f7c1980aac7152aee0304da0eb400d10dd7fef09e9e13f07ea09a3e500c86ba9fb93b5792003817cfd1639a9bffd085aa479521593d5ea516836e2eec5312c9044bafed29cf1339d4960ed96968fcbafd7ddd921b140b0de62f0576afa912789462630203010001300d06092a864886f70d01010505000381810027e6f99c4ef8c02d4dde0d1ec92bad13ea9ce85609e5d5e042e9800aca1e8472563be4fe6463ed1e12a72ff2780599d79ce03130925e345a196316b7ccab9b8941979c41e56c233d1a0a17f342cc74474615e7fde1340aac02c850b6119a708774973487250cd9d32e8c23ec8ed99d0a7ff07046c3ba53d387aa07805f6a8389
-    //  hash = 1746973045  0x6820b175
-    // (to update this, empty first field and look in the log for the printed signature to match.)
-    private static final String DEBUG_KEY_START = "30820255308201bea00302010202044";
-    private static final String DEBUG_KEY_END   = "e8c23ec8ed99d0a7ff07046c3ba53d387aa07805f6a8389";
-
     /**
      * Returns true if the current app is signed with my specific debug key.
      */
-    public static boolean isUsingDebugKey(Context context) {
+    public static boolean isUsingDebugKey(Context context, ICoreStrings strings) {
         try {
             PackageInfo pi = context.getPackageManager().getPackageInfo(
                             context.getPackageName(),
@@ -94,12 +88,15 @@ public class Utils {
             Signature sig = pi.signatures[0];
             String str = sig.toCharsString();
 
-            if (DEBUG_KEY_START.length() == 0) {
+            String start = strings.get(ICoreStrings.DEBUG_KEY1);
+            String end   = strings.get(ICoreStrings.DEBUG_KEY2);
+
+            if (start.length() == 0) {
                 int hash = sig.hashCode();
                 Log.d(TAG, String.format("Sig [%08x]: %s", hash, str));
             } else if (str != null &&
-                            str.startsWith(DEBUG_KEY_START) &&
-                            str.endsWith(DEBUG_KEY_END)) {
+                            str.startsWith(start) &&
+                            str.endsWith(end)) {
                 Log.d(TAG, "Using Debug Key");
                 return true;
             }
