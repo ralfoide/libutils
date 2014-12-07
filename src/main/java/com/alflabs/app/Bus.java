@@ -199,7 +199,7 @@ public class Bus {
      * Helper to use a weak bus reference.
      * Usage:
      * <pre>
-     * public class MyActivity extends Activity implements BusAdapter {
+     * public class MyActivity extends Activity implements IBusListener {
      *   private Bus.Reference mBusRef;
      *   public void onCreate(...) {
      *     mBusRef = globals.getBus().register(this);

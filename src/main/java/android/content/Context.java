@@ -20,6 +20,7 @@ package android.content;
 
 
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import com.alflabs.annotations.NonNull;
 
 import java.io.*;
@@ -41,4 +42,6 @@ public abstract class Context {
     public abstract PackageManager getPackageManager();
 
     public abstract String getPackageName();
+
+    public abstract Resources getResources();
 }
