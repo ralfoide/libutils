@@ -14,7 +14,7 @@ import android.view.View;
  * API 17: support Context_getScreenWidth
  */
 @TargetApi(17)
-class ApiHelper_17 extends ApiHelper_13 {
+class ApiHelper_17 extends ApiHelper_16 {
 
     /**
      * Generate a value suitable for use in View.setId(int).

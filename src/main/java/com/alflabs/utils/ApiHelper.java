@@ -7,6 +7,7 @@ package com.alflabs.utils;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -88,4 +89,12 @@ public abstract class ApiHelper {
 
     private static AtomicInteger sNextGeneratedId = null;
 
+    /**
+     * Calls {@link View#setBackground(Drawable)} or {@link View#setBackgroundDrawable(Drawable)}.
+     * The former is for API 16+, the later is for older API before 16. They do the same thing.
+     */
+    public void View_setBackground(View view, Drawable background) {
+        //noinspection deprecation
+        view.setBackgroundDrawable(background);
+    }
 }
