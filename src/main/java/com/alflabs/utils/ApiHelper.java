@@ -7,7 +7,9 @@ package com.alflabs.utils;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.view.Display;
 import android.view.View;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -96,5 +98,13 @@ public abstract class ApiHelper {
     public void View_setBackground(View view, Drawable background) {
         //noinspection deprecation
         view.setBackgroundDrawable(background);
+    }
+
+    /**
+     * Returns the {@link android.view.Display#getSize} with is defined starting with API 13.
+     * For API 10, uses {@link android.view.Display#getWidth} and {@link android.view.Display#getHeight}
+     */
+    public Point Display_getSize(Display display) {
+        return new Point(display.getWidth(),  display.getHeight());
     }
 }
