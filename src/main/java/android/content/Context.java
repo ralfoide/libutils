@@ -21,7 +21,6 @@ package android.content;
 
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import com.alflabs.annotations.NonNull;
 
 import java.io.*;
 
@@ -30,13 +29,10 @@ public abstract class Context {
 
     public abstract Context getApplicationContext();
 
-    @NonNull
     public abstract File getFileStreamPath(String filename) throws IllegalArgumentException;
 
-    @NonNull
     public abstract FileInputStream openFileInput(String filename) throws FileNotFoundException, IllegalArgumentException;
 
-    @NonNull
     public abstract FileOutputStream openFileOutput(String filename, int mode) throws FileNotFoundException, IllegalArgumentException;
 
     public abstract PackageManager getPackageManager();
