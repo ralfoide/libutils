@@ -56,18 +56,18 @@ public class Utils {
         // Build.MANUFACTURER = unknown -- API 4+
         // Build.HARDWARE = goldfish -- API 8+
 
-        String b = Build.BRAND;
-        String d = Build.DEVICE;
-        String p = Build.PRODUCT;
-        String h = ""; // RM TODO ApiHelper.get().Build_HARDWARE();
+        String b = Build.BRAND;     // "generic" or "generic_x86"
+        String d = Build.DEVICE;    // "generic" or "generic_x86"
+        String p = Build.PRODUCT;   // "sdk_phone", "google_sdk", "sdk_phone_x86", "google_sdk_x86"
 
-        if ("generic".equals(b) &&
-                "generic".equals(d) &&
-                (h == null || "goldfish".equals(h)) &&
-                ("sdk".equals(p) || "google_sdk".equals(p))) {
-            Log.w(TAG, "Emulator Detected. Stats disabled.");
+        //noinspection RedundantIfStatement
+        if (b != null && b.contains("generic") &&
+                d != null && d.contains("generic") &&
+                p != null && p.contains("sdk")) {
+            // Most likely an emulator
             return true;
         }
+
         return false;
     }
 
