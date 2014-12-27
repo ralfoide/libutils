@@ -12,6 +12,7 @@ import com.alflabs.annotations.Null;
 
 public abstract class BusAdapter implements IBusListener {
 
+    @Null
     private final Class<?> mClassFilter;
 
     /** Creates a bus listener that receives all type of data. */
@@ -28,6 +29,7 @@ public abstract class BusAdapter implements IBusListener {
         mClassFilter = classFilter;
     }
 
+    @Null
     public Class<?> getClassFilter() {
         return mClassFilter;
     }
