@@ -16,7 +16,7 @@
  * Note(RM): Extracted from Android 4.2.2 SDK source, used by SparseBooleanArray.
  */
 
-package com.android.internal.util;
+package com.alflabs.utils;
 
 import java.lang.reflect.Array;
 
@@ -28,13 +28,13 @@ import java.lang.reflect.Array;
  * ArrayUtils contains some methods that you can call to find out
  * the most efficient increments by which to grow arrays.
  */
-public class ArrayUtils
+public class RArrayUtils
 {
     private static Object[] EMPTY = new Object[0];
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
 
-    private ArrayUtils() { /* cannot be instantiated */ }
+    private RArrayUtils() { /* cannot be instantiated */ }
 
     public static int idealByteArraySize(int need) {
         for (int i = 4; i < 32; i++)

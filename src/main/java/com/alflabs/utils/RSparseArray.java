@@ -20,7 +20,6 @@ package com.alflabs.utils;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
 
@@ -50,7 +49,7 @@ public class RSparseArray<E> implements Cloneable {
      * number of mappings.
      */
     public RSparseArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
+        initialCapacity = RArrayUtils.idealIntArraySize(initialCapacity);
 
         mKeys = new int[initialCapacity];
         mValues = new Object[initialCapacity];
@@ -183,7 +182,7 @@ public class RSparseArray<E> implements Cloneable {
             }
 
             if (mSize >= mKeys.length) {
-                int n = ArrayUtils.idealIntArraySize(mSize + 1);
+                int n = RArrayUtils.idealIntArraySize(mSize + 1);
 
                 int[] nkeys = new int[n];
                 Object[] nvalues = new Object[n];
@@ -325,7 +324,7 @@ public class RSparseArray<E> implements Cloneable {
 
         int pos = mSize;
         if (pos >= mKeys.length) {
-            int n = ArrayUtils.idealIntArraySize(pos + 1);
+            int n = RArrayUtils.idealIntArraySize(pos + 1);
 
             int[] nkeys = new int[n];
             Object[] nvalues = new Object[n];
