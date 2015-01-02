@@ -11,7 +11,15 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.util.Log;
+
+import com.alflabs.annotations.NonNull;
 import com.alflabs.app.ICoreStrings;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 
 public class Utils {
@@ -105,5 +113,55 @@ public class Utils {
             Log.e(TAG, "UsingKey exception: " + e.toString());
         }
         return false;
+    }
+
+    /**
+     * Serializes a Java Serializable object to a string container.
+     * The string is only garanteed to be compatible with {@link #deserializeFromString}
+     */
+    @NonNull
+    public static String serializeToString(@NonNull Object object) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(object);
+        oos.close();
+
+        byte[] bytes = baos.toByteArray();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            int c = (b >> 4) & 0x0F;
+            sb.append((char)(c < 10 ? ('0' + c) : ('a' + c - 10)));
+            c = b & 0x0F;
+            sb.append((char)(c < 10 ? ('0' + c) : ('a' + c - 10)));
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Deserializes an object from a string previous returned by {@link #serializeToString(Object)}.
+     *
+     * @param serializedString
+     * @return Possibly something vaguely like the original object. Somewhat. Maybe. Kinda. Sorta.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static Object deserializeFromString(@NonNull String serializedString) throws IOException, ClassNotFoundException {
+        int n = serializedString.length() / 2;
+        byte[] bytes = new byte[n];
+        for (int i = 0, k = 0; i < n; i++, k+=2) {
+            char c = serializedString.charAt(k);
+            byte b = (byte) ((c < 'a' ? (c - '0') : (c + 10 - 'a')) << 4);
+
+                 c = serializedString.charAt(k+1);
+                b += (byte) ((c < 'a' ? (c - '0') : (c + 10 - 'a')));
+            bytes[i] = b;
+        }
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        Object object = ois.readObject();
+        ois.close();
+        return object;
     }
 }

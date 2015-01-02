@@ -70,7 +70,7 @@ public class AsyncSerialFile {
      * The C identifies this is for 24 *C*lock.
      * The 1 can serve has a format version number in case we want to have future versions.
      */
-    private static final byte[] HEADER = new byte[] {
+    private static final byte[] ASYNC_SERIAL_FILE_HEADER = new byte[] {
         'S', 'E', 'R', 'I', 'A', 'L', '2', '\0'};
 
     @SuppressWarnings("SpellCheckingInspection")
@@ -96,12 +96,30 @@ public class AsyncSerialFile {
     }
 
     /**
+     * To be overriden by derived classes to provide a 8-bytes array
+     * that serves as uniquely identify the file content.
+     * @return A non-null 8-byte array file identifier
+     */
+    @NonNull
+    protected byte[] getHeader() {
+        return ASYNC_SERIAL_FILE_HEADER;
+    }
+
+    /**
      * Returns the filename that was given to the constructor.
      * This is not an absolute path -- the actual path will depend on the application package.
      */
     @NonNull
     public String getFilename() {
         return mFilename;
+    }
+
+    /**
+     * Returns true if internal data has changed and it's worth
+     * calling {@link #beginWriteAsync(Context)}.
+     */
+    public boolean hasDataChanged() {
+        return mDataChanged;
     }
 
     /**
@@ -222,6 +240,7 @@ public class AsyncSerialFile {
                         saveChannel(fos.getChannel());
                         mDataChanged = false;
                     }
+                    postWriteAsync(appContext);
                     mSaveResult = true;
                 } catch (Throwable t) {
                     mSaveResult = false;
@@ -248,6 +267,13 @@ public class AsyncSerialFile {
             }
         }
     }
+
+    /**
+     * Called after successfully writing a file asynchronously.
+     *
+     * @param appContext The {@link Context} to use.
+     */
+    protected void postWriteAsync(Context appContext) {}
 
     /**
      * Makes sure the asynchronous save has finished.
@@ -485,16 +511,17 @@ public class AsyncSerialFile {
         // Size should be a multiple of 4. Always.
         // assert (Integer.SIZE / 8) == 4;
         long n = fileChannel.size();
-        if (n < HEADER.length || (n & 0x03) != 0) {
+        final byte[] headerConstant = getHeader();
+        if (n < headerConstant.length || (n & 0x03) != 0) {
             Log.d(TAG, "Invalid file size, should be multiple of 4.");                  //NLS
             return false;
         }
 
-        assert (HEADER.length & 0x03) == 0;
-        ByteBuffer header = ByteBuffer.allocate(HEADER.length);
+        assert (headerConstant.length & 0x03) == 0;
+        ByteBuffer header = ByteBuffer.allocate(headerConstant.length);
         header.order(ByteOrder.LITTLE_ENDIAN);
         int r = fileChannel.read(header);
-        if (r != HEADER.length || !Arrays.equals(HEADER, header.array())) {
+        if (r != headerConstant.length || !Arrays.equals(headerConstant, header.array())) {
             Log.d(TAG, "Invalid file format, wrong header.");                           //NLS
             return false;
         }
@@ -537,9 +564,10 @@ public class AsyncSerialFile {
     @SuppressWarnings("UnnecessaryUnboxing")
     @PublicForTesting
     protected void saveChannel(FileChannel fileChannel) throws IOException {
-        ByteBuffer header = ByteBuffer.wrap(HEADER);
+        final byte[] headerConstant = getHeader();
+        ByteBuffer header = ByteBuffer.wrap(headerConstant);
         header.order(ByteOrder.LITTLE_ENDIAN);
-        if (fileChannel.write(header) != HEADER.length) {
+        if (fileChannel.write(header) != headerConstant.length) {
             throw new IOException("Failed to write header.");                           //NLS
         }
 
