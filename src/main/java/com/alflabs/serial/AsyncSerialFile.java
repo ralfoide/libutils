@@ -337,7 +337,7 @@ public class AsyncSerialFile {
         }
     }
 
-    public void putString(@NonNull String key, @NonNull String value) {
+    public void putString(@NonNull String key, @Null String value) {
         synchronized(mData) {
             int intKey = mKeyer.encodeNewKey(key);
             Object  curVal = mData.get(intKey);
@@ -349,12 +349,12 @@ public class AsyncSerialFile {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public void putSerial(@NonNull String key, @NonNull SerialWriter value) {
+    public void putSerial(@NonNull String key, @Null SerialWriter value) {
         synchronized(mData) {
             int intKey = mKeyer.encodeNewKey(key);
             Object  curVal = mData.get(intKey);
             if ((value == null && curVal != null) || (value != null && !value.equals(curVal))) {
-                mData.put(intKey, value.encodeAsArray());
+                mData.put(intKey, value == null ? null : value.encodeAsArray());
                 mDataChanged = true;
             }
         }

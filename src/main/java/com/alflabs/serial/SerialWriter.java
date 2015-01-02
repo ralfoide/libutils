@@ -22,6 +22,7 @@ package com.alflabs.serial;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.zip.CRC32;
 
@@ -397,5 +398,26 @@ public class SerialWriter {
         }
 
         return (int) crc.getValue();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        int[] a1 = encodeAsArray();
+        int[] a2 = ((SerialWriter) o).encodeAsArray();
+
+        int n = a1.length;
+        if (n != a2.length) return false;
+        for (int i = 0; i < n; i++) {
+            if (a1[i] != a2[i]) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(mData);
     }
 }
