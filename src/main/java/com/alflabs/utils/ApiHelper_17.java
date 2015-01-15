@@ -6,7 +6,10 @@
 package com.alflabs.utils;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.view.View;
+
+import com.alflabs.annotations.NonNull;
 
 /**
  * API 17: support Context_getScreenWidth
@@ -22,5 +25,13 @@ class ApiHelper_17 extends ApiHelper_16 {
      */
     public int View_generateViewId() {
         return View.generateViewId();
+    }
+
+    /**
+     * Returns Activity.isDestroyed() for API 17+.
+     * Always returns false for API < 17.
+     */
+    public boolean Activity_isDestroyed(@NonNull Activity activity) {
+        return activity.isDestroyed();
     }
 }

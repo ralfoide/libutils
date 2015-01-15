@@ -5,12 +5,16 @@
 
 package com.alflabs.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.os.Looper;
 import android.view.Display;
 import android.view.View;
+
+import com.alflabs.annotations.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,7 +28,16 @@ public abstract class ApiHelper {
         if (sApiHelper == null) {
             int apiLevel = Utils.getApiLevel();
 
-            if (apiLevel >= 13) {
+            if (apiLevel >= 18) {
+                sApiHelper = new ApiHelper_18();
+
+            } else if (apiLevel >= 17) {
+                sApiHelper = new ApiHelper_17();
+
+            } else if (apiLevel >= 16) {
+                sApiHelper = new ApiHelper_16();
+
+            } else if (apiLevel >= 13) {
                 sApiHelper = new ApiHelper_13();
 
             } else {
@@ -107,4 +120,20 @@ public abstract class ApiHelper {
     public Point Display_getSize(Display display) {
         return new Point(display.getWidth(),  display.getHeight());
     }
+
+    /**
+     * Calls Looper.quitSafely() on API 18+.
+     * Calls the regular Looper.quit() below API 18.
+     */
+    public void Looper_quitSafely(@NonNull Looper looper) {
+        looper.quit();
+    }
+    /**
+     * Returns Activity.isDestroyed() for API 17+.
+     * Always returns false for API < 17.
+     */
+    public boolean Activity_isDestroyed(@NonNull Activity activity) {
+        return false;
+    }
+
 }
