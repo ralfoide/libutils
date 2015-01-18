@@ -56,44 +56,4 @@ public class BasePrefsValues {
         return b;
     }
 
-    public boolean isIntroDismissed() {
-        return mPrefs.getBoolean("dismiss_intro", false);
-    }
-
-    public void setIntroDismissed(boolean dismiss) {
-        synchronized (editLock()) {
-            mPrefs.edit().putBoolean("dismiss_intro", dismiss).commit();
-        }
-    }
-
-    public int getLastIntroVersion() {
-        return mPrefs.getInt("last_intro_vers", 0);
-    }
-
-    public void setLastIntroVersion(int lastIntroVers) {
-        synchronized (editLock()) {
-            mPrefs.edit().putInt("last_intro_vers", lastIntroVers).commit();
-        }
-    }
-
-    public String getLastExceptions() {
-        return mPrefs.getString("last_exceptions", null);
-    }
-
-    public void setLastExceptions(String s) {
-        synchronized (editLock()) {
-            mPrefs.edit().putString("last_exceptions", s).commit();
-        }
-    }
-
-    public String getLastActions() {
-        return mPrefs.getString("last_actions", null);
-    }
-
-    public void setLastActions(String s) {
-        synchronized (editLock()) {
-            mPrefs.edit().putString("last_actions", s).commit();
-        }
-    }
-
 }
