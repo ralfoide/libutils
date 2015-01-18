@@ -7,6 +7,7 @@ package com.alflabs.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
@@ -19,7 +20,7 @@ import com.alflabs.annotations.NonNull;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public abstract class ApiHelper {
+public class ApiHelper {
 
     private static ApiHelper sApiHelper = null;
 
@@ -40,8 +41,14 @@ public abstract class ApiHelper {
             } else if (apiLevel >= 13) {
                 sApiHelper = new ApiHelper_13();
 
-            } else {
+            } else if (apiLevel >= 11) {
                 sApiHelper = new ApiHelper_11();
+
+            } else if (apiLevel >= 9) {
+                sApiHelper = new ApiHelper_09();
+
+            } else {
+                sApiHelper = new ApiHelper();
             }
         }
 
@@ -134,6 +141,14 @@ public abstract class ApiHelper {
      */
     public boolean Activity_isDestroyed(@NonNull Activity activity) {
         return false;
+    }
+
+    /**
+     * Calls SharedPreferences.Editor.apply() on API 9+.
+     * Calls SharedPreferences.Editor.commit() on API < 9 but does not return any result.
+     */
+    public void SharedPreferences_Editor_apply(@NonNull SharedPreferences.Editor editor) {
+        editor.apply();
     }
 
 }

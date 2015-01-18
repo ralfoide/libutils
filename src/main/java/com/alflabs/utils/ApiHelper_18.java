@@ -1,13 +1,12 @@
 /*
  * Project: AndroidAppLib
- * Copyright (C) 2012 ralfoide gmail com.
+ * Copyright (C) 2015 ralfoide gmail com.
  */
 
 package com.alflabs.utils;
 
 import android.annotation.TargetApi;
 import android.os.Looper;
-import android.view.View;
 
 import com.alflabs.annotations.NonNull;
 

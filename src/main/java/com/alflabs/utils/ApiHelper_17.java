@@ -1,6 +1,6 @@
 /*
  * Project: AndroidAppLib
- * Copyright (C) 2012 ralfoide gmail com.
+ * Copyright (C) 2014 ralfoide gmail com.
  */
 
 package com.alflabs.utils;

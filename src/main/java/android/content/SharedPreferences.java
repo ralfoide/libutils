@@ -1,43 +1,32 @@
 package android.content;
 
+import android.annotation.TargetApi;
+
 /**
  * Placeholder
  */
-public class SharedPreferences {
+public interface SharedPreferences {
 
-    public Editor edit() {
-        return new Editor();
+    public Editor edit();
+
+    public boolean getBoolean(String name, boolean value);
+
+    public int getInt(String name, int value);
+
+    public String getString(String name, String value);
+
+    public interface Editor {
+
+        @TargetApi(9)
+        public void apply();
+
+        @TargetApi(1)
+        public boolean commit();
+
+        public Editor putBoolean(String name, boolean value);
+
+        public Editor putInt(String name, int value);
+
+        public Editor putString(String name, String value);
     }
-
-    public boolean getBoolean(String name, boolean value) {
-        return false;
-    }
-
-    public int getInt(String name, int value) {
-        return value;
-    }
-
-    public String getString(String name, String value) {
-        return value;
-    }
-
-    public class Editor {
-
-        public boolean commit() {
-            return false;
-        }
-
-        public Editor putBoolean(String name, boolean value) {
-            return this;
-        }
-
-        public Editor putInt(String name, int value) {
-            return this;
-        }
-
-        public Editor putString(String name, String value) {
-            return this;
-        }
-    }
-
 }

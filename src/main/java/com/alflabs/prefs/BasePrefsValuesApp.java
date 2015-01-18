@@ -20,9 +20,6 @@ package com.alflabs.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class BasePrefsValuesApp extends BasePrefsValues {
 
@@ -45,7 +42,7 @@ public class BasePrefsValuesApp extends BasePrefsValues {
 
     public void setIntroDismissed(boolean dismiss) {
         synchronized (editLock()) {
-            mPrefs.edit().putBoolean(PREF_DISMISS_INTRO, dismiss).commit();
+            endEdit(startEdit().putBoolean(PREF_DISMISS_INTRO, dismiss));
         }
     }
 
@@ -55,7 +52,7 @@ public class BasePrefsValuesApp extends BasePrefsValues {
 
     public void setLastIntroVersion(int lastIntroVers) {
         synchronized (editLock()) {
-            mPrefs.edit().putInt(PREF_LAST_INTRO_VERS, lastIntroVers).commit();
+            endEdit(startEdit().putInt(PREF_LAST_INTRO_VERS, lastIntroVers));
         }
     }
 
@@ -65,7 +62,7 @@ public class BasePrefsValuesApp extends BasePrefsValues {
 
     public void setLastExceptions(String s) {
         synchronized (editLock()) {
-            mPrefs.edit().putString(PREF_LAST_EXCEPTIONS, s).commit();
+            endEdit(startEdit().putString(PREF_LAST_EXCEPTIONS, s));
         }
     }
 
@@ -75,7 +72,7 @@ public class BasePrefsValuesApp extends BasePrefsValues {
 
     public void setLastActions(String s) {
         synchronized (editLock()) {
-            mPrefs.edit().putString(PREF_LAST_ACTIONS, s).commit();
+            endEdit(startEdit().putString(PREF_LAST_ACTIONS, s));
         }
     }
 

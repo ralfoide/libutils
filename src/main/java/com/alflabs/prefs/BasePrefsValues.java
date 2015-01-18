@@ -22,38 +22,40 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.util.Log;
+
+import com.alflabs.annotations.NonNull;
+import com.alflabs.utils.ApiHelper;
 
 public class BasePrefsValues {
 
     protected final SharedPreferences mPrefs;
 
-    public BasePrefsValues(Context context) {
+    public BasePrefsValues(@NonNull Context context) {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public BasePrefsValues(SharedPreferences prefs) {
+    public BasePrefsValues(@NonNull SharedPreferences prefs) {
         mPrefs = prefs;
     }
 
+    @NonNull
     public SharedPreferences getPrefs() {
         return mPrefs;
     }
 
+    @NonNull
     public Object editLock() {
         return BasePrefsValues.class;
     }
 
     /** Returns a shared pref editor. Must call endEdit() later. */
+    @NonNull
     public Editor startEdit() {
         return mPrefs.edit();
     }
 
     /** Commits an open editor. */
-    public boolean endEdit(Editor e, String tag) {
-        boolean b = e.commit();
-        if (!b) Log.w(tag, "Prefs.edit.commit failed");
-        return b;
+    public void endEdit(@NonNull Editor editor) {
+        ApiHelper.get().SharedPreferences_Editor_apply(editor);
     }
-
 }
