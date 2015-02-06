@@ -8,6 +8,7 @@ package com.alflabs.app;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.util.Log;
 
@@ -84,6 +85,7 @@ public class Bus {
     public static final int NO_WHAT = -1;
 
     private final int mBusId;
+    private Sender mSender;
 
     /**
      * Listeners. A map filter-type => listener list.
@@ -102,6 +104,8 @@ public class Bus {
 
     // -----
 
+    private final Queue<IBusListener> _mTempListenersToCall = new ConcurrentLinkedQueue<>();
+
     private void _send(int what, Object object) {
         Class<?> filter = object == null ? Void.class : object.getClass();
 
@@ -113,14 +117,25 @@ public class Bus {
             list0 = mListeners.get(null);
             list1 = mListeners.get(filter);
         }
-        _sendInternal(list0, what, object);
+        _collectListeners(list0, what, object);
         if (list1 != list0) {
-            _sendInternal(list1, what, object);
+            _collectListeners(list1, what, object);
+        }
+
+        // Execute all listeners queues by _collectListeners.
+        // We don't need to lock on this list since it's a ConcurrentLinkedQueue.
+        IBusListener listener;
+        while ((listener = _mTempListenersToCall.poll()) != null) {
+            try {
+                listener.onBusMessage(what, object);
+            } catch(Throwable tr) {
+                Log.d(TAG, listener.getClass().getSimpleName() + ".onBusMessage failed", tr);
+            }
         }
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private void _sendInternal(List<WeakReference<IBusListener>> list, int what, Object object) {
+    private void _collectListeners(List<WeakReference<IBusListener>> list, int what, Object object) {
         if (list != null) {
             synchronized (list) {
                 for (Iterator<WeakReference<IBusListener>> it = list.iterator(); it.hasNext(); ) {
@@ -129,11 +144,11 @@ public class Bus {
                     if (listener == null) {
                         it.remove();
                     } else {
-                        try {
-                            listener.onBusMessage(what, object);
-                        } catch(Throwable tr) {
-                            Log.d(TAG, listener.getClass().getSimpleName() + ".onBusMessage failed", tr);
-                        }
+                        // we don't call from within the iterator -- in case the message
+                        // generates add/removal to the listeners list which would cause
+                        // a ConcurrentModificationException. Instead we queue listeners
+                        // to call and then call them outside of the iterator.
+                        _mTempListenersToCall.add(listener);
                     }
                 }
             }
@@ -327,11 +342,14 @@ public class Bus {
 
     /**
      * Returns a sender that can be used to safely send messages on the Bus
-     * even if the Bus reference has been disposed.
+     * even if the Bus reference is later disposed.
      */
     @NonNull
-    public Sender getSender() {
-        return new Sender(this);
+    public synchronized Sender getSender() {
+        if (mSender == null) {
+            mSender = new Sender(this);
+        }
+        return mSender;
     }
 
     public static class Sender {

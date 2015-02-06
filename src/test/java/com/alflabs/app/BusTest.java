@@ -153,22 +153,18 @@ public class BusTest {
         assertSame(b, sender.getBus());
 
         // This calls the first listener which itself registers the string listener.
-        // That means there's a race condition -- the listener list is modified while
-        // the sender is looping through it, which should generate a ConcurrentModificationException.
-        try {
-            sender.safeSend(42);
-            fail("This code MUST throw ConcurrentModificationException and should not reach here.");
-        } catch (ConcurrentModificationException e) {
-            // this is expected
-        }
+        // That means there's a race condition but the sender is designed to allow for
+        // this and avoid ConcurrentModificationException.
+        sender.safeSend(42);
 
-        // the all listener should have been invoked but the string one not yet.
+        // the all listener should have been invoked but the string one not yet
+        // as all the messages are sent after the listeners are collected.
         assertEquals("[42: null]", Arrays.toString(allReceived.toArray()));
         assertEquals("[]", Arrays.toString(stringsReceived.toArray()));
 
         // now they should both be invoked.
-        sender.safeSend(43);
-        assertEquals("[42: null, 43: null]", Arrays.toString(allReceived.toArray()));
-        assertEquals("[43: null]", Arrays.toString(stringsReceived.toArray()));
+        sender.safeSend(43, "foo");
+        assertEquals("[42: null, 43: foo]", Arrays.toString(allReceived.toArray()));
+        assertEquals("[43: foo]", Arrays.toString(stringsReceived.toArray()));
     }
 }
