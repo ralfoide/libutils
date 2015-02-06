@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -124,5 +125,50 @@ public class BusTest {
         assertEquals(
                 "[43: some strings, -1: moar strings, 45: unregister all]",
                 Arrays.toString(stringsReceived.toArray()));
+    }
+
+    @SuppressWarnings("UnnecessaryBoxing")
+    @Test
+    public void testReentrant() throws Exception {
+        assertEquals("[]", Arrays.toString(allReceived.toArray()));
+        assertEquals("[]", Arrays.toString(stringsReceived.toArray()));
+
+        b.register(new BusAdapter() {
+            @Override
+            public void onBusMessage(int what, @Null Object object) {
+                // modify the class-agnostic list from withing the message sender.
+                b.register(new BusAdapter() {
+                    @Override
+                    public void onBusMessage(int what, @Null Object object) {}
+                });
+                // modify a class-specific list from withing the message sender.
+                b.register(String.class, strings);
+            }
+        });
+        b.register(all);
+
+        Bus.Sender sender = b.getSender();
+        assertNotNull(sender);
+        assertNotNull(sender.getBus());
+        assertSame(b, sender.getBus());
+
+        // This calls the first listener which itself registers the string listener.
+        // That means there's a race condition -- the listener list is modified while
+        // the sender is looping through it, which should generate a ConcurrentModificationException.
+        try {
+            sender.safeSend(42);
+            fail("This code MUST throw ConcurrentModificationException and should not reach here.");
+        } catch (ConcurrentModificationException e) {
+            // this is expected
+        }
+
+        // the all listener should have been invoked but the string one not yet.
+        assertEquals("[42: null]", Arrays.toString(allReceived.toArray()));
+        assertEquals("[]", Arrays.toString(stringsReceived.toArray()));
+
+        // now they should both be invoked.
+        sender.safeSend(43);
+        assertEquals("[42: null, 43: null]", Arrays.toString(allReceived.toArray()));
+        assertEquals("[43: null]", Arrays.toString(stringsReceived.toArray()));
     }
 }
