@@ -6,6 +6,7 @@
 package com.alflabs.utils;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -29,7 +30,10 @@ public class ApiHelper {
         if (sApiHelper == null) {
             int apiLevel = Utils.getApiLevel();
 
-            if (apiLevel >= 18) {
+            if (apiLevel >= 19) {
+                sApiHelper = new ApiHelper_19();
+
+            } else if (apiLevel >= 18) {
                 sApiHelper = new ApiHelper_18();
 
             } else if (apiLevel >= 17) {
@@ -149,6 +153,14 @@ public class ApiHelper {
      */
     public void SharedPreferences_Editor_apply(@NonNull SharedPreferences.Editor editor) {
         editor.apply();
+    }
+
+    /**
+     * Calls ActivityManager.isLowRamDevice() on API 19+.
+     * Returns true below API 19.
+     */
+    public boolean ActivityManager_isLowRamDevice(@NonNull ActivityManager activityManager) {
+        return true;
     }
 
 }
