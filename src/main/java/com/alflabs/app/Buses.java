@@ -21,7 +21,7 @@ import java.util.List;
  * <p/>
  * The Buses classes manages the global list of buses.
  * Each bus has an id so it's possible to find a bus by its
- * id if the referenec is still alive.
+ * id if the reference is still alive.
  */
 public final class Buses {
 
