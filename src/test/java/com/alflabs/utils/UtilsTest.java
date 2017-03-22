@@ -2,8 +2,6 @@ package com.alflabs.utils;
 
 import junit.framework.TestCase;
 
-import java.io.Serializable;
-
 public class UtilsTest extends TestCase {
 
     public void testGetApiLevel() throws Exception {

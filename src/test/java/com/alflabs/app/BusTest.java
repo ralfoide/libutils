@@ -1,15 +1,13 @@
 package com.alflabs.app;
 
 import com.alflabs.annotations.Null;
+import static com.google.common.truth.Truth.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class BusTest {
 
@@ -41,28 +39,26 @@ public class BusTest {
     @SuppressWarnings("UnnecessaryBoxing")
     @Test
     public void testRegister() throws Exception {
-        assertEquals("[]", Arrays.toString(allReceived.toArray()));
-        assertEquals("[]", Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[]");
 
         b.register(all);
         b.register(String.class, strings);
 
         Bus.Sender sender = b.getSender();
-        assertNotNull(sender);
-        assertNotNull(sender.getBus());
-        assertSame(b, sender.getBus());
+        assertThat(sender).isNotNull();
+        assertThat(sender.getBus()).isNotNull();
+        assertThat(sender.getBus()).isSameAs(b);
 
         sender.safeSend(42);
         sender.safeSend(43, "some strings");
         sender.safeSend("moar strings");
         sender.safeSend(44, Integer.valueOf(44));
 
-        assertEquals(
-                "[42: null, 43: some strings, -1: moar strings, 44: 44]",
-                Arrays.toString(allReceived.toArray()));
-        assertEquals(
-                "[43: some strings, -1: moar strings]",
-                Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo(
+                "[42: null, 43: some strings, -1: moar strings, 44: 44]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo(
+                "[43: some strings, -1: moar strings]");
 
         b = null;
         System.gc();
@@ -72,66 +68,58 @@ public class BusTest {
         sender.safeSend(45, "weak ref");
         sender.safeSend(46, Integer.valueOf(46));
 
-        assertEquals(
-                "[42: null, 43: some strings, -1: moar strings, 44: 44]",
-                Arrays.toString(allReceived.toArray()));
-        assertEquals(
-                "[43: some strings, -1: moar strings]",
-                Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo(
+                "[42: null, 43: some strings, -1: moar strings, 44: 44]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo(
+                "[43: some strings, -1: moar strings]");
     }
 
     @SuppressWarnings("UnnecessaryBoxing")
     @Test
     public void testUnregister() throws Exception {
-        assertEquals("[]", Arrays.toString(allReceived.toArray()));
-        assertEquals("[]", Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[]");
 
         b.register(all);
         b.register(String.class, strings);
 
         Bus.Sender sender = b.getSender();
-        assertNotNull(sender);
-        assertNotNull(sender.getBus());
-        assertSame(b, sender.getBus());
+        assertThat(sender).isNotNull();
+        assertThat(sender.getBus()).isNotNull();
+        assertThat(sender.getBus()).isSameAs(b);
 
         sender.safeSend(42);
         sender.safeSend(43, "some strings");
         sender.safeSend("moar strings");
         sender.safeSend(44, Integer.valueOf(44));
 
-        assertEquals(
-                "[42: null, 43: some strings, -1: moar strings, 44: 44]",
-                Arrays.toString(allReceived.toArray()));
-        assertEquals(
-                "[43: some strings, -1: moar strings]",
-                Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo(
+                "[42: null, 43: some strings, -1: moar strings, 44: 44]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo(
+                "[43: some strings, -1: moar strings]");
 
         b.unregister(all);
         sender.safeSend(45, "unregister all");
 
-        assertEquals(
-                "[42: null, 43: some strings, -1: moar strings, 44: 44]",
-                Arrays.toString(allReceived.toArray()));
-        assertEquals(
-                "[43: some strings, -1: moar strings, 45: unregister all]",
-                Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo(
+                "[42: null, 43: some strings, -1: moar strings, 44: 44]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo(
+                "[43: some strings, -1: moar strings, 45: unregister all]");
 
         b.unregister(strings);
         sender.safeSend(45, "unregister string");
 
-        assertEquals(
-                "[42: null, 43: some strings, -1: moar strings, 44: 44]",
-                Arrays.toString(allReceived.toArray()));
-        assertEquals(
-                "[43: some strings, -1: moar strings, 45: unregister all]",
-                Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo(
+                "[42: null, 43: some strings, -1: moar strings, 44: 44]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo(
+                "[43: some strings, -1: moar strings, 45: unregister all]");
     }
 
     @SuppressWarnings("UnnecessaryBoxing")
     @Test
     public void testReentrant() throws Exception {
-        assertEquals("[]", Arrays.toString(allReceived.toArray()));
-        assertEquals("[]", Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[]");
 
         b.register(new BusAdapter() {
             @Override
@@ -148,9 +136,9 @@ public class BusTest {
         b.register(all);
 
         Bus.Sender sender = b.getSender();
-        assertNotNull(sender);
-        assertNotNull(sender.getBus());
-        assertSame(b, sender.getBus());
+        assertThat(sender).isNotNull();
+        assertThat(sender.getBus()).isNotNull();
+        assertThat(sender.getBus()).isSameAs(b);
 
         // This calls the first listener which itself registers the string listener.
         // That means there's a race condition but the sender is designed to allow for
@@ -159,12 +147,12 @@ public class BusTest {
 
         // the all listener should have been invoked but the string one not yet
         // as all the messages are sent after the listeners are collected.
-        assertEquals("[42: null]", Arrays.toString(allReceived.toArray()));
-        assertEquals("[]", Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[42: null]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[]");
 
         // now they should both be invoked.
         sender.safeSend(43, "foo");
-        assertEquals("[42: null, 43: foo]", Arrays.toString(allReceived.toArray()));
-        assertEquals("[43: foo]", Arrays.toString(stringsReceived.toArray()));
+        assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[42: null, 43: foo]");
+        assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[43: foo]");
     }
 }

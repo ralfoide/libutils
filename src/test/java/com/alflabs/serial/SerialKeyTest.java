@@ -19,7 +19,7 @@
 
 package com.alflabs.serial;
 
-import org.junit.Assert;
+import static com.google.common.truth.Truth.assertThat;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,20 +31,20 @@ public class SerialKeyTest {
     @Test
     public void testEncodeNewKey() throws Exception {
         SerialKey s = new SerialKey();
-        Assert.assertEquals("foo".hashCode(),  s.encodeNewKey("foo"));
-        Assert.assertEquals("blah".hashCode(), s.encodeNewKey("blah"));
+        assertThat(s.encodeNewKey("foo" )).isEqualTo("foo" .hashCode());
+        assertThat(s.encodeNewKey("blah")).isEqualTo("blah".hashCode());
 
         // "encodeNew" returns the same integer if the same key is used
-        Assert.assertEquals("foo".hashCode(),  s.encodeNewKey("foo"));
-        Assert.assertEquals("foo".hashCode(),  s.encodeNewKey("foo"));
+        assertThat(s.encodeNewKey("foo")).isEqualTo("foo".hashCode());
+        assertThat(s.encodeNewKey("foo")).isEqualTo("foo".hashCode());
 
     }
 
     @Test
     public void testEncodeUniqueKey() throws Exception {
         SerialKey s = new SerialKey();
-        Assert.assertEquals("foo".hashCode(),  s.encodeUniqueKey("foo"));
-        Assert.assertEquals("blah".hashCode(), s.encodeUniqueKey("blah"));
+        assertThat(s.encodeUniqueKey("foo" )).isEqualTo("foo" .hashCode());
+        assertThat(s.encodeUniqueKey("blah")).isEqualTo("blah".hashCode());
 
         // encodeUnique throws an except if trying to use a key previously used
         exception.expect(SerialKey.DuplicateKey.class);
@@ -55,7 +55,7 @@ public class SerialKeyTest {
     @Test
     public void testEncodeKey() throws Exception {
         SerialKey s = new SerialKey();
-        Assert.assertEquals("foo".hashCode(),  s.encodeKey("foo"));
-        Assert.assertEquals("blah".hashCode(), s.encodeKey("blah"));
+        assertThat(s.encodeKey("foo" )).isEqualTo("foo" .hashCode());
+        assertThat(s.encodeKey("blah")).isEqualTo("blah".hashCode());
     }
 }
