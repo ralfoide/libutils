@@ -117,7 +117,7 @@ public class Utils {
 
     /**
      * Serializes a Java Serializable object to a string container.
-     * The string is only garanteed to be compatible with {@link #deserializeFromString}
+     * The string is only guaranteed to be compatible with {@link #deserializeFromString}
      */
     @NonNull
     public static String serializeToString(@NonNull Object object) throws IOException {
