@@ -4,7 +4,7 @@
  * License TBD
  */
 
-package com.alflabs.app;
+package com.alflabs.app.v1;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
@@ -23,7 +23,7 @@ import java.util.List;
  * Each bus has an id so it's possible to find a bus by its
  * id if the reference is still alive.
  */
-public final class Buses {
+public class Buses {
 
     private static final String TAG = Buses.class.getSimpleName();
     private static final boolean DEBUG = Utils.isEmulator();

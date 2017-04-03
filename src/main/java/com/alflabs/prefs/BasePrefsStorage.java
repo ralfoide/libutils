@@ -5,27 +5,12 @@
 
 package com.alflabs.prefs;
 
-import com.alflabs.annotations.PublicForTesting;
 import com.alflabs.app.BackupWrapper;
 import com.alflabs.serial.AsyncSerialFile;
-import com.alflabs.serial.SerialKey;
 import com.alflabs.serial.SerialReader;
 import com.alflabs.serial.SerialWriter;
 
 import android.content.Context;
-import android.util.Log;
-import com.alflabs.utils.RSparseArray;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
-import java.util.Arrays;
 
 /**
  * Wrapper around {@link SerialWriter} and {@link SerialReader} to deal with app prefs.
@@ -46,6 +31,7 @@ import java.util.Arrays;
  */
 public class BasePrefsStorage extends AsyncSerialFile {
 
+    @SuppressWarnings("unused")
     private static final boolean DEBUG = true;
     public static final String TAG = BasePrefsStorage.class.getSimpleName();
 

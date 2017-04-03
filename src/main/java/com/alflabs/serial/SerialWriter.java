@@ -23,7 +23,6 @@ import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.zip.CRC32;
 
 /**
@@ -93,6 +92,7 @@ import java.util.zip.CRC32;
  * - 1 int: EOF
  * </pre>
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class SerialWriter {
 
     public static class CantAddData extends RuntimeException {

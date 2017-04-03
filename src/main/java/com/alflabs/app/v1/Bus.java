@@ -4,7 +4,7 @@
  * License TBD
  */
 
-package com.alflabs.app;
+package com.alflabs.app.v1;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -160,8 +160,8 @@ public class Bus {
     /**
      * Registers a BusListener with no class filter.
      *
-     * @param listener A receiver object implement {@link com.alflabs.app.IBusListener}
-     *                 or {@link com.alflabs.app.BusAdapter}.
+     * @param listener A receiver object implement {@link IBusListener}
+     *                 or {@link BusAdapter}.
      * @return self for chaining.
      */
     @NonNull
@@ -176,8 +176,8 @@ public class Bus {
      * @param classFilter The object class to filter. Can be null to receive everything (any kind
      *      of object, including null) or the {@link Void} class to filter on message with null
      *      objects.
-     * @param listener A receiver object implementing {@link com.alflabs.app.IBusListener}
-     *                 or {@link com.alflabs.app.BusAdapter}.
+     * @param listener A receiver object implementing {@link IBusListener}
+     *                 or {@link BusAdapter}.
      * @return self for chaining.
      */
     @NonNull
@@ -277,8 +277,8 @@ public class Bus {
         /**
          * Registers a BusListener with no class filter.
          *
-         * @param listener A receiver object implement {@link com.alflabs.app.IBusListener}
-         *                 or {@link com.alflabs.app.BusAdapter}.
+         * @param listener A receiver object implement {@link IBusListener}
+         *                 or {@link BusAdapter}.
          * @return self for chaining.
          */
         @NonNull

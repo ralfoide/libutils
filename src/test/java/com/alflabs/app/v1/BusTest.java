@@ -1,6 +1,10 @@
-package com.alflabs.app;
+package com.alflabs.app.v1;
 
 import com.alflabs.annotations.Null;
+import com.alflabs.app.v1.Bus;
+import com.alflabs.app.v1.BusAdapter;
+import com.alflabs.app.v1.Buses;
+import com.alflabs.app.v1.IBusListener;
 import static com.google.common.truth.Truth.assertThat;
 import org.junit.Before;
 import org.junit.Test;

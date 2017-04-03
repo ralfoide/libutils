@@ -4,7 +4,7 @@
  * License TBD
  */
 
-package com.alflabs.app;
+package com.alflabs.app.v1;
 
 import com.alflabs.annotations.Null;
 

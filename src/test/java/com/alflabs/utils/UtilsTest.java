@@ -1,11 +1,14 @@
 package com.alflabs.utils;
 
+import com.google.common.truth.Expect;
 import static com.google.common.truth.Truth.assertThat;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.Serializable;
 
 public class UtilsTest {
+    @Rule public final Expect expect = Expect.create();
 
     @Test
     public void testGetApiLevel() throws Exception {
@@ -38,12 +41,16 @@ public class UtilsTest {
 
         String s1 = Utils.serializeToString(r1);
         assertThat(s1).isNotNull();
-        assertThat(_reformatLongString(s1)).isEqualTo(_reformatLongString(
-                "aced000573720031636f6d2e616c666c6162732e7574696c732e5574696c7354657374244a61" +
-                        "766153657269616c697a61626c65436c61737300000000000000010200045a000162" +
-                        "490001694a00016c4c0001737400124c6a6176612f6c616e672f537472696e673b78" +
-                        "70010000002a00000000002fefd8740018736f6d652073657269616c697a61626c65" +
-                        "206f626a656374"));
+        expect.that(_reformatLongString(s1)).isEqualTo(_reformatLongString(
+                "aced000573720031636f6d2e616c666c6162732e7574696c732e5574696c7354657374244a617661" +
+                        "53657269616c697a61626c65436c61737300000000000000010200045a00016249000169" +
+                        "4a00016c4c0001737400124c6a6176612f6c616e672f537472696e673b7870010000002a" +
+                        "00000000002fefd8740018736f6d652073657269616c697a61626c65206f626a656374"));
+        assertThat(s1).isEqualTo(
+                "aced000573720031636f6d2e616c666c6162732e7574696c732e5574696c7354657374244a617661" +
+                        "53657269616c697a61626c65436c61737300000000000000010200045a00016249000169" +
+                        "4a00016c4c0001737400124c6a6176612f6c616e672f537472696e673b7870010000002a" +
+                        "00000000002fefd8740018736f6d652073657269616c697a61626c65206f626a656374");
 
         Object r2 = Utils.deserializeFromString(s1);
         assertThat(r2).isNotNull();
