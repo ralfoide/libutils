@@ -26,7 +26,9 @@ buildscript {
 }
 
 dependencies {
-    testCompile group: "junit", name: "junit", version: "4.12"
+    compile "javax.inject:javax.inject:1"
+
+    testCompile "junit:junit:4.12"
     testCompile "com.google.truth:truth:0.31"
 }
 
