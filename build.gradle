@@ -18,6 +18,16 @@
 
 apply plugin: "com.android.library"
 
+// jackOptions { enabled true } is not supported in library projects yet.
+// From http://stackoverflow.com/questions/3797512 :
+// Java8 not fully supported in library projects yet, https://code.google.com/p/android/issues/detail?id=211386
+// this is a temporary workaround to get at least lambdas compiling.
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xbootclasspath/a:" + System.properties.get("java.home") + "/lib/rt.jar"
+    }
+}
+
 android {
     compileSdkVersion 24
     buildToolsVersion "25.0.2"
@@ -37,9 +47,16 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
+    compile "com.android.support:appcompat-v7:24.2.1"
+
     // Note: annotationProcessor starting with gradle 2.2 replaces the previous APT (annotation processor plugin)
     compile "com.google.dagger:dagger:2.5"
     annotationProcessor "com.google.dagger:dagger-compiler:2.5"
@@ -50,37 +67,3 @@ dependencies {
     testCompile "org.robolectric:robolectric:3.1"
     testCompile "junit:junit:4.12"
 }
-
-/* OLD
-dependencies {
-    compile "javax.inject:javax.inject:1"
-
-    testCompile "junit:junit:4.12"
-    testCompile "com.google.truth:truth:0.31"
-}
-
-test {
-    testLogging {
-        showStandardStreams = true
-        showStackTraces = true
-        exceptionFormat = "full"
-    }
-}
-
-def _root1 = _join("main", "android");
-
-jar {
-    exclude {
-        def path = it.file.getPath();
-        boolean hasRoot = path.contains(_root1);
-        if (hasRoot) {
-            print "@@ Skipping " + path + "\n";
-        }
-        return hasRoot;
-    }
-}
-
-String _join(String path1, String path2) {
-    return path1 + File.separator + path2;
-}
-*/
