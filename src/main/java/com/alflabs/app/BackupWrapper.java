@@ -8,6 +8,7 @@ package com.alflabs.app;
 import android.app.backup.BackupManager;
 import android.content.Context;
 import android.util.Log;
+import com.alflabs.libutils.BuildConfig;
 
 /**
  * Wrapper around the {@link BackupManager} API, which is only available
@@ -21,7 +22,7 @@ import android.util.Log;
 public class BackupWrapper {
 
     public static final String TAG = BackupWrapper.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final Object[] sLock = new Object[0];
 
     private final BaseBackupWrapperImpl mImpl;

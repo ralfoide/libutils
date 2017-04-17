@@ -3,6 +3,7 @@ package com.alflabs.utils;
 import android.util.Log;
 
 import com.alflabs.annotations.Null;
+import com.alflabs.libutils.BuildConfig;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -11,7 +12,7 @@ import java.util.Enumeration;
 
 public abstract class NetworkUtils {
     public static final String TAG = Utils.class.getSimpleName();
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = BuildConfig.DEBUG;
 
     @Null
     public static String getWifiAndroidDeviceName() {

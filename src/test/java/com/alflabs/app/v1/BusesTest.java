@@ -1,9 +1,8 @@
 package com.alflabs.app.v1;
 
-import com.alflabs.app.v1.Bus;
-import com.alflabs.app.v1.Buses;
-import static com.google.common.truth.Truth.assertThat;
 import org.junit.Test;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class BusesTest {
 

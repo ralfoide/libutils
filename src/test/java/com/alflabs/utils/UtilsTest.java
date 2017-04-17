@@ -4,9 +4,14 @@ import com.google.common.truth.Expect;
 import static com.google.common.truth.Truth.assertThat;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.Serializable;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, sdk = 16)
 public class UtilsTest {
     @Rule public final Expect expect = Expect.create();
 

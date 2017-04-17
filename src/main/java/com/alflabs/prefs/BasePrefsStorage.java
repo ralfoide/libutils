@@ -6,6 +6,7 @@
 package com.alflabs.prefs;
 
 import com.alflabs.app.BackupWrapper;
+import com.alflabs.libutils.BuildConfig;
 import com.alflabs.serial.AsyncSerialFile;
 import com.alflabs.serial.SerialReader;
 import com.alflabs.serial.SerialWriter;
@@ -32,7 +33,7 @@ import android.content.Context;
 public class BasePrefsStorage extends AsyncSerialFile {
 
     @SuppressWarnings("unused")
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     public static final String TAG = BasePrefsStorage.class.getSimpleName();
 
     /*

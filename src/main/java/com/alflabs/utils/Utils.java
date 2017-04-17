@@ -1,5 +1,5 @@
 /*
- * Project: AndroidAppLib
+ * Project: Lib Utils
  * Copyright (C) 2012 ralfoide gmail com.
  */
 
@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.app.ICoreStrings;
+import com.alflabs.libutils.BuildConfig;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,7 +26,7 @@ import java.io.ObjectOutputStream;
 public class Utils {
 
     public static final String TAG = Utils.class.getSimpleName();
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = BuildConfig.DEBUG;
 
     private static int sSdkInt = 0;
 

@@ -1,11 +1,6 @@
 package com.alflabs.app.v1;
 
 import com.alflabs.annotations.Null;
-import com.alflabs.app.v1.Bus;
-import com.alflabs.app.v1.BusAdapter;
-import com.alflabs.app.v1.Buses;
-import com.alflabs.app.v1.IBusListener;
-import static com.google.common.truth.Truth.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,11 +8,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
+
 public class BusTest {
 
     private Bus b;
-    private final List<String> allReceived = new ArrayList<String>();
-    private final List<String> stringsReceived = new ArrayList<String>();
+    private final List<String> allReceived = new ArrayList<>();
+    private final List<String> stringsReceived = new ArrayList<>();
     private IBusListener all;
     private IBusListener strings;
 

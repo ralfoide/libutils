@@ -33,6 +33,7 @@ import android.util.Log;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.annotations.PublicForTesting;
+import com.alflabs.libutils.BuildConfig;
 import com.alflabs.utils.RSparseArray;
 
 /**
@@ -54,7 +55,7 @@ import com.alflabs.utils.RSparseArray;
  */
 public class AsyncSerialFile {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     public static final String TAG = AsyncSerialFile.class.getSimpleName();
 
     /**
@@ -96,7 +97,7 @@ public class AsyncSerialFile {
     }
 
     /**
-     * To be overriden by derived classes to provide a 8-bytes array
+     * To be overridden by derived classes to provide a 8-bytes array
      * that serves as uniquely identify the file content.
      * @return A non-null 8-byte array file identifier
      */
