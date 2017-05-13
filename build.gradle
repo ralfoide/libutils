@@ -55,6 +55,8 @@ android {
 }
 
 dependencies {
+    compile "junit:junit:4.12"
+    compile "com.google.truth:truth:0.31"
     compile "com.android.support:appcompat-v7:24.2.1"
 
     // Note: annotationProcessor starting with gradle 2.2 replaces the previous APT (annotation processor plugin)
