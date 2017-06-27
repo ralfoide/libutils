@@ -1,4 +1,4 @@
-package com.alflabs.utils;
+package com.alflabs.utils.v1;
 
 import android.util.Log;
 
