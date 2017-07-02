@@ -4,6 +4,7 @@ import android.util.Log;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.libutils.BuildConfig;
+import com.alflabs.utils.ILogger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
@@ -33,7 +35,7 @@ public class KeyValueClientTest {
         mClientChanges.clear();
         mServerChanges.clear();
         mClient = null;
-        mServer = new KeyValueServer();
+        mServer = new KeyValueServer(mock(ILogger.class));
         mServer.setOnChangeListener((key, value) -> mServerChanges.add(key + "=" + value));
     }
 
@@ -74,7 +76,10 @@ public class KeyValueClientTest {
         InetSocketAddress address = mServer.start(20005);
         assertThat(address).isNotNull();
 
-        mClient = new KeyValueClient(address, new KeyValueClient.IListener() {
+        mClient = new KeyValueClient(
+                mock(ILogger.class),
+                address,
+                new KeyValueClient.IListener() {
             @Override
             public void addBandwidthTXBytes(int count) {
 

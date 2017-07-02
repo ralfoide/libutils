@@ -1,9 +1,8 @@
 package com.alflabs.kv;
 
-import android.util.Log;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.alflabs.libutils.BuildConfig;
+import com.alflabs.utils.ILogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KeyValueClient implements IConnection {
     private static final String TAG = KeyValueClient.class.getSimpleName();
-    private static final boolean DEBUG = BuildConfig.DEBUG;
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_VERBOSE = true;
 
     public interface IListener {
@@ -37,14 +36,9 @@ public class KeyValueClient implements IConnection {
     }
 
     @NonNull private final Thread mSocketThread;
+    @NonNull private final ILogger mLogger;
     @NonNull private final IListener mListener;
-    @NonNull private final KeyValueProtocol mProtocol = new KeyValueProtocol() {
-        @Override
-        protected void processPing(@NonNull Sender sender, @NonNull String line) {
-            super.processPing(sender, line);
-            onReceiveClientHeartBeat(line);
-        }
-    };
+    @NonNull private final KeyValueProtocol mProtocol;
     private volatile long mHBValue = 1;
     private volatile boolean mIsRunning;
     private AtomicBoolean mStartSyncSuccess;
@@ -68,21 +62,34 @@ public class KeyValueClient implements IConnection {
         }
     };
 
-    public KeyValueClient(@NonNull final SocketAddress address, @NonNull IListener listener) {
+    public KeyValueClient(
+            @NonNull ILogger logger,
+            @NonNull final SocketAddress address,
+            @NonNull IListener listener) {
+        mLogger = logger;
         mListener = listener;
+
+        mProtocol = new KeyValueProtocol(mLogger) {
+            @Override
+            protected void processPing(@NonNull Sender sender, @NonNull String line) {
+                super.processPing(sender, line);
+                onReceiveClientHeartBeat(line);
+            }
+        };
+
         mSocketThread = new Thread(() -> {
             while (mIsRunning) {
                 updateCnxMessage("Opening connection...");
 
                 Socket socket = null;
                 for (int i = 0; socket == null && mIsRunning && i < 10; i++) {
-                    if (DEBUG) Log.d(TAG, "[" + i + "] Trying to connect to " + address);
+                    if (DEBUG) mLogger.d(TAG, "[" + i + "] Trying to connect to " + address);
                     socket = new Socket();
                     try {
                         socket.connect(address, 1000 /*ms*/);
                     } catch (IOException e) {
                         socket = null;
-                        if (DEBUG) Log.d(TAG, "[" + i + "] Connect failed: " + e.toString());
+                        if (DEBUG) mLogger.d(TAG, "[" + i + "] Connect failed: " + e.toString());
                         String a = address.toString();
                         if (address instanceof InetSocketAddress) {
                             a = ((InetSocketAddress) address).getAddress().getHostAddress();
@@ -102,7 +109,7 @@ public class KeyValueClient implements IConnection {
                 }
 
                 if (socket == null) {
-                    Log.d(TAG, "Socket null [wait before retrying]");
+                    mLogger.d(TAG, "Socket null [wait before retrying]");
                     if (mStartSyncLatch != null) {
                         mStartSyncLatch.countDown();
                         return;
@@ -112,11 +119,11 @@ public class KeyValueClient implements IConnection {
                         Thread.sleep(1000 /*ms*/);
                     } catch (InterruptedException e) {
                         // This should happen when stop() is called.
-                        Log.d(TAG, "Socket sleep interrupted: " + e);
+                        mLogger.d(TAG, "Socket sleep interrupted: " + e);
                     }
 
                 } else {
-                    Log.d(TAG, "Socket opened [Start read/write threads]");
+                    mLogger.d(TAG, "Socket opened [Start read/write threads]");
                     if (mStartSyncLatch != null) {
                         mStartSyncLatch.countDown();
                     }
@@ -135,11 +142,11 @@ public class KeyValueClient implements IConnection {
                             Thread.sleep(100 /*ms*/);
                              version = mProtocol.getServerVersion();
                             if (version != 0) {
-                                Log.d(TAG, "Got server version in " + i*100 + " ms");
+                                mLogger.d(TAG, "Got server version in " + i*100 + " ms");
                                 break;
                             }
                         }
-                        Log.d(TAG, "Got server version: " + version);
+                        mLogger.d(TAG, "Got server version: " + version);
                         updateCnxMessage("Connected to server v" + version);
 
                         // heart beat
@@ -154,7 +161,7 @@ public class KeyValueClient implements IConnection {
 
                     } catch (InterruptedException e) {
                         // This should happen when stop() is called.
-                        Log.d(TAG, "Read/write thread interrupted: " + e);
+                        mLogger.d(TAG, "Read/write thread interrupted: " + e);
 
                         if (!mIsRunning && socket.isConnected()) {
                             // This thread got interrupt because we must quit this connection.
@@ -170,17 +177,17 @@ public class KeyValueClient implements IConnection {
                         try {
                             socket.close();
                         } catch (IOException e) {
-                            Log.d(TAG, "Socket close exception: " + e);
+                            mLogger.d(TAG, "Socket close exception: " + e);
                         }
                         reader.interrupt();
                         writer.interrupt();
                     }
 
-                    Log.d(TAG, "Socket lost: | isRunning=" + mIsRunning);
+                    mLogger.d(TAG, "Socket lost: | isRunning=" + mIsRunning);
                 }
             }
 
-            if (DEBUG) Log.d(TAG, "end of SocketThread.");
+            if (DEBUG) mLogger.d(TAG, "end of SocketThread.");
         }, TAG + "-Thread");
     }
 
@@ -220,7 +227,7 @@ public class KeyValueClient implements IConnection {
      * The client thread will keep trying to connect as long as possible.
      */
     public void startAsync() {
-        if (DEBUG) Log.d(TAG, "start | isRunning=" + mIsRunning);
+        if (DEBUG) mLogger.d(TAG, "start | isRunning=" + mIsRunning);
         if (!mIsRunning) {
             mIsRunning = true;
             mSocketThread.start();
@@ -244,7 +251,7 @@ public class KeyValueClient implements IConnection {
     }
 
     public void stopAsync() {
-        if (DEBUG) Log.d(TAG, "stop -| isRunning=" + mIsRunning);
+        if (DEBUG) mLogger.d(TAG, "stop -| isRunning=" + mIsRunning);
         if (mIsRunning) {
             mIsRunning = false;
 
@@ -263,7 +270,7 @@ public class KeyValueClient implements IConnection {
             try {
                 mSocketThread.join();
             } catch (InterruptedException e) {
-                Log.d(TAG, "stop -| join interrupted: " + e);
+                mLogger.d(TAG, "stop -| join interrupted: " + e);
             }
         }
     }
@@ -276,13 +283,13 @@ public class KeyValueClient implements IConnection {
             socket.setKeepAlive(true);      // try to keep alive
             socket.setSoTimeout(0 /*ms*/);  // infinite *read* timeout
         } catch (SocketException e) {
-            Log.d(TAG, "socket set params failed: " + e);
+            mLogger.d(TAG, "socket set params failed: " + e);
         }
     }
 
     private Thread writeSocket(@NonNull final Socket socket) {
         Thread t = new Thread(() -> {
-            if (DEBUG) Log.d(TAG, "start of writeSocket thread.");
+            if (DEBUG) mLogger.d(TAG, "start of writeSocket thread.");
             try {
                 PrintWriter out = new PrintWriter(socket.getOutputStream());
                 while (socket.isConnected() &&
@@ -290,17 +297,17 @@ public class KeyValueClient implements IConnection {
                         mIsRunning &&
                         !Thread.interrupted()) {
                     String line = getNextWriterLine();
-                    if (DEBUG_VERBOSE) Log.d(TAG, "WRITE << " + line.trim());
+                    if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE << " + line.trim());
                     out.println(line);
                     out.flush();
                     mListener.addBandwidthTXBytes(line.length() + 1);
                 }
             } catch (IOException e) {
-                if (DEBUG) Log.d(TAG, "WRITE failed: " + e);
+                if (DEBUG) mLogger.d(TAG, "WRITE failed: " + e);
             } catch (InterruptedException e) {
-                if (DEBUG) Log.d(TAG, "getNextWriterLine interrupted: " + e);
+                if (DEBUG) mLogger.d(TAG, "getNextWriterLine interrupted: " + e);
             }
-            if (DEBUG) Log.d(TAG, "end of writeSocket thread.");
+            if (DEBUG) mLogger.d(TAG, "end of writeSocket thread.");
         }, TAG + "-Writer");
         t.start();
         return t;
@@ -318,7 +325,7 @@ public class KeyValueClient implements IConnection {
 
     private Thread readSocket(@NonNull final Socket socket) {
         Thread t = new Thread(() -> {
-            if (DEBUG) Log.d(TAG, "start of readSocket thread.");
+            if (DEBUG) mLogger.d(TAG, "start of readSocket thread.");
             // We've set SO_TIMEOUT to zero meaning reads will block forever.
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -330,18 +337,18 @@ public class KeyValueClient implements IConnection {
                         String line = in.readLine();
                         if (line != null) {  // null when readLine is interrupted
                             mListener.addBandwidthRXBytes(line.length() + 1);
-                            if (DEBUG_VERBOSE) Log.d(TAG, "READ >> " + line.trim());
+                            if (DEBUG_VERBOSE) mLogger.d(TAG, "READ >> " + line.trim());
                             mProtocol.processLine(mSender, line);
                         }
                     } catch (SocketTimeoutException expected) {
                         // We're blocking on input, this should never happen
-                        if (DEBUG_VERBOSE) Log.d(TAG, "READ expected: " + expected);
+                        if (DEBUG_VERBOSE) mLogger.d(TAG, "READ expected: " + expected);
                     }
                 }
             } catch (IOException e) {
-                if (DEBUG) Log.d(TAG, "READ failed: " + e);
+                if (DEBUG) mLogger.d(TAG, "READ failed: " + e);
             }
-            if (DEBUG) Log.d(TAG, "end of readSocket thread.");
+            if (DEBUG) mLogger.d(TAG, "end of readSocket thread.");
         }, TAG + "-Reader");
         t.start();
         return t;
@@ -354,7 +361,7 @@ public class KeyValueClient implements IConnection {
     private void sendClientHeartBeat() {
         synchronized (mListener) {
             if (mHBValue > 0) {
-                if (DEBUG_VERBOSE) Log.d(TAG, "HB SEND value " + mHBValue);
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "HB SEND value " + mHBValue);
                 mSender.sendPing(Long.toString(mHBValue));
                 mListener.HBLatencyRequestSent();
                 mHBValue = -mHBValue; // make it negative while waiting for an answer
@@ -367,7 +374,7 @@ public class KeyValueClient implements IConnection {
             if (mHBValue < 0) {
                 long value = -1 * mHBValue;
                 String expected = "PR" + value;
-                if (DEBUG_VERBOSE) Log.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
                 if (expected.equals(line)) {
                     mListener.HBLatencyReplyReceived();
                     mHBValue = 1 + value;

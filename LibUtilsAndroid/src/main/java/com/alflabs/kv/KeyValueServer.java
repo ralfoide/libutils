@@ -1,10 +1,8 @@
 package com.alflabs.kv;
 
-import android.util.Log;
-import android.util.SparseArray;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.alflabs.libutils.BuildConfig;
+import com.alflabs.utils.ILogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +14,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,30 +42,31 @@ import java.util.concurrent.TimeUnit;
  */
 public class KeyValueServer {
     private static final String TAG = KeyValueServer.class.getSimpleName();
-    private static final boolean DEBUG = BuildConfig.DEBUG;
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_VERBOSE = false;
+
+    @NonNull private final ILogger mLogger;
 
     private volatile Thread mSocketThread;
     private volatile boolean mIsRunning;
     private volatile ServerSocket mServerSocket;
     private volatile int mNextSender = 0;
-    private final SparseArray<Sender> mSenders = new SparseArray<>();
-    private final KeyValueProtocol mProtocol = new KeyValueProtocol();
+    private final Set<Sender> mSenders = new HashSet<>();
+    private final KeyValueProtocol mProtocol;
     private final ExecutorService mThreadPool = Executors.newCachedThreadPool();
     private KeyValueProtocol.OnChangeListener mOnChangeListener;
     private Runnable mOnClientConnectedRunnable;
 
-    public KeyValueServer() {
-        mProtocol.setOnChangeListener(new KeyValueProtocol.OnChangeListener() {
-            @Override
-            public void onValueChanged(@NonNull String key, @Null String value) {
-                broadcastChangeToAllSenders(key, value);
-                KeyValueProtocol.OnChangeListener l = mOnChangeListener;
-                if (l != null) {
-                    try {
-                        l.onValueChanged(key, value);
-                    } catch (Exception ignore) {}
-                }
+    public KeyValueServer(@NonNull ILogger logger) {
+        mLogger = logger;
+        mProtocol = new KeyValueProtocol(logger);
+        mProtocol.setOnChangeListener((key, value) -> {
+            broadcastChangeToAllSenders(key, value);
+            KeyValueProtocol.OnChangeListener l = mOnChangeListener;
+            if (l != null) {
+                try {
+                    l.onValueChanged(key, value);
+                } catch (Exception ignore) {}
             }
         });
     }
@@ -134,7 +135,7 @@ public class KeyValueServer {
      * Returns the socket address & port of the server, null in case of error.
      */
     public InetSocketAddress start(@Null final InetAddress ip, final int port) {
-        if (DEBUG) Log.d(TAG, "start | isRunning=" + mIsRunning);
+        if (DEBUG) mLogger.d(TAG, "start | isRunning=" + mIsRunning);
         if (mIsRunning) return null;
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -142,7 +143,7 @@ public class KeyValueServer {
         mSocketThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                if (DEBUG) Log.d(TAG, "socket-thread [start]");
+                if (DEBUG) mLogger.d(TAG, "socket-thread [start]");
 
                 mServerSocket = null;
                 try {
@@ -156,32 +157,29 @@ public class KeyValueServer {
                     latch.countDown();
 
                     while (mIsRunning && !Thread.interrupted()) {
-                        if (DEBUG) Log.d(TAG, "socket-thread [accept] ");
+                        if (DEBUG) mLogger.d(TAG, "socket-thread [accept] ");
                         final Socket socket = mServerSocket.accept();
-                        if (DEBUG) Log.d(TAG, "socket-thread [accept] " + socket);
-                        mThreadPool.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    if (DEBUG) Log.d(TAG, "socket-thread [pool-worker start] ");
-                                    processConnection(socket);
-                                    if (DEBUG) Log.d(TAG, "socket-thread [pool-worker end] ");
-                                } catch (IOException e) {
-                                    if (DEBUG) Log.d(TAG, "socket-thread [pool-worker] " + e);
-                                }
+                        if (DEBUG) mLogger.d(TAG, "socket-thread [accept] " + socket);
+                        mThreadPool.execute(() -> {
+                            try {
+                                if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker start] ");
+                                processConnection(socket);
+                                if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker end] ");
+                            } catch (IOException e) {
+                                if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker] " + e);
                             }
                         });
                     }
 
                 } catch (SocketException e) {
                     // It's expected to get SocketException due to socket.close here from stop()
-                    if (DEBUG) Log.d(TAG, "socket-thread [expected] " + e);
+                    if (DEBUG) mLogger.d(TAG, "socket-thread [expected] " + e);
 
                 } catch (Throwable t) {
-                    if (DEBUG) Log.d(TAG, "socket-thread [unexpected] " + t);
+                    if (DEBUG) mLogger.d(TAG, "socket-thread [unexpected] " + t);
 
                 } finally {
-                    if (DEBUG) Log.d(TAG, "socket-thread [tear down]");
+                    if (DEBUG) mLogger.d(TAG, "socket-thread [tear down]");
                     if (mServerSocket != null) {
                         try {
                             mServerSocket.close();
@@ -195,11 +193,11 @@ public class KeyValueServer {
                     try {
                         mThreadPool.awaitTermination(1, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
-                        if (DEBUG) Log.d(TAG, "socket-thread [awaitTermination] " + e);
+                        if (DEBUG) mLogger.d(TAG, "socket-thread [awaitTermination] " + e);
                     }
                 }
 
-                if (DEBUG) Log.d(TAG, "socket-thread [end]");
+                if (DEBUG) mLogger.d(TAG, "socket-thread [end]");
             }
         }, TAG + "-Thread");
 
@@ -210,16 +208,16 @@ public class KeyValueServer {
         try {
             if (!latch.await(5, TimeUnit.SECONDS)) {
                 // latch expired
-                if (DEBUG) Log.d(TAG, "socket-thread [latch expired]");
+                if (DEBUG) mLogger.d(TAG, "socket-thread [latch expired]");
                 return null;
             }
         } catch (InterruptedException e) {
             // Interrupted while waiting...
-            if (DEBUG) Log.d(TAG, "socket-thread [latch interrupted] " + e);
+            if (DEBUG) mLogger.d(TAG, "socket-thread [latch interrupted] " + e);
             return null;
         }
         InetSocketAddress address = (InetSocketAddress) mServerSocket.getLocalSocketAddress();
-        if (DEBUG) Log.d(TAG, "socket-thread listening on " + address);
+        if (DEBUG) mLogger.d(TAG, "socket-thread listening on " + address);
         return address;
     }
 
@@ -228,28 +226,28 @@ public class KeyValueServer {
         if (mIsRunning) {
             stopAsync();
             try {
-                if (DEBUG) Log.d(TAG, "stop -| join, state=" + mSocketThread.getState());
+                if (DEBUG) mLogger.d(TAG, "stop -| join, state=" + mSocketThread.getState());
                 mSocketThread.join();
-                if (DEBUG) Log.d(TAG, "stop -| joined");
+                if (DEBUG) mLogger.d(TAG, "stop -| joined");
                 mSocketThread = null;
             } catch (Throwable t) {
-                Log.d(TAG, "stop -| join interrupted: " + t);
+                mLogger.d(TAG, "stop -| join interrupted: " + t);
             }
         }
     }
 
     /** Ask server to stop. Returns once the server is stopped. */
     public void stopAsync() {
-        if (DEBUG) Log.d(TAG, "stop -| isRunning=" + mIsRunning);
+        if (DEBUG) mLogger.d(TAG, "stop -| isRunning=" + mIsRunning);
         if (mIsRunning) {
             mIsRunning = false;
-            if (DEBUG) Log.d(TAG, "stop -| socket.close, thread.state=" + mSocketThread.getState());
+            if (DEBUG) mLogger.d(TAG, "stop -| socket.close, thread.state=" + mSocketThread.getState());
             ServerSocket socket = mServerSocket;
             if (socket != null) {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    if (DEBUG) Log.d(TAG, "stop -| socket.close=" + e);
+                    if (DEBUG) mLogger.d(TAG, "stop -| socket.close=" + e);
                 }
             }
         }
@@ -281,9 +279,9 @@ public class KeyValueServer {
 
             synchronized (mSenders) {
                 senderIndex = mNextSender++;
-                mSenders.put(senderIndex, sender);
+                mSenders.add(sender);
             }
-            if (DEBUG) Log.d(TAG, "Added sender " + senderIndex);
+            if (DEBUG) mLogger.d(TAG, "Added sender " + senderIndex);
 
             if (mOnClientConnectedRunnable != null) {
                 try {
@@ -291,24 +289,21 @@ public class KeyValueServer {
                 } catch (Exception ignore) {}
             }
 
-            mThreadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (DEBUG) Log.d(TAG, "Writer thread started");
-                    while (socket.isConnected() && !socket.isClosed() && mIsRunning) {
-                        try {
-                            String line = outCommands.takeFirst();
-                            if (line != null) {
-                                if (DEBUG_VERBOSE) Log.d(TAG, "WRITE << " + line.trim());
-                                out_.println(line);
-                                out_.flush();
-                            }
-                        } catch (InterruptedException e) {
-                            break;
+            mThreadPool.execute(() -> {
+                if (DEBUG) mLogger.d(TAG, "Writer thread started");
+                while (socket.isConnected() && !socket.isClosed() && mIsRunning) {
+                    try {
+                        String line = outCommands.takeFirst();
+                        if (line != null) {
+                            if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE << " + line.trim());
+                            out_.println(line);
+                            out_.flush();
                         }
+                    } catch (InterruptedException e) {
+                        break;
                     }
-                    if (DEBUG) Log.d(TAG, "Writer thread ended");
                 }
+                if (DEBUG) mLogger.d(TAG, "Writer thread ended");
             });
 
             sender.sendInit();
@@ -318,18 +313,18 @@ public class KeyValueServer {
                 try {
                     mProtocol.processLine(sender, line);
                 } catch (KeyValueProtocol.QCloseRequestException e) {
-                    if (DEBUG) Log.d(TAG, "Q Close Request received.");
+                    if (DEBUG) mLogger.d(TAG, "Q Close Request received.");
                     break;
                 } catch (Exception e) {
-                    if (DEBUG) Log.d(TAG, "Malformed line '" + line + "': " + e);
+                    if (DEBUG) mLogger.d(TAG, "Malformed line '" + line + "': " + e);
                 }
             }
         } finally {
             if (senderIndex != -1) {
                 synchronized (mSenders) {
-                    mSenders.remove(senderIndex);
+                    mSenders.remove(sender);
                 }
-                if (DEBUG) Log.d(TAG, "Removed sender " + senderIndex);
+                if (DEBUG) mLogger.d(TAG, "Removed sender " + senderIndex);
 
                 if (mOnClientConnectedRunnable != null) {
                     try {
@@ -354,8 +349,8 @@ public class KeyValueServer {
     private void broadcastChangeToAllSenders(@NonNull String key, @Null String value) {
         if (value == null) value = "";
         synchronized (mSenders) {
-            for (int n = mSenders.size() - 1; n >= 0; n--) {
-                mSenders.valueAt(n).sendValue(key, value);
+            for (Sender sender : mSenders) {
+                sender.sendValue(key, value);
             }
         }
     }

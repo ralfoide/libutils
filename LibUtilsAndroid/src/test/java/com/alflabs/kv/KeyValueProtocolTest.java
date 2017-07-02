@@ -3,6 +3,7 @@ package com.alflabs.kv;
 import android.util.Pair;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.libutils.BuildConfig;
+import com.alflabs.utils.ILogger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
@@ -38,7 +40,7 @@ public class KeyValueProtocolTest {
         mCounts.put("Read", 0);
         mCounts.put("Write", 0);
 
-        mProtocol = new KeyValueProtocol() {
+        mProtocol = new KeyValueProtocol(mock(ILogger.class)) {
             @Override
             protected void processPing(@NonNull Sender sender, @NonNull String line) {
                 super.processPing(sender, line);

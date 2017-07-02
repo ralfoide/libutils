@@ -1,9 +1,8 @@
 package com.alflabs.kv;
 
-import android.util.Log;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.alflabs.libutils.BuildConfig;
+import com.alflabs.utils.ILogger;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -31,7 +30,7 @@ import java.util.TreeMap;
  */
 public class KeyValueProtocol {
     private static final String TAG = KeyValueProtocol.class.getSimpleName();
-    private static final boolean DEBUG = BuildConfig.DEBUG;
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_VERBOSE = false;
 
     /**
@@ -41,6 +40,8 @@ public class KeyValueProtocol {
      * The map is a tree map so iterator is stable on the key ordering.
      */
     private final Map<String, String> mValues = Collections.synchronizedMap(new TreeMap<String, String>());
+    @NonNull
+    private final ILogger mLogger;
     @Null private OnChangeListener mOnChangeListener;
     private int mServerVersion = 0;
 
@@ -48,7 +49,8 @@ public class KeyValueProtocol {
         public void onValueChanged(@NonNull String key, @Null String value);
     }
 
-    public KeyValueProtocol() {
+    public KeyValueProtocol(@NonNull ILogger logger) {
+        mLogger = logger;
     }
 
     public void setOnChangeListener(@Null OnChangeListener listener) {
@@ -89,7 +91,7 @@ public class KeyValueProtocol {
         if (line == null) return;
         line = line.trim();
         if (line.isEmpty()) return;
-        if (DEBUG_VERBOSE) Log.d(TAG, "Input: " + line);
+        if (DEBUG_VERBOSE) mLogger.d(TAG, "Input: " + line);
 
         char prefix = line.charAt(0);
         switch (prefix) {
@@ -97,7 +99,7 @@ public class KeyValueProtocol {
                 // Server version
                 String key = line.substring(1);
                 String fields[] = key.split(":", 2);
-                if (DEBUG_VERBOSE) Log.d(TAG, "Process V: " + Arrays.toString(fields));
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "Process V: " + Arrays.toString(fields));
                 if (fields.length < 2) break;
                 key = fields[0].trim();
                 if ("JuniorDayModelServer".equals(key)) {
@@ -129,14 +131,14 @@ public class KeyValueProtocol {
     }
 
     protected void processQuit() throws QCloseRequestException {
-        if (DEBUG_VERBOSE) Log.d(TAG, "Process Q");
+        if (DEBUG_VERBOSE) mLogger.d(TAG, "Process Q");
         throw new QCloseRequestException();
     }
 
     // Ping Send (PS prefix) ... we reply with Ping Reply (PR prefix) + value
     // P followed by any other prefix than S is ignored.
     protected void processPing(@NonNull Sender sender, @NonNull String line) {
-        if (DEBUG_VERBOSE) Log.d(TAG, "Process P: " + line);
+        if (DEBUG_VERBOSE) mLogger.d(TAG, "Process P: " + line);
         if (line.length() > 2) {
             char prefix = line.charAt(1);
             if (prefix == 'S') {
@@ -147,7 +149,7 @@ public class KeyValueProtocol {
 
     protected void processRead(@NonNull Sender sender, @NonNull String line) {
         String key = line.substring(1).trim();
-        if (DEBUG_VERBOSE) Log.d(TAG, "Process R: " + key);
+        if (DEBUG_VERBOSE) mLogger.d(TAG, "Process R: " + key);
         if (key.isEmpty()) return;  // ignore empty names
         if ("*".equals(key)) {
             synchronized (mValues) {
@@ -172,7 +174,7 @@ public class KeyValueProtocol {
     protected void processWrite(@NonNull String line) {
         String key = line.substring(1);
         String fields[] = key.split(":", 2);
-        if (DEBUG_VERBOSE) Log.d(TAG, "Process W: " + Arrays.toString(fields));
+        if (DEBUG_VERBOSE) mLogger.d(TAG, "Process W: " + Arrays.toString(fields));
         if (fields.length < 2) return;
         key = fields[0].trim();
         if (key.isEmpty()) return;  // ignore empty names
@@ -194,7 +196,7 @@ public class KeyValueProtocol {
                 try {
                     l.onValueChanged(key, value);
                 } catch (Throwable t) {
-                    if (DEBUG) Log.e(TAG, "OnChangeListener failed", t);
+                    if (DEBUG) mLogger.d(TAG, "OnChangeListener failed", t);
                 }
             }
         }

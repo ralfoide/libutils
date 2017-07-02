@@ -4,6 +4,7 @@ import android.util.Log;
 import android.util.Pair;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.libutils.BuildConfig;
+import com.alflabs.utils.ILogger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = Config.NONE)
@@ -36,7 +38,7 @@ public class KeyValueServerTest {
     public void setUp() throws Exception {
         mLastChanged = null;
         mOnConnectedCallCount.set(0);
-        mServer = new KeyValueServer();
+        mServer = new KeyValueServer(mock(ILogger.class));
         mServer.setOnChangeListener((key, value) -> mLastChanged = Pair.create(key, value));
         mServer.setOnClientConnected(() -> mOnConnectedCallCount.incrementAndGet());
     }
