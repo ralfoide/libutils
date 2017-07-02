@@ -1,0 +1,11 @@
+apply plugin: "java-library"
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+dependencies {
+    // Testing: Mockito and Truth
+    testCompile "org.mockito:mockito-all:2.0.2-beta"
+    testCompile "com.google.truth:truth:0.31"
+    testCompile "junit:junit:4.12"
+}
