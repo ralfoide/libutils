@@ -1,8 +1,5 @@
 package com.alflabs.kv;
 
-import android.content.Context;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.util.SparseArray;
 import com.alflabs.annotations.NonNull;
@@ -13,14 +10,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -382,33 +377,4 @@ public class KeyValueServer {
             sendLine("VJuniorDayModelServer:1");
         }
     }
-
-    // ----
-
-    /** Temp. Move to NetworkUtils later. */
-    @Null
-    public static InetAddress getWifiIpAddress(@NonNull Context context) {
-        try {
-            WifiManager man = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            WifiInfo info = man.getConnectionInfo();
-            if (info != null && man.isWifiEnabled()) {
-                int hostAddress = info.getIpAddress();
-                if (hostAddress == 0) {
-                    // No address associated with this connection yet
-                    return null;
-                }
-
-                // Extract from Android's NetworkUtils.intToInetAddress() which is hidden from SDK
-                byte[] addressBytes = { (byte)(0xff & hostAddress),
-                        (byte)(0xff & (hostAddress >> 8)),
-                        (byte)(0xff & (hostAddress >> 16)),
-                        (byte)(0xff & (hostAddress >> 24)) };
-
-                return Inet4Address.getByAddress(addressBytes);
-            }
-        } catch (UnknownHostException ignore) {
-        }
-        return null;
-    }
-
 }
