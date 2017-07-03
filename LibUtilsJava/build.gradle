@@ -1,11 +1,21 @@
-apply plugin: "java-library"
+group "com.alflabs.libutilsjava"
+version "1.0-SNAPSHOT"
+
+// Note:
+// - Android Studio generates a plugin: "java-library" line.
+// - IntellJ (non Android) generates a plugin: "java" line.
+apply plugin: "java"
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     // Testing: Mockito and Truth
-    testCompile "org.mockito:mockito-all:2.0.2-beta"
+    testCompile "org.mockito:mockito-core:2.2.9"
     testCompile "com.google.truth:truth:0.31"
     testCompile "junit:junit:4.12"
 }
