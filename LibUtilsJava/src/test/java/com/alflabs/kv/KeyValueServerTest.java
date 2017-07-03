@@ -1,16 +1,13 @@
 package com.alflabs.kv;
 
-import android.util.Log;
-import android.util.Pair;
 import com.alflabs.annotations.NonNull;
-import com.alflabs.libutils.BuildConfig;
 import com.alflabs.utils.ILogger;
+import com.alflabs.utils.RPair;
+import com.google.common.truth.Truth;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,27 +22,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class KeyValueServerTest {
     private static final String TAG = KeyValueServerTest.class.getSimpleName();
 
     private KeyValueServer mServer;
-    private Pair<String, String> mLastChanged;
+    private RPair<String, String> mLastChanged;
     private final AtomicInteger mOnConnectedCallCount = new AtomicInteger();
+
+    public void logD(String tag, String msg) {
+        System.out.println(tag + ": " + msg + "\n");
+    }
 
     @Before
     public void setUp() throws Exception {
         mLastChanged = null;
         mOnConnectedCallCount.set(0);
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.setOnChangeListener((key, value) -> mLastChanged = Pair.create(key, value));
+        mServer.setOnChangeListener((key, value) -> mLastChanged = RPair.create(key, value));
         mServer.setOnClientConnected(() -> mOnConnectedCallCount.incrementAndGet());
     }
 
     @After
     public void tearDown() throws Exception {
-        Log.d(TAG, "tearDown server stop");
+        logD(TAG, "tearDown server stop");
         mServer.stopSync();
         mServer = null;
     }
@@ -117,19 +116,19 @@ public class KeyValueServerTest {
             assertThat(_readAll(in)).isEqualTo("[]");
 
             assertThat(mServer.getValue("foo")).isNull();
-            assertThat(mLastChanged).isNull();
+            Truth.assertThat(mLastChanged).isNull();
 
             _sendLine(out, "  Wfoo:bar  ");
             assertThat(_readAll(in)).isEqualTo("[Wfoo:bar]");
 
             assertThat(mServer.getValue("foo")).isEqualTo("bar");
-            assertThat(mLastChanged).isEqualTo(Pair.create("foo", "bar"));
+            Truth.assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar"));
             mLastChanged = null;
 
             // Writing the same value does not trigger a change notification
             _sendLine(out, "  Wfoo:bar  ");
             assertThat(_readAll(in)).isEqualTo("[]");
-            assertThat(mLastChanged).isNull();
+            Truth.assertThat(mLastChanged).isNull();
 
             _sendLine(out, "R*");
             assertThat(_readAll(in)).isEqualTo("[Wfoo:bar]");
@@ -149,7 +148,7 @@ public class KeyValueServerTest {
             _sendLine(out, " W foo : bar : foo : bar  ");
             assertThat(_readAll(in)).isEqualTo("[Wfoo:bar : foo : bar]");
             assertThat(mServer.getValue("foo")).isEqualTo("bar : foo : bar");
-            assertThat(mLastChanged).isEqualTo(Pair.create("foo", "bar : foo : bar"));
+            Truth.assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar : foo : bar"));
 
             // send some ill-formatted lines
             _sendLine(out, "R");
@@ -166,19 +165,19 @@ public class KeyValueServerTest {
 
 
             // Q closes the connection but not the server
-            Log.d(TAG, "KeyValueServerTest_Protocol: start Q request");
+            logD(TAG, "KeyValueServerTest_Protocol: start Q request");
             assertThat(socket.isConnected()).isTrue();
             _sendLine(out, "Q");
             assertThat(_readAll(in)).isEqualTo("[]");
 
-            Log.d(TAG, "KeyValueServerTest_Protocol: pause for socket disconnect");
+            logD(TAG, "KeyValueServerTest_Protocol: pause for socket disconnect");
             Thread.sleep(100 /*ms*/);
             assertThat(mServer.isRunning()).isTrue();
             assertThat(mServer.getNumConnections()).isEqualTo(0);
             assertThat(mOnConnectedCallCount.get()).isEqualTo(2);
 
         } finally {
-            Log.d(TAG, "KeyValueServerTest_Protocol: finally socket stop");
+            logD(TAG, "KeyValueServerTest_Protocol: finally socket stop");
             socket.close();
         }
         // Oddly enough socket.isConnected remains true on at least one tablet device

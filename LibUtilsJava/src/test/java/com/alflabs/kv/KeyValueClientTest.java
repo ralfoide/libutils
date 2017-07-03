@@ -1,16 +1,11 @@
 package com.alflabs.kv;
 
-import android.util.Log;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.alflabs.libutils.BuildConfig;
 import com.alflabs.utils.ILogger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -20,8 +15,6 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, manifest = Config.NONE)
 public class KeyValueClientTest {
     private static final String TAG = KeyValueClientTest.class.getSimpleName();
 
@@ -29,6 +22,10 @@ public class KeyValueClientTest {
     private KeyValueClient mClient;
     private final List<String> mServerChanges = new ArrayList<>();
     private final List<String> mClientChanges = new ArrayList<>();
+
+    public void logD(String tag, String msg) {
+        System.out.println(tag + ": " + msg + "\n");
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -42,11 +39,11 @@ public class KeyValueClientTest {
     @After
     public void tearDown() throws Exception {
         if (mClient != null) {
-            Log.d(TAG, "tearDown client stop");
+            logD(TAG, "tearDown client stop");
             mClient.stopSync();
             mClient = null;
         }
-        Log.d(TAG, "tearDown server stop");
+        logD(TAG, "tearDown server stop");
         mServer.stopSync();
         mServer = null;
     }
@@ -135,10 +132,10 @@ public class KeyValueClientTest {
         assertThat(mServer.getValue("foo")).isEqualTo("bar2");
 
         // Q closes the connection but not the server
-        Log.d(TAG, "KeyValueServerTest_Protocol: start Q request");
+        logD(TAG, "KeyValueServerTest_Protocol: start Q request");
         mClient.stopSync();
 
-        Log.d(TAG, "KeyValueServerTest_Protocol: pause for socket disconnect");
+        logD(TAG, "KeyValueServerTest_Protocol: pause for socket disconnect");
         Thread.sleep(100 /*ms*/);
         assertThat(mServer.isRunning()).isTrue();
         assertThat(mServer.getNumConnections()).isEqualTo(0);

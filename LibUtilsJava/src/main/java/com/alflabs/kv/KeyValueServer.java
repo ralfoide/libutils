@@ -3,6 +3,7 @@ package com.alflabs.kv;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.utils.ILogger;
+import com.alflabs.utils.RSparseArray;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,8 +15,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,7 +50,7 @@ public class KeyValueServer {
     private volatile boolean mIsRunning;
     private volatile ServerSocket mServerSocket;
     private volatile int mNextSender = 0;
-    private final Set<Sender> mSenders = new HashSet<>();
+    private final RSparseArray<Sender> mSenders = new RSparseArray<>();
     private final KeyValueProtocol mProtocol;
     private final ExecutorService mThreadPool = Executors.newCachedThreadPool();
     private KeyValueProtocol.OnChangeListener mOnChangeListener;
@@ -279,7 +278,7 @@ public class KeyValueServer {
 
             synchronized (mSenders) {
                 senderIndex = mNextSender++;
-                mSenders.add(sender);
+                mSenders.put(senderIndex, sender);
             }
             if (DEBUG) mLogger.d(TAG, "Added sender " + senderIndex);
 
@@ -322,7 +321,7 @@ public class KeyValueServer {
         } finally {
             if (senderIndex != -1) {
                 synchronized (mSenders) {
-                    mSenders.remove(sender);
+                    mSenders.remove(senderIndex);
                 }
                 if (DEBUG) mLogger.d(TAG, "Removed sender " + senderIndex);
 
@@ -349,8 +348,8 @@ public class KeyValueServer {
     private void broadcastChangeToAllSenders(@NonNull String key, @Null String value) {
         if (value == null) value = "";
         synchronized (mSenders) {
-            for (Sender sender : mSenders) {
-                sender.sendValue(key, value);
+            for (int n = mSenders.size() - 1; n >= 0; n--) {
+                mSenders.valueAt(n).sendValue(key, value);
             }
         }
     }
