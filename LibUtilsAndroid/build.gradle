@@ -55,7 +55,7 @@ android {
 }
 
 dependencies {
-    compile project(":LibUtils:LibUtilsJava")
+    compile project(":LibUtilsJava")
 
     // Used by InjectionValidator
     compile "com.google.truth:truth:0.31"
