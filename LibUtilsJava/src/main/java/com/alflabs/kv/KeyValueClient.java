@@ -17,6 +17,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A single {@link KeyValueProtocol} client.
+ * <p/>
+ * Many clients connect to the same server.
+ * Clients either query keys to get their values or listen to updates sent by the server.
+ * See {@link KeyValueProtocol} for an explanation of the exchange protocol.
+ * <p/>
+ * When a value changes, the server broadcasts it to all other clients.
+ *
+ * @see KeyValueProtocol
+ */
 public class KeyValueClient implements IConnection {
     private static final String TAG = KeyValueClient.class.getSimpleName();
     private static final boolean DEBUG = false;

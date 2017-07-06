@@ -22,22 +22,15 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Protocol is text & line-oriented.
- * All communication should be UTF-8.
- * Server > Client.
- * The server holds key-value pairs. Client can request values and notifies of updates.
- * Names and values are simple strings.
- * Names cannot contain the colon (:) character.
- * Values end with any EOL.
- * Names and values are trimmed so any whitespace at the beginning or end is removed.
+ * A single {@link KeyValueProtocol} server.
+ * <p/>
+ * The server is designed to be unique and have multiple clients connect to it.
+ * Clients either query keys to get their values or listen to updates sent by the server.
+ * See {@link KeyValueProtocol} for an explanation of the exchange protocol.
+ * <p/>
+ * When a value changes, the server broadcasts it to all other clients.
  *
- * - Server init: "ModelServer:version" with version int >= 1.
- * - Server writes value: "Wname:value"
- * - Client reads all values: "R*" ==> server replies with all known values, one per line.
- * - Client reads value: "Rname" ==> server replies with single value.
- * - Client writes value: "Wname:value"
- * - Client ping for keep-alives: "PSstring" ==> server replies with PR + rest of line.
- * - Client close: "Q" ==> server closes this client connection
+ * @see KeyValueProtocol
  */
 public class KeyValueServer {
     private static final String TAG = KeyValueServer.class.getSimpleName();
@@ -60,7 +53,7 @@ public class KeyValueServer {
         mLogger = logger;
         mProtocol = new KeyValueProtocol(logger);
         mProtocol.setOnChangeListener((key, value) -> {
-            broadcastChangeToAllSenders(key, value);
+            broadcastChangeViaAllSenders(key, value);
             KeyValueProtocol.OnChangeListener l = mOnChangeListener;
             if (l != null) {
                 try {
@@ -104,7 +97,7 @@ public class KeyValueServer {
     public void putValue(@NonNull String key, @Null String value, boolean broadcast) {
         if (mProtocol.putValue(key, value)) {
             if (broadcast) {
-                broadcastChangeToAllSenders(key, value);
+                broadcastChangeViaAllSenders(key, value);
             }
         }
     }
@@ -139,65 +132,62 @@ public class KeyValueServer {
 
         final CountDownLatch latch = new CountDownLatch(1);
         mIsRunning = true;
-        mSocketThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (DEBUG) mLogger.d(TAG, "socket-thread [start]");
+        mSocketThread = new Thread(() -> {
+            if (DEBUG) mLogger.d(TAG, "socket-thread [start]");
 
-                mServerSocket = null;
-                try {
-                    mServerSocket = new ServerSocket();
+            mServerSocket = null;
+            try {
+                mServerSocket = new ServerSocket();
 
-                    SocketAddress address = new InetSocketAddress(
-                            ip != null ? ip : InetAddress.getByName("0.0.0.0"),
-                            port);
-                    mServerSocket.setReuseAddress(true);
-                    mServerSocket.bind(address);
-                    latch.countDown();
+                SocketAddress address = new InetSocketAddress(
+                        ip != null ? ip : InetAddress.getByName("0.0.0.0"),
+                        port);
+                mServerSocket.setReuseAddress(true);
+                mServerSocket.bind(address);
+                latch.countDown();
 
-                    while (mIsRunning && !Thread.interrupted()) {
-                        if (DEBUG) mLogger.d(TAG, "socket-thread [accept] ");
-                        final Socket socket = mServerSocket.accept();
-                        if (DEBUG) mLogger.d(TAG, "socket-thread [accept] " + socket);
-                        mThreadPool.execute(() -> {
-                            try {
-                                if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker start] ");
-                                processConnection(socket);
-                                if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker end] ");
-                            } catch (IOException e) {
-                                if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker] " + e);
-                            }
-                        });
-                    }
-
-                } catch (SocketException e) {
-                    // It's expected to get SocketException due to socket.close here from stop()
-                    if (DEBUG) mLogger.d(TAG, "socket-thread [expected] " + e);
-
-                } catch (Throwable t) {
-                    if (DEBUG) mLogger.d(TAG, "socket-thread [unexpected] " + t);
-
-                } finally {
-                    if (DEBUG) mLogger.d(TAG, "socket-thread [tear down]");
-                    if (mServerSocket != null) {
+                while (mIsRunning && !Thread.interrupted()) {
+                    if (DEBUG) mLogger.d(TAG, "socket-thread [accept] ");
+                    final Socket socket = mServerSocket.accept();
+                    if (DEBUG) mLogger.d(TAG, "socket-thread [accept] " + socket);
+                    mThreadPool.execute(() -> {
                         try {
-                            mServerSocket.close();
-                        } catch (IOException ignore) {}
-                        mServerSocket = null;
-                    }
-                    // any connection handler is likely to terminate itself
-                    // quite quickly since the socket has been shutdown so
-                    // we'll wait shortly for them, shouldn't be blocking much.
-                    mThreadPool.shutdown();
-                    try {
-                        mThreadPool.awaitTermination(1, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        if (DEBUG) mLogger.d(TAG, "socket-thread [awaitTermination] " + e);
-                    }
+                            if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker start] ");
+                            processConnection(socket);
+                            if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker end] ");
+                        } catch (IOException e) {
+                            if (DEBUG) mLogger.d(TAG, "socket-thread [pool-worker] " + e);
+                        }
+                    });
                 }
 
-                if (DEBUG) mLogger.d(TAG, "socket-thread [end]");
+            } catch (SocketException e) {
+                // It's expected to get SocketException due to socket.close here from stop()
+                if (DEBUG) mLogger.d(TAG, "socket-thread [expected] " + e);
+
+            } catch (Throwable t) {
+                if (DEBUG) mLogger.d(TAG, "socket-thread [unexpected] " + t);
+
+            } finally {
+                if (DEBUG) mLogger.d(TAG, "socket-thread [tear down]");
+                if (mServerSocket != null) {
+                    try {
+                        mServerSocket.close();
+                    } catch (IOException ignore) {}
+                    mServerSocket = null;
+                }
+                // any connection handler is likely to terminate itself
+                // quite quickly since the socket has been shutdown so
+                // we'll wait shortly for them, shouldn't be blocking much.
+                mThreadPool.shutdown();
+                try {
+                    mThreadPool.awaitTermination(1, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    if (DEBUG) mLogger.d(TAG, "socket-thread [awaitTermination] " + e);
+                }
             }
+
+            if (DEBUG) mLogger.d(TAG, "socket-thread [end]");
         }, TAG + "-Thread");
 
         // start socket thread.
@@ -235,7 +225,7 @@ public class KeyValueServer {
         }
     }
 
-    /** Ask server to stop. Returns once the server is stopped. */
+    /** Ask server to stop. Returns immediately. */
     public void stopAsync() {
         if (DEBUG) mLogger.d(TAG, "stop -| isRunning=" + mIsRunning);
         if (mIsRunning) {
@@ -345,7 +335,7 @@ public class KeyValueServer {
         }
     }
 
-    private void broadcastChangeToAllSenders(@NonNull String key, @Null String value) {
+    private void broadcastChangeViaAllSenders(@NonNull String key, @Null String value) {
         if (value == null) value = "";
         synchronized (mSenders) {
             for (int n = mSenders.size() - 1; n >= 0; n--) {

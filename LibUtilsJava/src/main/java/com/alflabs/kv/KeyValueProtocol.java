@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Protocol is text & line-oriented.
+ * Protocol is text & line-oriented. <br/>
+ * <pre>
  * All communication should be UTF-8.
  * Server > Client.
  * The server holds key-value pairs. Client can request values and notifies of updates.
@@ -19,14 +20,25 @@ import java.util.TreeMap;
  * Names cannot contain the colon (:) character.
  * Values end with any EOL.
  * Names and values are trimmed so any whitespace at the beginning or end is removed.
- *
+ * There are no pure null values. Null values, empty strings and missing keys are mostly equivalent.
+ * </pre><pre>
  * - Server init: "ModelServer:version" with version int >= 1.
- * - Server writes value: "Wname:value"
+ * - Server writes value: "Wname:value".
  * - Client reads all values: "R*" ==> server replies with all known values, one per line.
  * - Client reads value: "Rname" ==> server replies with single value.
- * - Client writes value: "Wname:value"
+ * - Client writes value: "Wname:value".
  * - Client ping for keep-alives: "PSstring" (ping send) ==> server replies with PR (ping reply) + rest of the line.
- * - Client close: "Q" ==> server closes this client connection
+ * - Client close: "Q" ==> server closes this client connection.
+ * </pre>
+ * The protocol object actually holds the current state of all key-values in a map. <br/>
+ * It provides the logic to decode command lines received from the network. <br/>
+ * The {@link Sender} provides the logic to encode command lines to be sent on the network.
+ * Neither the {@link KeyValueProtocol} nor {@link Sender} do any network operations, this is
+ * left to the actual client and server implementations. <br/>
+ * Since the protocol is symetrical, both the clients and the server use the same protocol encoding
+ * and decoding on both sides to communicate. <br/>
+ * When the protocol receives a write command, it stores the new value in its key-value map
+ * and notifies the {@link OnChangeListener} if the value has changed.
  */
 public class KeyValueProtocol {
     private static final String TAG = KeyValueProtocol.class.getSimpleName();
@@ -34,25 +46,28 @@ public class KeyValueProtocol {
     private static final boolean DEBUG_VERBOSE = false;
 
     /**
-     * Synchronized value map.
+     * Synchronized value map. <br/>
      * Simple operations are synchronized by the collection on the map itself.
      * Non-"atomic" operations such as iterators much synchronize on the map itself.
      * The map is a tree map so iterator is stable on the key ordering.
      */
     private final Map<String, String> mValues = Collections.synchronizedMap(new TreeMap<String, String>());
-    @NonNull
-    private final ILogger mLogger;
+    @NonNull private final ILogger mLogger;
     @Null private OnChangeListener mOnChangeListener;
     private int mServerVersion = 0;
 
+    /** Listener used to notify users when a key or value has changed. */
     public interface OnChangeListener {
-        public void onValueChanged(@NonNull String key, @Null String value);
+        /** Notifies the listener that the value for the given key has changed. */
+        void onValueChanged(@NonNull String key, @Null String value);
     }
 
+    /** Creates a new {@link KeyValueProtocol} with the specified logger. */
     public KeyValueProtocol(@NonNull ILogger logger) {
         mLogger = logger;
     }
 
+    /** Sets the unique {@link OnChangeListener}, notified when a write command changed a value. */
     public void setOnChangeListener(@Null OnChangeListener listener) {
         mOnChangeListener = listener;
     }
@@ -84,9 +99,18 @@ public class KeyValueProtocol {
         return mServerVersion;
     }
 
+    /** Protocol command was received that requested the client/server connection to be closed. */
     static class QCloseRequestException extends IOException {
     }
 
+    /**
+     * Decodes a command line received from the network. <br/>
+     * This is the counterpart to {@link Sender}.
+     *
+     * @param sender Sender to use for replies.
+     * @param line The line received from the network, as-is.
+     * @throws QCloseRequestException
+     */
     void processLine(@NonNull Sender sender, @Null String line) throws QCloseRequestException {
         if (line == null) return;
         line = line.trim();
@@ -135,7 +159,7 @@ public class KeyValueProtocol {
         throw new QCloseRequestException();
     }
 
-    // Ping Send (PS prefix) ... we reply with Ping Reply (PR prefix) + value
+    // Ping Send (PS prefix) ... we reply with Ping Reply (PR prefix) + value.
     // P followed by any other prefix than S is ignored.
     protected void processPing(@NonNull Sender sender, @NonNull String line) {
         if (DEBUG_VERBOSE) mLogger.d(TAG, "Process P: " + line);
@@ -202,8 +226,16 @@ public class KeyValueProtocol {
         }
     }
 
-
+    /**
+     * A "sender" is an utility class that implements the various commands that can be
+     * exchanged between clients and servers. It formats the commands appropriately and
+     * generates the text line to be sent on the network.
+     * <p/>
+     * This is an abstract class. Derived implementations perform the actual network
+     * operation needed to send the formatted command line.
+     */
     abstract static class Sender {
+        /** Implemented by actual implementations to send the text line on a network socket. */
         public abstract void sendLine(@NonNull String line);
 
         public void sendValue(@NonNull String key, @NonNull String value) {
