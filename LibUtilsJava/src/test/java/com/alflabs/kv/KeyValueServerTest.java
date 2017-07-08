@@ -66,6 +66,7 @@ public class KeyValueServerTest {
         assertThat(mServer.getNumConnections()).isEqualTo(0);
     }
 
+    @Test
     public void testKeyValueServerTest_StartStop2() throws Exception {
         assertThat(mServer.isRunning()).isFalse();
         assertThat(mServer.getNumConnections()).isEqualTo(0);
@@ -94,6 +95,7 @@ public class KeyValueServerTest {
         assertThat(mServer.isRunning()).isFalse();
     }
 
+    @Test
     public void testKeyValueServerTest_Protocol() throws Exception {
         InetSocketAddress address = mServer.start(20005);
         assertThat(address).isNotNull();
@@ -110,7 +112,7 @@ public class KeyValueServerTest {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream());
 
-            assertThat(_readAll(in)).isEqualTo("[JuniorDayModelServer:1]");
+            assertThat(_readAll(in)).isEqualTo("[VJuniorDayModelServer:1]");
 
             _sendLine(out, "R*");
             assertThat(_readAll(in)).isEqualTo("[]");
@@ -141,8 +143,8 @@ public class KeyValueServerTest {
             _sendLine(out, "    R  *  ");
             assertThat(_readAll(in)).isEqualTo("[Wfoo:bar, Wkey 1:value 1, Wkey 2:value 2]");
 
-            _sendLine(out, "  P anything after P is repeated as is even : or any $p3ci4|_ characters  ");
-            assertThat(_readAll(in)).isEqualTo("[P anything after P is repeated as is even : or any $p3ci4|_ characters]");
+            _sendLine(out, "  PS anything after P is repeated as is even : or any $p3ci4|_ characters  ");
+            assertThat(_readAll(in)).isEqualTo("[PR anything after P is repeated as is even : or any $p3ci4|_ characters]");
 
             // This is not an ill-formatted line
             _sendLine(out, " W foo : bar : foo : bar  ");
