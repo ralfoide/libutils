@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @see KeyValueProtocol
  */
-public class KeyValueClient implements IConnection {
+public class KeyValueClient implements IConnection, IKeyValue {
     private static final String TAG = KeyValueClient.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_VERBOSE = true;
@@ -202,6 +202,7 @@ public class KeyValueClient implements IConnection {
         }, TAG + "-Thread");
     }
 
+    @Override
     public void setOnChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
         mProtocol.setOnChangeListener(listener);
     }
@@ -212,17 +213,19 @@ public class KeyValueClient implements IConnection {
     }
 
     /** Returns the value for the given key or null if it doesn't exist. */
+    @Override
     @Null
     public String getValue(@NonNull String key) {
         return mProtocol.getValue(key);
     }
 
     /**
-     * Sets the non-value for the given key.
-     * A null value removes the key if it existed.
-     * When broadcast is false, the change is purely internal.
+     * Sets the non-value for the given key. <br/>
+     * A null value removes the key if it existed. <br/>
+     * When broadcast is false, the change is purely internal. <br/>
      * When broadcast is true, the server is notified if there's a change.
      */
+    @Override
     public void putValue(@NonNull String key, @Null String value, boolean broadcast) {
         if (mProtocol.putValue(key, value)) {
             if (broadcast) {

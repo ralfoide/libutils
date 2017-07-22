@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @see KeyValueProtocol
  */
-public class KeyValueServer {
+public class KeyValueServer implements IKeyValue {
     private static final String TAG = KeyValueServer.class.getSimpleName();
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_VERBOSE = false;
@@ -78,22 +78,25 @@ public class KeyValueServer {
         mOnClientConnectedRunnable = runnable;
     }
 
+    @Override
     public void setOnChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
         mOnChangeListener = listener;
     }
 
     /** Returns the value for the given key or null if it doesn't exist. */
+    @Override
     @Null
     public String getValue(@NonNull String key) {
         return mProtocol.getValue(key);
     }
 
     /**
-     * Sets the non-value for the given key.
-     * A null value removes the key if it existed.
-     * When broadcast is false, the change is purely internal.
-     * When broadcast is true, the server is notified if there's a change.
+     * Sets the non-value for the given key. <br/>
+     * A null value removes the key if it existed. <br/>
+     * When broadcast is false, the change is purely internal. <br/>
+     * When broadcast is true, the server is notified if there's a change. <br/>
      */
+    @Override
     public void putValue(@NonNull String key, @Null String value, boolean broadcast) {
         if (mProtocol.putValue(key, value)) {
             if (broadcast) {
