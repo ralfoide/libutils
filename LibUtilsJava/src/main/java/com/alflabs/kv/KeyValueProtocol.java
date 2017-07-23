@@ -95,6 +95,10 @@ public class KeyValueProtocol {
         }
     }
 
+    public Map<String, String> getAllValues() {
+        return mValues;
+    }
+
     public int getServerVersion() {
         return mServerVersion;
     }

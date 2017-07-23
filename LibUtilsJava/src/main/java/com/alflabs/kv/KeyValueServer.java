@@ -15,6 +15,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -88,6 +89,10 @@ public class KeyValueServer implements IKeyValue {
     @Null
     public String getValue(@NonNull String key) {
         return mProtocol.getValue(key);
+    }
+
+    public Map<String, String> getAllValues() {
+        return mProtocol.getAllValues();
     }
 
     /**
