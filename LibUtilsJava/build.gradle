@@ -13,6 +13,14 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    main {
+        java {
+            exclude "java/**"
+        }
+    }
+}
+
 dependencies {
     // Testing: Mockito and Truth
     testCompile "org.mockito:mockito-core:2.2.9"

@@ -18,19 +18,26 @@
 
 apply plugin: "com.android.library"
 
-// jackOptions { enabled true } is not supported in library projects yet.
-// From http://stackoverflow.com/questions/3797512 :
-// Java8 not fully supported in library projects yet, https://code.google.com/p/android/issues/detail?id=211386
-// this is a temporary workaround to get at least lambdas compiling.
-gradle.projectsEvaluated {
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xbootclasspath/a:" + System.properties.get("java.home") + "/lib/rt.jar"
+if (!gradle.gradleVersion.startsWith("4")) {
+    // jackOptions { enabled true } is not supported in library projects yet.
+    // From http://stackoverflow.com/questions/3797512 :
+    // Java8 not fully supported in library projects yet, https://code.google.com/p/android/issues/detail?id=211386
+    // this is a temporary workaround to get at least lambdas compiling.
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xbootclasspath/a:" + System.properties.get("java.home") + "/lib/rt.jar"
+        }
     }
 }
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+
+    if (!gradle.gradleVersion.startsWith("4")) {
+        buildToolsVersion "25.0.2"
+    } else {
+        buildToolsVersion "26.0.0"
+    }
 
     defaultConfig {
         minSdkVersion 9
@@ -51,6 +58,22 @@ android {
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            java {
+                exclude "java/**"
+            }
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    dexOptions {
+        incremental true
     }
 }
 
