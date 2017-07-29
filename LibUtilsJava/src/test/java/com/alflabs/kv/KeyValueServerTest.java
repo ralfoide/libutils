@@ -1,5 +1,6 @@
 package com.alflabs.kv;
 
+import com.alflabs.annotations.LargeTest;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.utils.ILogger;
 import com.alflabs.utils.RPair;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
+@LargeTest
 public class KeyValueServerTest {
     private static final String TAG = KeyValueServerTest.class.getSimpleName();
 

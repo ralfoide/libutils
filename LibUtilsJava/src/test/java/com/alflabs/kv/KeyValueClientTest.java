@@ -1,5 +1,6 @@
 package com.alflabs.kv;
 
+import com.alflabs.annotations.LargeTest;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.utils.ILogger;
@@ -15,6 +16,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
+@LargeTest
 public class KeyValueClientTest {
     private static final String TAG = KeyValueClientTest.class.getSimpleName();
 

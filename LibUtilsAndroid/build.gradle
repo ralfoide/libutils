@@ -72,8 +72,10 @@ android {
         abortOnError false
     }
 
-    dexOptions {
-        incremental true
+    if (!gradle.gradleVersion.startsWith("4")) {
+        dexOptions {
+            incremental true
+        }
     }
 }
 
