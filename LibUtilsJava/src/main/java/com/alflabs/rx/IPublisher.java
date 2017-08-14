@@ -1,0 +1,17 @@
+package com.alflabs.rx;
+
+/**
+ * A publisher is a generator that publishes events to a stream.
+ * <p/>
+ * Publishers are convenience objects. Anything can use {@link IStream#publish(Object)} directly.
+ * <p/>
+ * A publishers is generally a synchronous or asynchronous objects that generates one or more event
+ * and publishes them directly to the underlying stream when attached to it.
+ * <p/>
+ * Publishers are attached to a single stream and operate on the scheduler indicated when attached.
+ */
+public interface IPublisher<Event> extends IStateChanged<Event> {
+
+    void onAttached(IStream<? super Event> stream);
+    void onDetached(IStream<? super Event> stream);
+}
