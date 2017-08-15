@@ -61,12 +61,17 @@ class Stream<Event> implements IStream<Event> {
         if (!mSubscribers.containsKey(subscriber)) {
             mSubscribers.put(subscriber, scheduler);
 
+            boolean doSend = false;
             if (mState == State.IDLE) {
                 changeState(State.OPEN);
+                doSend = true;
             }
             if (subscriber instanceof IAttached) {
                 //noinspection unchecked
                 scheduler.invoke(() -> ((IAttached) subscriber).onAttached(this));
+            }
+            if (doSend) {
+                send();
             }
         }
         return this;
@@ -197,13 +202,13 @@ class Stream<Event> implements IStream<Event> {
     }
 
     private void send() {
-        if (mState == State.PAUSED || mState == State.CLOSED || mEvents.isEmpty()) {
+        if (mState == State.CLOSED || mEvents.isEmpty()) {
             return;
         }
 
         mScheduler.invoke(() -> {
             for(; !mEvents.isEmpty(); ) {
-                if (mState == State.PAUSED || mState == State.CLOSED) {
+                if (mState == State.IDLE || mState == State.PAUSED || mState == State.CLOSED) {
                     return;
                 }
 
@@ -217,9 +222,11 @@ class Stream<Event> implements IStream<Event> {
                 }
 
                 if (!mSubscribers.isEmpty()) {
+                    //noinspection unchecked
                     invokeAll(mSubscribers, subscriber -> subscriber.onReceive(this, e));
                 }
                 if (!mProcessors.isEmpty()) {
+                    //noinspection unchecked
                     invokeAll(mProcessors, processor -> processor.process(e));
                 }
             }
