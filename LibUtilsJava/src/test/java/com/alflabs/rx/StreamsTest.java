@@ -57,6 +57,7 @@ public class StreamsTest {
                 .publish(43)
                 .close();
 
+        verify(mIntSubscriber).onAttached(stream);
         verify(mIntSubscriber).onStateChanged(stream, State.OPEN);
         verify(mIntSubscriber).onReceive(stream, 42);
         verify(mIntSubscriber).onReceive(stream, 43);
@@ -75,6 +76,7 @@ public class StreamsTest {
                 .publish(44)
                 .publish(45);
 
+        verify(mIntSubscriber).onAttached(stream);
         verify(mIntSubscriber).onStateChanged(stream, State.OPEN);
         verify(mIntSubscriber).onReceive(stream, 42);
         verify(mIntSubscriber).onReceive(stream, 43);
@@ -91,6 +93,26 @@ public class StreamsTest {
 
         stream.close();
         verify(mIntSubscriber).onStateChanged(stream, State.CLOSED);
+
+        verifyNoMoreInteractions(mIntSubscriber);
+    }
+
+    @Test
+    public void testStreamAttachedDetached() throws Exception {
+
+        IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.sync());
+        verify(mIntSubscriber, never()).onAttached(stream);
+        verify(mIntSubscriber, never()).onDetached(stream);
+
+        stream.subscribe(mIntSubscriber);
+        verify(mIntSubscriber).onAttached(stream);
+        verify(mIntSubscriber).onStateChanged(stream, State.OPEN);
+
+        stream.close();
+        verify(mIntSubscriber).onStateChanged(stream, State.CLOSED);
+
+        stream.remove(mIntSubscriber);
+        verify(mIntSubscriber).onDetached(stream);
 
         verifyNoMoreInteractions(mIntSubscriber);
     }

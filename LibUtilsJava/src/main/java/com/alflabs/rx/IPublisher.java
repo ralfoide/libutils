@@ -12,11 +12,8 @@ import com.alflabs.annotations.NonNull;
  * <p/>
  * Publishers are attached to a single stream and operate on the scheduler indicated when attached.
  * <p/>
- * Optional interface: if the publisher implements {@link IStateChanged<Event>}, it will be notified
- * when the stream changes state.
+ * Optional interface: <br/>
+ * - if the publisher implements {@link IStateChanged<Event>}, it will be notified when the stream changes state. <br/>
  */
-public interface IPublisher<Event> {
-
-    void onAttached(@NonNull IStream<? super Event> stream);
-    void onDetached(@NonNull IStream<? super Event> stream);
+public interface IPublisher<Event> extends IAttached<Event> {
 }

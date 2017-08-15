@@ -45,6 +45,7 @@ class Stream<Event> implements IStream<Event> {
     public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, IScheduler scheduler) {
         if (!mPublishers.containsKey(publisher)) {
             mPublishers.put(publisher, scheduler);
+
             scheduler.invoke(() -> publisher.onAttached(this));
         }
         return this;
@@ -57,9 +58,16 @@ class Stream<Event> implements IStream<Event> {
 
     @Override
     public IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber, IScheduler scheduler) {
-        mSubscribers.put(subscriber, scheduler);
-        if (mState == State.IDLE) {
-            changeState(State.OPEN);
+        if (!mSubscribers.containsKey(subscriber)) {
+            mSubscribers.put(subscriber, scheduler);
+
+            if (mState == State.IDLE) {
+                changeState(State.OPEN);
+            }
+            if (subscriber instanceof IAttached) {
+                //noinspection unchecked
+                scheduler.invoke(() -> ((IAttached) subscriber).onAttached(this));
+            }
         }
         return this;
     }
@@ -71,7 +79,14 @@ class Stream<Event> implements IStream<Event> {
 
     @Override
     public <OutEvent> IStream<OutEvent> process(@NonNull IProcessor<? super Event, OutEvent> processor, @NonNull IScheduler scheduler) {
-        mProcessors.put(processor, scheduler);
+        if (!mProcessors.containsKey(processor)) {
+            mProcessors.put(processor, scheduler);
+
+            if (processor instanceof IAttached) {
+                //noinspection unchecked
+                scheduler.invoke(() -> ((IAttached) processor).onAttached(this));
+            }
+        }
         return processor.output();
     }
 
@@ -92,16 +107,32 @@ class Stream<Event> implements IStream<Event> {
 
     @Override
     public IStream<Event> remove(@NonNull ISubscriber<? super Event> subscriber) {
-        mSubscribers.remove(subscriber);
-        if (mSubscribers.isEmpty() && mState == State.OPEN) {
-            changeState(State.IDLE);
+        IScheduler scheduler = mSubscribers.get(subscriber);
+        if (scheduler != null) {
+            mSubscribers.remove(subscriber);
+
+            if (mSubscribers.isEmpty() && mState == State.OPEN) {
+                changeState(State.IDLE);
+            }
+            if (subscriber instanceof IAttached) {
+                //noinspection unchecked
+                scheduler.invoke(() -> ((IAttached) subscriber).onDetached(this));
+            }
         }
         return this;
     }
 
     @Override
     public <OutEvent> IStream<OutEvent> remove(@NonNull IProcessor<? super Event, OutEvent> processor) {
-        mProcessors.remove(processor);
+        IScheduler scheduler = mProcessors.get(processor);
+        if (scheduler != null) {
+            mProcessors.remove(processor);
+
+            if (processor instanceof IAttached) {
+                //noinspection unchecked
+                scheduler.invoke(() -> ((IAttached) processor).onDetached(this));
+            }
+        }
         return processor.output();
     }
 

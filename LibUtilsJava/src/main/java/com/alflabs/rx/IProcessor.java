@@ -6,8 +6,9 @@ import com.alflabs.annotations.Null;
  *
  *
  * <p/>
- * Optional interface: if the publisher implements {@link IStateChanged<InEvent>}, it will be notified
- * when an input stream changes state.
+ * Optional interface: <br/>
+ * - if the subscriber implements {@link IStateChanged<InEvent>}, it will be notified when the input stream changes state. <br/>
+ * - if the subscriber implements {@link IAttached<InEvent>}, it will be notified when attached to the input stream. <br/>
  */
 public interface IProcessor<InEvent, OutEvent> {
     @Null IStream<OutEvent> output();

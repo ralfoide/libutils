@@ -11,8 +11,9 @@ import com.alflabs.annotations.Null;
  * <p/>
  * The same subscriber can be subscribed to more than one stream, even on different schedulers.
  * <p/>
- * Optional interface: if the subscriber implements {@link IStateChanged<Event>}, it will be notified
- * when the stream changes state.
+ * Optional interface: <br/>
+ * - if the subscriber implements {@link IStateChanged<Event>}, it will be notified when the stream changes state. <br/>
+ * - if the subscriber implements {@link IAttached<Event>}, it will be notified when attached to the stream. <br/>
  */
 public interface ISubscriber<Event> {
     /** Receives an event that was published to the stream, if attached to one. */
