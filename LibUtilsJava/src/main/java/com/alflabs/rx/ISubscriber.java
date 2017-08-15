@@ -10,8 +10,11 @@ import com.alflabs.annotations.Null;
  * It will be invoked by the stream using the scheduler indicated when subscribing.
  * <p/>
  * The same subscriber can be subscribed to more than one stream, even on different schedulers.
+ * <p/>
+ * Optional interface: if the subscriber implements {@link IStateChanged<Event>}, it will be notified
+ * when the stream changes state.
  */
-public interface ISubscriber<Event> extends IStateChanged<Event> {
+public interface ISubscriber<Event> {
     /** Receives an event that was published to the stream, if attached to one. */
     void onReceive(@NonNull IStream<? extends Event> stream, @Null Event event);
 }

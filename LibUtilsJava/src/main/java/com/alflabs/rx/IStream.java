@@ -8,19 +8,19 @@ package com.alflabs.rx;
 import com.alflabs.annotations.NonNull;
 
 /**
- * A stream carries even created by publishers and sends them to subscribers.
+ * A stream carries events created by publishers and sends them to subscribers.
  * A stream can have 0..N publishers and 0..M subscribers.
  * <p/>
  * A stream is either open, paused or closed. Closing the stream is a terminal action.
  * <p/>
  * Publishers are optional convenient generators.
- * Anything can directly publish to the stream without an actual publisher.
+ * Any caller can directly {@link #publish(Object)} to the stream without an actual publisher.
  */
 public interface IStream<Event> {
 
     /**
      * Sets the default scheduler on which the stream will operate.
-     * Unless specified, publishers, subscribers and processors will also use that scheduler.
+     * Unless specified, publishers, subscribers and processors added after will also use that scheduler.
      */
     IStream<Event> on(@NonNull IScheduler scheduler);
 

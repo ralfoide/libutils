@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class StreamsTest {
     @Rule public MockitoRule mRule = MockitoJUnit.rule();
 
-    @Mock ISubscriber<Integer> mIntSubscriber;
+    @Mock Subscribers.Adapter<Integer> mIntSubscriber;
 
     @Test
     public void testStreamPublish1() throws Exception {
@@ -27,12 +27,7 @@ public class StreamsTest {
 
         Streams.<Integer>create()
                 .on(Schedulers.sync())
-                .subscribe(new Subscribers.Adapter<Integer>() {
-                    @Override
-                    public void onReceive(@NonNull IStream<? extends Integer> stream, Integer integer) {
-                        result.set(integer);
-                    }
-                }).publish(42)
+                .subscribe((stream, integer) -> result.set(integer)).publish(42)
                 .close();
         assertThat(result.get()).isEqualTo(42);
     }
@@ -40,12 +35,7 @@ public class StreamsTest {
     @Test
     public void testStreamPublish2() throws Exception {
         AtomicInteger result = new AtomicInteger(0);
-        ISubscriber<Integer> subscriber = new Subscribers.Adapter<Integer>() {
-            @Override
-            public void onReceive(@NonNull IStream<? extends Integer> stream, Integer integer) {
-                result.set(integer);
-            }
-        };
+        ISubscriber<Integer> subscriber = (stream, integer) -> result.set(integer);
 
         IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.sync());
         assertThat(stream.state()).isEqualTo(State.IDLE);
@@ -136,7 +126,7 @@ public class StreamsTest {
 
         IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.io());
 
-        ISubscriber<Integer> subscriber = new ISubscriber<Integer>() {
+        Subscribers.Adapter<Integer> subscriber = new Subscribers.Adapter<Integer>() {
             @Override
             public void onReceive(@NonNull IStream<? extends Integer> stream, Integer integer) {
                 result.set(integer);

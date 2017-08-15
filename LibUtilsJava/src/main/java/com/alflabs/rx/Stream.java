@@ -150,9 +150,17 @@ class Stream<Event> implements IStream<Event> {
         }
 
         if (lastState != newState) {
-            RConsumer<IStateChanged> consumer = object -> object.onStateChanged(this, newState);
+            RConsumer consumer = object -> {
+                if (object instanceof IStateChanged) {
+                    //noinspection unchecked
+                    ((IStateChanged) object).onStateChanged(Stream.this, newState);
+                }
+            };
+            //noinspection unchecked
             invokeAll(mSubscribers, consumer);
+            //noinspection unchecked
             invokeAll(mProcessors, consumer);
+            //noinspection unchecked
             invokeAll(mPublishers, consumer);
         }
     }
