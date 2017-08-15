@@ -1,5 +1,6 @@
 package com.alflabs.rx;
 
+import com.alflabs.annotations.NonNull;
 import com.alflabs.func.RConsumer;
 
 import java.util.LinkedList;
@@ -16,7 +17,17 @@ class Stream<Event> implements IStream<Event> {
     private final Map<IPublisher, IScheduler> mPublishers = new ConcurrentHashMap<>();      // thread-safe
     private final Map<ISubscriber, IScheduler> mSubscribers = new ConcurrentHashMap<>();    // thread-safe
     private final Map<IProcessor, IScheduler> mProcessors = new ConcurrentHashMap<>();      // thread-safe
-    private final IScheduler mSender = Schedulers.io();
+    private IScheduler mScheduler;
+
+    public Stream(@NonNull IScheduler scheduler) {
+        mScheduler = scheduler;
+    }
+
+    @Override
+    public IStream<Event> on(@NonNull IScheduler scheduler) {
+        mScheduler = scheduler;
+        return this;
+    }
 
     @Override
     public IStream<Event> publish(Event event) {
@@ -31,7 +42,7 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
-    public IStream<Event> publishWith(IPublisher<? extends Event> publisher, IScheduler scheduler) {
+    public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, IScheduler scheduler) {
         if (!mPublishers.containsKey(publisher)) {
             mPublishers.put(publisher, scheduler);
             scheduler.invoke(() -> publisher.onAttached(this));
@@ -40,7 +51,12 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
-    public IStream<Event> subscribe(ISubscriber<? super Event> subscriber, IScheduler scheduler) {
+    public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher) {
+        return publishWith(publisher, mScheduler);
+    }
+
+    @Override
+    public IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber, IScheduler scheduler) {
         mSubscribers.put(subscriber, scheduler);
         if (mState == State.IDLE) {
             changeState(State.OPEN);
@@ -49,13 +65,23 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
-    public <OutEvent> IStream<OutEvent> process(IProcessor<? super Event, OutEvent> processor, IScheduler scheduler) {
+    public IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber) {
+        return subscribe(subscriber, mScheduler);
+    }
+
+    @Override
+    public <OutEvent> IStream<OutEvent> process(@NonNull IProcessor<? super Event, OutEvent> processor, @NonNull IScheduler scheduler) {
         mProcessors.put(processor, scheduler);
         return processor.output();
     }
 
     @Override
-    public IStream<Event> remove(IPublisher<? extends Event> publisher) {
+    public <OutEvent> IStream<OutEvent> process(@NonNull IProcessor<? super Event, OutEvent> processor) {
+        return process(processor, mScheduler);
+    }
+
+    @Override
+    public IStream<Event> remove(@NonNull IPublisher<? extends Event> publisher) {
         IScheduler scheduler = mPublishers.get(publisher);
         if (scheduler != null) {
             mPublishers.remove(publisher);
@@ -65,7 +91,7 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
-    public IStream<Event> remove(ISubscriber<? super Event> subscriber) {
+    public IStream<Event> remove(@NonNull ISubscriber<? super Event> subscriber) {
         mSubscribers.remove(subscriber);
         if (mSubscribers.isEmpty() && mState == State.OPEN) {
             changeState(State.IDLE);
@@ -74,7 +100,7 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
-    public <OutEvent> IStream<OutEvent> remove(IProcessor<? super Event, OutEvent> processor) {
+    public <OutEvent> IStream<OutEvent> remove(@NonNull IProcessor<? super Event, OutEvent> processor) {
         mProcessors.remove(processor);
         return processor.output();
     }
@@ -85,7 +111,7 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
-    public IStream<Event> setState(State state) {
+    public IStream<Event> setState(@NonNull State state) {
         if (state == State.IDLE) {
             state = State.OPEN;
         }
@@ -98,7 +124,22 @@ class Stream<Event> implements IStream<Event> {
         return this;
     }
 
-    private void changeState(State newState) {
+    @Override
+    public IStream<Event> pause() {
+        return setState(State.PAUSED);
+    }
+
+    @Override
+    public IStream<Event> open() {
+        return setState(State.OPEN);
+    }
+
+    @Override
+    public IStream<Event> close() {
+        return setState(State.CLOSED);
+    }
+
+    private void changeState(@NonNull State newState) {
         State lastState = mState;
         mState = newState;
 
@@ -121,7 +162,7 @@ class Stream<Event> implements IStream<Event> {
             return;
         }
 
-        mSender.invoke(() -> {
+        mScheduler.invoke(() -> {
             for(; !mEvents.isEmpty(); ) {
                 if (mState == State.PAUSED || mState == State.CLOSED) {
                     return;
@@ -146,7 +187,7 @@ class Stream<Event> implements IStream<Event> {
         });
     }
 
-    private <T> void invokeAll(Map<? extends T, IScheduler> map, RConsumer<T> consumer) {
+    private <T> void invokeAll(@NonNull Map<? extends T, IScheduler> map, @NonNull RConsumer<T> consumer) {
         if (map.isEmpty()) {
             return;
         }

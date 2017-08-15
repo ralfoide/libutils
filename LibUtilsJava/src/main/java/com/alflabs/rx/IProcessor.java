@@ -1,6 +1,8 @@
 package com.alflabs.rx;
 
+import com.alflabs.annotations.Null;
+
 public interface IProcessor<InEvent, OutEvent> extends IStateChanged<InEvent> {
-    IStream<OutEvent> output();
+    @Null IStream<OutEvent> output();
     void process(InEvent event);
 }

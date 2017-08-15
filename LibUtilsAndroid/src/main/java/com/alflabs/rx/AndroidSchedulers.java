@@ -1,6 +1,7 @@
 package com.alflabs.rx;
 
 import android.os.Handler;
+import com.alflabs.annotations.NonNull;
 import com.alflabs.func.RConsumer;
 
 public class AndroidSchedulers {
@@ -19,12 +20,12 @@ public class AndroidSchedulers {
         private Handler mHandler = new Handler();
 
         @Override
-        public void invoke(Runnable runnable) {
+        public void invoke(@NonNull Runnable runnable) {
             mHandler.post(runnable);
         }
 
         @Override
-        public <T> void invoke(RConsumer<? super T> consumer, T value) {
+        public <T> void invoke(@NonNull RConsumer<? super T> consumer, T value) {
             mHandler.post(() -> consumer.accept(value));
         }
     }

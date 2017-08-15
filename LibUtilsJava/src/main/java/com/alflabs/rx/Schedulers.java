@@ -1,5 +1,7 @@
 package com.alflabs.rx;
 
+import com.alflabs.annotations.NonNull;
+import com.alflabs.annotations.Null;
 import com.alflabs.func.RConsumer;
 
 import java.util.concurrent.ExecutorService;
@@ -10,6 +12,7 @@ public class Schedulers {
     private static Sync sSync;
     private static Worker sWorker;
 
+    @NonNull
     public static IScheduler sync() {
         if (sSync == null) {
             sSync = new Sync();
@@ -17,6 +20,7 @@ public class Schedulers {
         return sSync;
     }
 
+    @NonNull
     public static IScheduler io() {
         if (sWorker == null) {
             sWorker = new Worker();
@@ -26,12 +30,12 @@ public class Schedulers {
 
     static class Worker implements IScheduler {
         @Override
-        public void invoke(Runnable runnable) {
+        public void invoke(@NonNull Runnable runnable) {
             sWorkerPool.execute(runnable);
         }
 
         @Override
-        public <T> void invoke(RConsumer<? super T> consumer, T value) {
+        public <T> void invoke(@NonNull RConsumer<? super T> consumer, @Null T value) {
             sWorkerPool.execute(() -> consumer.accept(value));
         }
     }
@@ -39,7 +43,7 @@ public class Schedulers {
     static class Sync implements IScheduler {
 
         @Override
-        public void invoke(Runnable runnable) {
+        public void invoke(@NonNull Runnable runnable) {
             try {
                 runnable.run();
             } catch (Throwable e) {
@@ -48,7 +52,7 @@ public class Schedulers {
         }
 
         @Override
-        public <T> void invoke(RConsumer<? super T> consumer, T value) {
+        public <T> void invoke(@NonNull RConsumer<? super T> consumer, @Null T value) {
             try {
                 consumer.accept(value);
             } catch (Throwable e) {

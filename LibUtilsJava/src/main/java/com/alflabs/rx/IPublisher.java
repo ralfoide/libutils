@@ -1,5 +1,7 @@
 package com.alflabs.rx;
 
+import com.alflabs.annotations.NonNull;
+
 /**
  * A publisher is a generator that publishes events to a stream.
  * <p/>
@@ -12,6 +14,6 @@ package com.alflabs.rx;
  */
 public interface IPublisher<Event> extends IStateChanged<Event> {
 
-    void onAttached(IStream<? super Event> stream);
-    void onDetached(IStream<? super Event> stream);
+    void onAttached(@NonNull IStream<? super Event> stream);
+    void onDetached(@NonNull IStream<? super Event> stream);
 }
