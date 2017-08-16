@@ -7,6 +7,7 @@ __LibUtils__ is collection of utilities used by all my projects.
 ## Versions
 
 The git repo is organized using branches:
+
 * __android-lib-v2__ is The latest branch.
     This collection of utility classes is split int a plain Java
     library and an Android library.
