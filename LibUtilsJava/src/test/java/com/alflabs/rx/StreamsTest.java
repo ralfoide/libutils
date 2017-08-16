@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.never;
@@ -27,9 +28,24 @@ public class StreamsTest {
 
         Streams.<Integer>create()
                 .on(Schedulers.sync())
-                .subscribe((stream, integer) -> result.set(integer)).publish(42)
+                .subscribe((stream, integer) -> result.set(integer))
+                .publish(42)
                 .close();
         assertThat(result.get()).isEqualTo(42);
+    }
+
+    @Test
+    public void testStreamNulls() throws Exception {
+        // Null objects are perfectly valid stream event values.
+        AtomicReference<Object> result = new AtomicReference<>(new Object());
+        assertThat(result.get()).isNotNull();
+
+        Streams.<Object>create()
+                .on(Schedulers.sync())
+                .subscribe((stream, event) -> result.set(event))
+                .publish(null)
+                .close();
+        assertThat(result.get()).isNull();
     }
 
     @Test
@@ -38,14 +54,18 @@ public class StreamsTest {
         ISubscriber<Integer> subscriber = (stream, integer) -> result.set(integer);
 
         IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.sync());
-        assertThat(stream.state()).isEqualTo(State.IDLE);
+        assertThat(stream.getState()).isEqualTo(State.IDLE);
+        assertThat(stream.isIdle()).isTrue();
 
         stream.subscribe(subscriber, Schedulers.sync());
-        assertThat(stream.state()).isEqualTo(State.OPEN);
+        assertThat(stream.getState()).isEqualTo(State.OPEN);
+        assertThat(stream.isIdle()).isFalse();
+        assertThat(stream.isClosed()).isFalse();
 
         stream.publish(42);
         stream.close();
         assertThat(result.get()).isEqualTo(42);
+        assertThat(stream.isClosed()).isTrue();
     }
 
     @Test
@@ -121,21 +141,26 @@ public class StreamsTest {
     public void testStreamIdle() throws Exception {
         IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.sync());
 
-        assertThat(stream.state()).isEqualTo(State.IDLE);
+        assertThat(stream.getState()).isEqualTo(State.IDLE);
+        assertThat(stream.isIdle()).isTrue();
 
         stream.subscribe(mIntSubscriber);
-        assertThat(stream.state()).isEqualTo(State.OPEN);
+        assertThat(stream.getState()).isEqualTo(State.OPEN);
+        assertThat(stream.isIdle()).isFalse();
+        assertThat(stream.isClosed()).isFalse();
         verify(mIntSubscriber).onStateChanged(stream, State.OPEN);
 
         stream.remove(mIntSubscriber);
-        assertThat(stream.state()).isEqualTo(State.IDLE);
+        assertThat(stream.getState()).isEqualTo(State.IDLE);
+        assertThat(stream.isIdle()).isTrue();
         verify(mIntSubscriber, never()).onStateChanged(stream, State.IDLE);
 
         stream.publish(42);
         verify(mIntSubscriber, never()).onReceive(stream, 42);
 
         stream.close();
-        assertThat(stream.state()).isEqualTo(State.CLOSED);
+        assertThat(stream.getState()).isEqualTo(State.CLOSED);
+        assertThat(stream.isClosed()).isTrue();
         verify(mIntSubscriber, never()).onStateChanged(stream, State.CLOSED);
     }
 

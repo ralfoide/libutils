@@ -60,7 +60,7 @@ public interface IStream<Event> {
     <OutEvent> IStream<OutEvent> remove(@NonNull IProcessor<? super Event, OutEvent> processor);
 
     /** Returns the current state of the stream. */
-    State state();
+    State getState();
 
     /**
      * Sets the state of the stream.
@@ -83,4 +83,13 @@ public interface IStream<Event> {
 
     /** An alias for {@link #setState(State)} with {@link State#CLOSED}. */
     IStream<Event> close();
+
+    /** An alias for {@link #getState()} with {@link State#IDLE}. */
+    boolean isIdle();
+
+    /** An alias for {@link #getState()} with {@link State#PAUSED}. */
+    boolean isPaused();
+
+    /** An alias for {@link #getState()} with {@link State#CLOSED}. */
+    boolean isClosed();
 }

@@ -142,7 +142,7 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
-    public State state() {
+    public State getState() {
         return mState;
     }
 
@@ -173,6 +173,21 @@ class Stream<Event> implements IStream<Event> {
     @Override
     public IStream<Event> close() {
         return setState(State.CLOSED);
+    }
+
+    @Override
+    public boolean isIdle() {
+        return mState == State.IDLE;
+    }
+
+    @Override
+    public boolean isPaused() {
+        return mState == State.PAUSED;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return mState == State.CLOSED;
     }
 
     private void changeState(@NonNull State newState) {
