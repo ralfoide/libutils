@@ -8,7 +8,7 @@ __LibUtils__ is collection of utilities used by all my projects.
 
 The git repo is organized using branches:
 
-* __android-lib-v2__ is The latest branch.
+* __android-lib-v2__ is the latest branch.
     This collection of utility classes is split int a plain Java
     library and an Android library.
     It relies on Gradle and is designed to be integrated into Android
@@ -40,7 +40,7 @@ __android-lib-v2__ branch:
 * __com.alflabs.serial__: A simplified object serialization mechanism
     to encode plain Java objects into strings or integer arrays and
     later deserialize them. It is platform independent.
-  * Comes with an Android specific async file writer/reader.
+    Comes with an Android specific async file writer/reader.
 
 * __com.alflabs.annotations__: A few helper annotations (null, non
     null, visible for testing, large test) that I was using in my
