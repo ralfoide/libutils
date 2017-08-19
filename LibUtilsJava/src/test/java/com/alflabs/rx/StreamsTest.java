@@ -1,6 +1,7 @@
 package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
+import com.alflabs.rx.subscribers.Adapter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -20,14 +21,15 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class StreamsTest {
     @Rule public MockitoRule mRule = MockitoJUnit.rule();
 
-    @Mock Subscribers.Adapter<Integer> mIntSubscriber;
+    @Mock
+    Adapter<Integer> mIntSubscriber;
 
     @Test
     public void testStreamPublish1() throws Exception {
         AtomicInteger result = new AtomicInteger(0);
 
-        Streams.<Integer>create()
-                .on(Schedulers.sync())
+        com.alflabs.rx.streams.Streams.<Integer>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.sync())
                 .subscribe((stream, integer) -> result.set(integer))
                 .publish(42)
                 .close();
@@ -40,8 +42,8 @@ public class StreamsTest {
         AtomicReference<Object> result = new AtomicReference<>(new Object());
         assertThat(result.get()).isNotNull();
 
-        Streams.<Object>create()
-                .on(Schedulers.sync())
+        com.alflabs.rx.streams.Streams.<Object>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.sync())
                 .subscribe((stream, event) -> result.set(event))
                 .publish(null)
                 .close();
@@ -53,11 +55,11 @@ public class StreamsTest {
         AtomicInteger result = new AtomicInteger(0);
         ISubscriber<Integer> subscriber = (stream, integer) -> result.set(integer);
 
-        IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.sync());
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create().on(com.alflabs.rx.schedulers.Schedulers.sync());
         assertThat(stream.getState()).isEqualTo(State.IDLE);
         assertThat(stream.isIdle()).isTrue();
 
-        stream.subscribe(subscriber, Schedulers.sync());
+        stream.subscribe(subscriber, com.alflabs.rx.schedulers.Schedulers.sync());
         assertThat(stream.getState()).isEqualTo(State.OPEN);
         assertThat(stream.isIdle()).isFalse();
         assertThat(stream.isClosed()).isFalse();
@@ -70,8 +72,8 @@ public class StreamsTest {
 
     @Test
     public void testStreamPublish3() throws Exception {
-        IStream<Integer> stream = Streams.<Integer>create()
-                .on(Schedulers.sync())
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.sync())
                 .subscribe(mIntSubscriber)
                 .publish(42)
                 .publish(43)
@@ -87,8 +89,8 @@ public class StreamsTest {
 
     @Test
     public void testStreamPause() throws Exception {
-        IStream<Integer> stream = Streams.<Integer>create()
-                .on(Schedulers.sync())
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.sync())
                 .subscribe(mIntSubscriber)
                 .publish(42)
                 .publish(43)
@@ -120,7 +122,7 @@ public class StreamsTest {
     @Test
     public void testStreamAttachedDetached() throws Exception {
 
-        IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.sync());
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create().on(com.alflabs.rx.schedulers.Schedulers.sync());
         verify(mIntSubscriber, never()).onAttached(stream);
         verify(mIntSubscriber, never()).onDetached(stream);
 
@@ -139,7 +141,7 @@ public class StreamsTest {
 
     @Test
     public void testStreamIdle() throws Exception {
-        IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.sync());
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create().on(com.alflabs.rx.schedulers.Schedulers.sync());
 
         assertThat(stream.getState()).isEqualTo(State.IDLE);
         assertThat(stream.isIdle()).isTrue();
@@ -171,9 +173,9 @@ public class StreamsTest {
         CountDownLatch closetLatch = new CountDownLatch(1);
         AtomicInteger result = new AtomicInteger(0);
 
-        IStream<Integer> stream = Streams.<Integer>create().on(Schedulers.io());
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create().on(com.alflabs.rx.schedulers.Schedulers.io());
 
-        Subscribers.Adapter<Integer> subscriber = new Subscribers.Adapter<Integer>() {
+        Adapter<Integer> subscriber = new Adapter<Integer>() {
             @Override
             public void onReceive(@NonNull IStream<? extends Integer> stream, Integer integer) {
                 result.set(integer);
@@ -188,7 +190,7 @@ public class StreamsTest {
             }
         };
 
-        stream.subscribe(subscriber, Schedulers.io());
+        stream.subscribe(subscriber, com.alflabs.rx.schedulers.Schedulers.io());
         stream.publish(42);
 
         // Note: calling stream.close() here might close the stream BEFORE the async publish has a chance to

@@ -1,7 +1,15 @@
-package com.alflabs.rx;
+package com.alflabs.rx.streams;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.func.RConsumer;
+import com.alflabs.rx.IAttached;
+import com.alflabs.rx.IProcessor;
+import com.alflabs.rx.IPublisher;
+import com.alflabs.rx.IScheduler;
+import com.alflabs.rx.IStateChanged;
+import com.alflabs.rx.IStream;
+import com.alflabs.rx.ISubscriber;
+import com.alflabs.rx.State;
 
 import java.util.LinkedList;
 import java.util.Map;

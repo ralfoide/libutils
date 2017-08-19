@@ -1,6 +1,9 @@
-package com.alflabs.rx;
+package com.alflabs.rx.streams;
 
 import com.alflabs.annotations.NonNull;
+import com.alflabs.rx.IScheduler;
+import com.alflabs.rx.IStream;
+import com.alflabs.rx.schedulers.Schedulers;
 
 /**
  * Helper methods and classes for {@link IStream}.

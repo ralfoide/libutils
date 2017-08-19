@@ -2,6 +2,7 @@ package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
+import com.alflabs.rx.publishers.Adapter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.junit.MockitoJUnit;
@@ -21,9 +22,9 @@ public class PublishersTest {
     public void testStreamPublishSync() throws Exception {
         ArrayList<Integer> result = new ArrayList<>();
 
-        Streams.<Integer>create()
-                .on(Schedulers.sync())
-                .publishWith(Publishers.just(42, 43, 44, 45))
+        com.alflabs.rx.streams.Streams.<Integer>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.sync())
+                .publishWith(com.alflabs.rx.publishers.Publishers.just(42, 43, 44, 45))
                 .subscribe((stream, integer) -> result.add(integer))
                 .close();
         assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45 });
@@ -37,9 +38,9 @@ public class PublishersTest {
         List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
         CountDownLatch latch = new CountDownLatch(1);
 
-        Streams.<Integer>create()
-                .on(Schedulers.io())
-                .publishWith(new Publishers.Adapter<Integer>() {
+        com.alflabs.rx.streams.Streams.<Integer>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.io())
+                .publishWith(new Adapter<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
                         for (int i = 0; !stream.isClosed(); i++) {
@@ -80,9 +81,9 @@ public class PublishersTest {
         List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
         CountDownLatch latch = new CountDownLatch(1);
 
-        IStream<Integer> stream = Streams.<Integer>create()
-                .on(Schedulers.io())
-                .publishWith(new Publishers.Adapter<Integer>() {
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.io())
+                .publishWith(new Adapter<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
                         // Wait for the stream to go from idle to open
