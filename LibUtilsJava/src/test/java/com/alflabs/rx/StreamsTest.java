@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,8 +22,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class StreamsTest {
     @Rule public MockitoRule mRule = MockitoJUnit.rule();
 
-    @Mock
-    Adapter<Integer> mIntSubscriber;
+    @Mock Adapter<Integer> mIntSubscriber;
 
     @Test
     public void testStreamPublish1() throws Exception {
@@ -202,5 +202,43 @@ public class StreamsTest {
 
         stream.close();
         closetLatch.await();
+    }
+
+    @Test
+    public void testSubscriberAttached() throws Exception {
+        AtomicInteger result = new AtomicInteger(0);
+        AtomicBoolean subscriberAttached = new AtomicBoolean();
+
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams
+                .<Integer>create()
+                .on(com.alflabs.rx.schedulers.Schedulers.sync());
+
+        com.alflabs.rx.publishers.Adapter<Integer> publisher = new com.alflabs.rx.publishers.Adapter<Integer>() {
+            @Override
+            public void onSubscriberAttached(@NonNull IStream<? super Integer> s, @NonNull ISubscriber<? super Integer> subscriber) {
+                assertThat(s).isSameAs(stream);
+                subscriberAttached.set(true);
+            }
+
+            @Override
+            public void onSubscriberDetached(@NonNull IStream<? super Integer> s, @NonNull ISubscriber<? super Integer> subscriber) {
+                assertThat(s).isSameAs(stream);
+                subscriberAttached.set(false);
+            }
+        };
+
+        stream.publishWith(publisher);
+
+        assertThat(subscriberAttached.get()).isFalse();
+
+        ISubscriber<Integer> subscriber = (streas, integer) -> result.set(integer);
+        stream.subscribe(subscriber);
+        assertThat(subscriberAttached.get()).isTrue();
+
+        stream.publish(42);
+        assertThat(result.get()).isEqualTo(42);
+
+        stream.remove(subscriber);
+        assertThat(subscriberAttached.get()).isFalse();
     }
 }

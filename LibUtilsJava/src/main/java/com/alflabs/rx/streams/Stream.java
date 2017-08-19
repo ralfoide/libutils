@@ -9,6 +9,7 @@ import com.alflabs.rx.IScheduler;
 import com.alflabs.rx.IStateChanged;
 import com.alflabs.rx.IStream;
 import com.alflabs.rx.ISubscriber;
+import com.alflabs.rx.ISubscriberAttached;
 import com.alflabs.rx.State;
 
 import java.util.LinkedList;
@@ -79,10 +80,25 @@ class Stream<Event> implements IStream<Event> {
                 changeState(State.OPEN);
                 doSend = true;
             }
+
             if (subscriber instanceof IAttached) {
                 //noinspection unchecked
                 scheduler.invoke(() -> ((IAttached) subscriber).onAttached(this));
             }
+
+            RConsumer consumer = object -> {
+                if (object instanceof ISubscriberAttached) {
+                    //noinspection unchecked
+                    ((ISubscriberAttached) object).onSubscriberAttached(Stream.this, subscriber);
+                }
+            };
+            //noinspection unchecked
+            invokeAll(mSubscribers, consumer);
+            //noinspection unchecked
+            invokeAll(mProcessors, consumer);
+            //noinspection unchecked
+            invokeAll(mPublishers, consumer);
+
             if (doSend) {
                 send();
             }
@@ -137,10 +153,24 @@ class Stream<Event> implements IStream<Event> {
             if (mSubscribers.isEmpty() && mState == State.OPEN) {
                 changeState(State.IDLE);
             }
+
             if (subscriber instanceof IAttached) {
                 //noinspection unchecked
                 scheduler.invoke(() -> ((IAttached) subscriber).onDetached(this));
             }
+
+            RConsumer consumer = object -> {
+                if (object instanceof ISubscriberAttached) {
+                    //noinspection unchecked
+                    ((ISubscriberAttached) object).onSubscriberDetached(Stream.this, subscriber);
+                }
+            };
+            //noinspection unchecked
+            invokeAll(mSubscribers, consumer);
+            //noinspection unchecked
+            invokeAll(mProcessors, consumer);
+            //noinspection unchecked
+            invokeAll(mPublishers, consumer);
         }
         return this;
     }
