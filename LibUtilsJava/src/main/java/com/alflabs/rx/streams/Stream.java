@@ -31,12 +31,14 @@ class Stream<Event> implements IStream<Event> {
         mScheduler = scheduler;
     }
 
+    @NonNull
     @Override
     public IStream<Event> on(@NonNull IScheduler scheduler) {
         mScheduler = scheduler;
         return this;
     }
 
+    @NonNull
     @Override
     public IStream<Event> publish(Event event) {
         if (mState != State.CLOSED) {
@@ -49,8 +51,9 @@ class Stream<Event> implements IStream<Event> {
         return this;
     }
 
+    @NonNull
     @Override
-    public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, IScheduler scheduler) {
+    public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, @NonNull IScheduler scheduler) {
         if (!mPublishers.containsKey(publisher)) {
             mPublishers.put(publisher, scheduler);
 
@@ -59,13 +62,15 @@ class Stream<Event> implements IStream<Event> {
         return this;
     }
 
+    @NonNull
     @Override
     public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher) {
         return publishWith(publisher, mScheduler);
     }
 
+    @NonNull
     @Override
-    public IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber, IScheduler scheduler) {
+    public IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber, @NonNull IScheduler scheduler) {
         if (!mSubscribers.containsKey(subscriber)) {
             mSubscribers.put(subscriber, scheduler);
 
@@ -85,11 +90,13 @@ class Stream<Event> implements IStream<Event> {
         return this;
     }
 
+    @NonNull
     @Override
     public IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber) {
         return subscribe(subscriber, mScheduler);
     }
 
+    @NonNull
     @Override
     public <OutEvent> IStream<OutEvent> process(@NonNull IProcessor<? super Event, OutEvent> processor, @NonNull IScheduler scheduler) {
         if (!mProcessors.containsKey(processor)) {
@@ -103,11 +110,13 @@ class Stream<Event> implements IStream<Event> {
         return processor.output();
     }
 
+    @NonNull
     @Override
     public <OutEvent> IStream<OutEvent> process(@NonNull IProcessor<? super Event, OutEvent> processor) {
         return process(processor, mScheduler);
     }
 
+    @NonNull
     @Override
     public IStream<Event> remove(@NonNull IPublisher<? extends Event> publisher) {
         IScheduler scheduler = mPublishers.get(publisher);
@@ -118,6 +127,7 @@ class Stream<Event> implements IStream<Event> {
         return this;
     }
 
+    @NonNull
     @Override
     public IStream<Event> remove(@NonNull ISubscriber<? super Event> subscriber) {
         IScheduler scheduler = mSubscribers.get(subscriber);
@@ -135,6 +145,7 @@ class Stream<Event> implements IStream<Event> {
         return this;
     }
 
+    @NonNull
     @Override
     public <OutEvent> IStream<OutEvent> remove(@NonNull IProcessor<? super Event, OutEvent> processor) {
         IScheduler scheduler = mProcessors.get(processor);
@@ -149,11 +160,13 @@ class Stream<Event> implements IStream<Event> {
         return processor.output();
     }
 
+    @NonNull
     @Override
     public State getState() {
         return mState;
     }
 
+    @NonNull
     @Override
     public IStream<Event> setState(@NonNull State state) {
         if (state == State.IDLE) {
@@ -168,16 +181,19 @@ class Stream<Event> implements IStream<Event> {
         return this;
     }
 
+    @NonNull
     @Override
     public IStream<Event> pause() {
         return setState(State.PAUSED);
     }
 
+    @NonNull
     @Override
     public IStream<Event> open() {
         return setState(State.OPEN);
     }
 
+    @NonNull
     @Override
     public IStream<Event> close() {
         return setState(State.CLOSED);

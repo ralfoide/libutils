@@ -1,10 +1,6 @@
 package com.alflabs.rx.publishers;
 
-import com.alflabs.annotations.NonNull;
 import com.alflabs.rx.IPublisher;
-import com.alflabs.rx.IStateChanged;
-import com.alflabs.rx.IStream;
-import com.alflabs.rx.State;
 
 /**
  * Helper methods and classes for {@link IPublisher}.

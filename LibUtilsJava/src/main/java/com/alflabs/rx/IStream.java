@@ -22,6 +22,7 @@ public interface IStream<Event> {
      * Sets the default scheduler on which the stream will operate.
      * Unless specified, publishers, subscribers and processors added after will also use that scheduler.
      */
+    @NonNull
     IStream<Event> on(@NonNull IScheduler scheduler);
 
     /**
@@ -30,36 +31,47 @@ public interface IStream<Event> {
      * Unless a specific stream implementation provides constraints, the publish method should be
      * treated as thread-safe and asynchronous.
      */
+    @NonNull
     IStream<Event> publish(Event event);
 
     /** Add a publisher to the stream. */
+    @NonNull
     IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher);
 
     /** Add a publisher to the stream, operating on the specified scheduler. */
-    IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, IScheduler scheduler);
+    @NonNull
+    IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, @NonNull IScheduler scheduler);
 
     /** Add a subscriber to the stream. */
+    @NonNull
     IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber);
 
     /** Add a subscriber to the stream, operating on the specified scheduler. */
+    @NonNull
     IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber, @NonNull IScheduler scheduler);
 
     /** Add a processor to the stream. */
+    @NonNull
     <OutEvent> IStream<OutEvent> process(@NonNull IProcessor<? super Event, OutEvent> processor);
 
     /** Add a processor to the stream, operating on the specified scheduler. */
+    @NonNull
     <OutEvent> IStream<OutEvent> process(@NonNull IProcessor<? super Event, OutEvent> processor, @NonNull IScheduler scheduler);
 
     /** Removes a previously added publisher. */
+    @NonNull
     IStream<Event> remove(@NonNull IPublisher<? extends Event> publisher);
 
     /** Removes a previously added subscriber. */
+    @NonNull
     IStream<Event> remove(@NonNull ISubscriber<? super Event> subscriber);
 
     /** Removes a previously added processor. */
+    @NonNull
     <OutEvent> IStream<OutEvent> remove(@NonNull IProcessor<? super Event, OutEvent> processor);
 
     /** Returns the current state of the stream. */
+    @NonNull
     State getState();
 
     /**
@@ -73,15 +85,19 @@ public interface IStream<Event> {
      *
      * @throws IllegalArgumentException when trying to set a closed stream to anything else than {@link State#CLOSED}.
      */
+    @NonNull
     IStream<Event> setState(@NonNull State state);
 
     /** An alias for {@link #setState(State)} with {@link State#PAUSED}. */
+    @NonNull
     IStream<Event> pause();
 
     /** An alias for {@link #setState(State)} with {@link State#OPEN} (to unpause a stream previously paused). */
+    @NonNull
     IStream<Event> open();
 
     /** An alias for {@link #setState(State)} with {@link State#CLOSED}. */
+    @NonNull
     IStream<Event> close();
 
     /** An alias for {@link #getState()} with {@link State#IDLE}. */
