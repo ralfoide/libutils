@@ -27,7 +27,7 @@ class BasePublisher<E> implements IPublish<E>, IPublisher<E>, IAttached<E> {
     }
 
     protected void publishOnStream(@Null E event, IStream<? super E> stream) {
-        if (stream.getState() == State.OPEN) {
+        if (stream.isOpen()) {
             stream.publish(event);
         }
     }

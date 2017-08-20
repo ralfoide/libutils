@@ -25,6 +25,7 @@ public interface IStream<Event> extends IPublish<Event> {
      * treated as thread-safe and asynchronous.
      */
     @NonNull
+    @Deprecated
     IStream<Event> publish(Event event);
 
     /**
@@ -106,6 +107,9 @@ public interface IStream<Event> extends IPublish<Event> {
 
     /** An alias for {@link #getState()} with {@link State#IDLE}. */
     boolean isIdle();
+
+    /** An alias for {@link #getState()} with {@link State#OPEN}. */
+    boolean isOpen();
 
     /** An alias for {@link #getState()} with {@link State#PAUSED}. */
     boolean isPaused();

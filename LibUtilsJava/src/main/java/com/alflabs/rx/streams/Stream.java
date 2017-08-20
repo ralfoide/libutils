@@ -251,6 +251,11 @@ class Stream<Event> implements IStream<Event> {
     }
 
     @Override
+    public boolean isOpen() {
+        return mState == State.OPEN;
+    }
+
+    @Override
     public boolean isPaused() {
         return mState == State.PAUSED;
     }

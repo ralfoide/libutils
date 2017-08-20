@@ -63,6 +63,7 @@ public class StreamsTest {
 
         stream.subscribe(subscriber, com.alflabs.rx.schedulers.Schedulers.sync());
         assertThat(stream.getState()).isEqualTo(State.OPEN);
+        assertThat(stream.isOpen()).isTrue();
         assertThat(stream.isIdle()).isFalse();
         assertThat(stream.isClosed()).isFalse();
 
@@ -150,6 +151,7 @@ public class StreamsTest {
 
         stream.subscribe(mIntSubscriber);
         assertThat(stream.getState()).isEqualTo(State.OPEN);
+        assertThat(stream.isOpen()).isTrue();
         assertThat(stream.isIdle()).isFalse();
         assertThat(stream.isClosed()).isFalse();
         verify(mIntSubscriber).onStateChanged(stream, State.OPEN);
