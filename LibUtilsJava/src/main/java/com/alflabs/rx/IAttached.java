@@ -10,6 +10,8 @@ import com.alflabs.annotations.NonNull;
 public interface IAttached<Event> {
     /**
      * The {@link ISubscriber}, {@link IGenerator}, or {@link IProcessor} was attached (added) to the stream.
+     *
+     * @throws PublisherAttachedException if publisher is already attached.
      */
     void onAttached(@NonNull IStream<? super Event> stream);
 

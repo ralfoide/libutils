@@ -1,9 +1,11 @@
 package com.alflabs.rx;
 
+import com.alflabs.annotations.Null;
+
 /**
  * A publisher and a generator both publish events to a stream.
  * The semantical difference is that a publisher allows its callers to publish on the stream
- * whereas a generator does the publishing and doesn't allow callers to do the publishing directly.
+ * whereas a generator does the publishing internally and doesn't allow callers to do the publishing directly.
  * <p/>
  * A publisher is generally a synchronous or asynchronous object that generates one or more event
  * and publishes them directly to the underlying stream when attached to it.
@@ -16,4 +18,6 @@ package com.alflabs.rx;
  * - if the publisher implements {@link ISubscriberAttached<Event>}, it will be notified when a subscriber is attached to the stream. <br/>
  */
 public interface IGenerator<Event> {
+    @Null
+    IStream<? super Event> getStream();
 }

@@ -5,6 +5,8 @@ import com.alflabs.annotations.Null;
 
 /**
  * A simple publisher that repeats the latest value when a new subscriber is added.
+ * <p/>
+ * This particular publisher does not publish null events.
  */
 class _Latest<E> extends BasePublisher<E> implements ISubscriberAttached<E> {
 
@@ -13,9 +15,10 @@ class _Latest<E> extends BasePublisher<E> implements ISubscriberAttached<E> {
     @NonNull
     public IPublisher<E> publish(@Null E event) {
         mLastEvent = event;
-        for (IStream<? super E> stream : getStreams()) {
-            if (stream.isOpen()) {
-                stream._publishOnStream(event);
+        if (event != null) {
+            IStream<? super E> stream = getStream();
+            if (stream != null && stream.isOpen()) {
+                super.publish(event);
             }
         }
         return this;
@@ -24,7 +27,7 @@ class _Latest<E> extends BasePublisher<E> implements ISubscriberAttached<E> {
     @Override
     public void onSubscriberAttached(@NonNull IStream<? super E> stream, @NonNull ISubscriber<? super E> subscriber) {
         if (mLastEvent != null) {
-            stream._publishOnStream(mLastEvent);
+            super.publish(mLastEvent);
         }
     }
 

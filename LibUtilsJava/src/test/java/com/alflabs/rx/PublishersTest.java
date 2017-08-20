@@ -30,6 +30,29 @@ public class PublishersTest {
         assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45 });
     }
 
+    @Test
+    public void testPublishSingleAttach() throws Exception {
+        IPublisher<Integer> publisher = Publishers.latest();
+
+        IStream<Integer> stream1 = Streams.<Integer>stream().on(Schedulers.sync());
+        IStream<Integer> stream2 = Streams.<Integer>stream().on(Schedulers.sync());
+
+        stream1.publishWith(publisher);
+
+        // Trying to publish with the same subscriber on a second stream throws an exception
+        Exception expected = null;
+        try {
+            stream2.publishWith(publisher);
+        } catch (PublisherAttachedException exception) {
+            expected = exception;
+        }
+        assertThat(expected).isInstanceOf(PublisherAttachedException.class);
+
+        // However the publisher can first be detached then reattached properly.
+        stream1.remove(publisher);
+        stream2.publishWith(publisher);
+    }
+
     /**
      * Example of a generator that sends values on a timer forever till the stream is closed.
      */
@@ -40,14 +63,14 @@ public class PublishersTest {
 
         Streams.<Integer>stream()
                 .on(Schedulers.io())
-                .publishWith(new BasePublisher<Integer>() {
+                .publishWith(new BaseGenerator<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
                         // Calling super.onAttached is important as the base publisher needs it to publish something.
                         super.onAttached(stream);
 
                         for (int i = 0; !stream.isClosed(); i++) {
-                            publish(42 + i);
+                            publishOnStream(42 + i);
                             try {
                                 Thread.sleep(10);
                             } catch (InterruptedException ignore) {
@@ -86,7 +109,7 @@ public class PublishersTest {
 
         IStream<Integer> stream = Streams.<Integer>stream()
                 .on(Schedulers.io())
-                .publishWith(new BasePublisher<Integer>() {
+                .publishWith(new BaseGenerator<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
                         // Calling super.onAttached is important as the base publisher needs it to publish something.
@@ -103,7 +126,7 @@ public class PublishersTest {
 
                         // Once open, generate values till it becomes closed or idle again.
                         for (int i = 0; !stream.isClosed() && !stream.isIdle(); i++) {
-                            publish(42 + i);
+                            publishOnStream(42 + i);
                             try {
                                 Thread.sleep(10);
                             } catch (InterruptedException ignore) {

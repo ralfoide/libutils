@@ -45,6 +45,10 @@ class _Stream<Event> implements IStream<Event> {
     @Override
     public IStream<Event> publishWith(@NonNull IGenerator<? extends Event> publisher, @NonNull IScheduler scheduler) {
         if (!mPublishers.containsKey(publisher)) {
+            if (publisher.getStream() != null) {
+                throw new PublisherAttachedException("Publisher is already attached to a stream.");
+            }
+
             mPublishers.put(publisher, scheduler);
 
             if (publisher instanceof IAttached) {
