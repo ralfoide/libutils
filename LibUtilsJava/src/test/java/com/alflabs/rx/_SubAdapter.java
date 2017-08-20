@@ -1,18 +1,16 @@
-package com.alflabs.rx.subscribers;
+package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.alflabs.rx.IAttached;
-import com.alflabs.rx.IStateChanged;
-import com.alflabs.rx.IStream;
-import com.alflabs.rx.ISubscriber;
-import com.alflabs.rx.State;
 
 /**
  * A subscriber adapter that provides default implementations to all the methods from
  * {@link ISubscriber}, including those from the optional {@link IStateChanged} and {@link IAttached} interfaces.
+ * <p/>
+ * It's probably overkill and has not much application outside of convenience for testing
+ * and thus has been moved to the test package.
  */
-public class SubAdapter<Event> implements ISubscriber<Event>, IStateChanged<Event>, IAttached<Event> {
+class _SubAdapter<Event> implements ISubscriber<Event>, IStateChanged<Event>, IAttached<Event> {
     @Override
     public void onStateChanged(@NonNull IStream<? super Event> stream, @NonNull State newState) {}
 

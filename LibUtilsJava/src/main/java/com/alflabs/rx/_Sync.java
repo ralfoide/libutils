@@ -1,11 +1,10 @@
-package com.alflabs.rx.schedulers;
+package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.func.RConsumer;
-import com.alflabs.rx.IScheduler;
 
-class Sync implements IScheduler {
+class _Sync implements IScheduler {
     @Override
     public void invoke(@NonNull Runnable runnable) {
         try {

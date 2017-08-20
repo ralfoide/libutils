@@ -1,16 +1,15 @@
-package com.alflabs.rx.schedulers;
+package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
-import com.alflabs.rx.IScheduler;
 
 public class Schedulers {
-    private static Sync sSync;
-    private static Worker sWorker;
+    private static _Sync sSync;
+    private static _Worker sWorker;
 
     @NonNull
     public static IScheduler sync() {
         if (sSync == null) {
-            sSync = new Sync();
+            sSync = new _Sync();
         }
         return sSync;
     }
@@ -18,7 +17,7 @@ public class Schedulers {
     @NonNull
     public static IScheduler io() {
         if (sWorker == null) {
-            sWorker = new Worker();
+            sWorker = new _Worker();
         }
         return sWorker;
     }

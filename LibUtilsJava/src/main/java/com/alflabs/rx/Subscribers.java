@@ -1,4 +1,4 @@
-package com.alflabs.rx.subscribers;
+package com.alflabs.rx;
 
 import com.alflabs.rx.ISubscriber;
 

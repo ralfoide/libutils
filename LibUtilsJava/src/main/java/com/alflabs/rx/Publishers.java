@@ -1,7 +1,4 @@
-package com.alflabs.rx.publishers;
-
-import com.alflabs.rx.IPublish;
-import com.alflabs.rx.IPublisher;
+package com.alflabs.rx;
 
 /**
  * Helper methods and classes for {@link IPublisher}.
@@ -20,13 +17,13 @@ public class Publishers {
      */
     @SafeVarargs
     public static <E> IPublisher<E> just(E...values) {
-        return new Just<E>(values);
+        return new _Just<E>(values);
     }
 
     /**
      * Returns a simple publisher that repeats the latest value when a new subscriber is added.
      */
     public static <E> IPublish<E> latest() {
-        return new Latest<>();
+        return new _Latest<>();
     }
 }

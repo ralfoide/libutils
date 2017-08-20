@@ -13,20 +13,9 @@ import com.alflabs.annotations.NonNull;
  * <p/>
  * A stream is either open, paused or closed. Closing the stream is a terminal action.
  * <p/>
- * Publishers are optional convenient generators.
- * Any caller can directly {@link #publish(Object)} to the stream without an actual publisher.
+ * A publisher is needed to publish events on a stream.
  */
-public interface IStream<Event> extends IPublish<Event> {
-
-    /**
-     * Publishes a new event to the stream.
-     * <p/>
-     * Unless a specific stream implementation provides constraints, the publish method should be
-     * treated as thread-safe and asynchronous.
-     */
-    @NonNull
-    @Deprecated
-    IStream<Event> publish(Event event);
+public interface IStream<Event> extends _IPublishOnStream<Event> {
 
     /**
      * Sets the default scheduler on which the stream will operate.
@@ -38,10 +27,6 @@ public interface IStream<Event> extends IPublish<Event> {
     /** Add a publisher to the stream. */
     @NonNull
     IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher);
-
-    /** Add a publisher to the stream. */
-    @NonNull
-    IStream<Event> publishWith(@NonNull IPublish<? extends Event> publisher);
 
     /** Add a publisher to the stream, operating on the specified scheduler. */
     @NonNull

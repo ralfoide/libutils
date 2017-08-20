@@ -1,24 +1,14 @@
-package com.alflabs.rx.streams;
+package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.func.RConsumer;
-import com.alflabs.rx.IAttached;
-import com.alflabs.rx.IProcessor;
-import com.alflabs.rx.IPublish;
-import com.alflabs.rx.IPublisher;
-import com.alflabs.rx.IScheduler;
-import com.alflabs.rx.IStateChanged;
-import com.alflabs.rx.IStream;
-import com.alflabs.rx.ISubscriber;
-import com.alflabs.rx.ISubscriberAttached;
-import com.alflabs.rx.State;
 
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
-class Stream<Event> implements IStream<Event>, IPublish<Event> {
+class _Stream<Event> implements IStream<Event> {
 
     private volatile State mState = State.IDLE;
     private volatile boolean mPaused;
@@ -29,7 +19,7 @@ class Stream<Event> implements IStream<Event>, IPublish<Event> {
     private final Map<IProcessor, IScheduler> mProcessors = new ConcurrentHashMap<>(1, 0.75f, 1);      // thread-safe
     private IScheduler mScheduler;
 
-    public Stream(@NonNull IScheduler scheduler) {
+    public _Stream(@NonNull IScheduler scheduler) {
         mScheduler = scheduler;
     }
 
@@ -40,10 +30,8 @@ class Stream<Event> implements IStream<Event>, IPublish<Event> {
         return this;
     }
 
-    @NonNull
     @Override
-    @Deprecated
-    public IStream<Event> publish(Event event) {
+    public void _publishOnStream(Event event) {
         if (mState != State.CLOSED) {
             synchronized (mEvents) {
                 mEvents.addLast(event);
@@ -51,7 +39,6 @@ class Stream<Event> implements IStream<Event>, IPublish<Event> {
 
             send();
         }
-        return this;
     }
 
     @NonNull
@@ -76,13 +63,6 @@ class Stream<Event> implements IStream<Event>, IPublish<Event> {
 
     @NonNull
     @Override
-    public IStream<Event> publishWith(@NonNull IPublish<? extends Event> publisher) {
-        //noinspection unchecked
-        return publishWith((IPublisher) publisher);
-    }
-
-    @NonNull
-    @Override
     public IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber, @NonNull IScheduler scheduler) {
         if (!mSubscribers.containsKey(subscriber)) {
             mSubscribers.put(subscriber, scheduler);
@@ -101,7 +81,7 @@ class Stream<Event> implements IStream<Event>, IPublish<Event> {
             RConsumer consumer = object -> {
                 if (object instanceof ISubscriberAttached) {
                     //noinspection unchecked
-                    ((ISubscriberAttached) object).onSubscriberAttached(Stream.this, subscriber);
+                    ((ISubscriberAttached) object).onSubscriberAttached(_Stream.this, subscriber);
                 }
             };
             //noinspection unchecked
@@ -179,7 +159,7 @@ class Stream<Event> implements IStream<Event>, IPublish<Event> {
             RConsumer consumer = object -> {
                 if (object instanceof ISubscriberAttached) {
                     //noinspection unchecked
-                    ((ISubscriberAttached) object).onSubscriberDetached(Stream.this, subscriber);
+                    ((ISubscriberAttached) object).onSubscriberDetached(_Stream.this, subscriber);
                 }
             };
             //noinspection unchecked
@@ -280,7 +260,7 @@ class Stream<Event> implements IStream<Event>, IPublish<Event> {
             RConsumer consumer = object -> {
                 if (object instanceof IStateChanged) {
                     //noinspection unchecked
-                    ((IStateChanged) object).onStateChanged(Stream.this, newState);
+                    ((IStateChanged) object).onStateChanged(_Stream.this, newState);
                 }
             };
             //noinspection unchecked

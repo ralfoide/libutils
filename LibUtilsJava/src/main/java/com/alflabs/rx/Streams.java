@@ -1,9 +1,6 @@
-package com.alflabs.rx.streams;
+package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
-import com.alflabs.rx.IScheduler;
-import com.alflabs.rx.IStream;
-import com.alflabs.rx.schedulers.Schedulers;
 
 /**
  * Helper methods and classes for {@link IStream}.
@@ -29,6 +26,6 @@ public class Streams {
      */
     @NonNull
     public static <Event> IStream<Event> stream() {
-        return new Stream<>(Schedulers.io());
+        return new _Stream<>(Schedulers.io());
     }
 }
