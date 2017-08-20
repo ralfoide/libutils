@@ -16,14 +16,7 @@ import com.alflabs.annotations.NonNull;
  * Publishers are optional convenient generators.
  * Any caller can directly {@link #publish(Object)} to the stream without an actual publisher.
  */
-public interface IStream<Event> {
-
-    /**
-     * Sets the default scheduler on which the stream will operate.
-     * Unless specified, publishers, subscribers and processors added after will also use that scheduler.
-     */
-    @NonNull
-    IStream<Event> on(@NonNull IScheduler scheduler);
+public interface IStream<Event> extends IPublish<Event> {
 
     /**
      * Publishes a new event to the stream.
@@ -34,9 +27,20 @@ public interface IStream<Event> {
     @NonNull
     IStream<Event> publish(Event event);
 
+    /**
+     * Sets the default scheduler on which the stream will operate.
+     * Unless specified, publishers, subscribers and processors added after will also use that scheduler.
+     */
+    @NonNull
+    IStream<Event> on(@NonNull IScheduler scheduler);
+
     /** Add a publisher to the stream. */
     @NonNull
     IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher);
+
+    /** Add a publisher to the stream. */
+    @NonNull
+    IStream<Event> publishWith(@NonNull IPublish<? extends Event> publisher);
 
     /** Add a publisher to the stream, operating on the specified scheduler. */
     @NonNull

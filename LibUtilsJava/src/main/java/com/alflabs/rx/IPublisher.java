@@ -1,11 +1,7 @@
 package com.alflabs.rx;
 
-import com.alflabs.annotations.NonNull;
-
 /**
  * A publisher is a generator that publishes events to a stream.
- * <p/>
- * Publishers are convenience objects. Anything can use {@link IStream#publish(Object)} directly.
  * <p/>
  * A publishers is generally a synchronous or asynchronous objects that generates one or more event
  * and publishes them directly to the underlying stream when attached to it.
@@ -14,6 +10,8 @@ import com.alflabs.annotations.NonNull;
  * <p/>
  * Optional interface: <br/>
  * - if the publisher implements {@link IStateChanged<Event>}, it will be notified when the stream changes state. <br/>
+ * - if the publisher implements {@link IAttached<Event>}, it will be notified when attached to the stream. <br/>
+ * - if the publisher implements {@link ISubscriberAttached<Event>}, it will be notified when a subscriber is attached to the stream. <br/>
  */
-public interface IPublisher<Event> extends IAttached<Event> {
+public interface IPublisher<Event> {
 }

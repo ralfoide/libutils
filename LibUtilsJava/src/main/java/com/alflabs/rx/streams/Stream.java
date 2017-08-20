@@ -4,6 +4,7 @@ import com.alflabs.annotations.NonNull;
 import com.alflabs.func.RConsumer;
 import com.alflabs.rx.IAttached;
 import com.alflabs.rx.IProcessor;
+import com.alflabs.rx.IPublish;
 import com.alflabs.rx.IPublisher;
 import com.alflabs.rx.IScheduler;
 import com.alflabs.rx.IStateChanged;
@@ -23,9 +24,9 @@ class Stream<Event> implements IStream<Event> {
     private volatile boolean mPaused;
 
     private final LinkedList<Event> mEvents = new LinkedList<>();
-    private final Map<IPublisher, IScheduler> mPublishers = new ConcurrentHashMap<>();      // thread-safe
-    private final Map<ISubscriber, IScheduler> mSubscribers = new ConcurrentHashMap<>();    // thread-safe
-    private final Map<IProcessor, IScheduler> mProcessors = new ConcurrentHashMap<>();      // thread-safe
+    private final Map<IPublisher, IScheduler> mPublishers = new ConcurrentHashMap<>(1, 0.75f, 1);      // thread-safe
+    private final Map<ISubscriber, IScheduler> mSubscribers = new ConcurrentHashMap<>(1, 0.75f, 1);    // thread-safe
+    private final Map<IProcessor, IScheduler> mProcessors = new ConcurrentHashMap<>(1, 0.75f, 1);      // thread-safe
     private IScheduler mScheduler;
 
     public Stream(@NonNull IScheduler scheduler) {
@@ -58,7 +59,10 @@ class Stream<Event> implements IStream<Event> {
         if (!mPublishers.containsKey(publisher)) {
             mPublishers.put(publisher, scheduler);
 
-            scheduler.invoke(() -> publisher.onAttached(this));
+            if (publisher instanceof IAttached) {
+                //noinspection unchecked
+                scheduler.invoke(() -> ((IAttached) publisher).onAttached(this));
+            }
         }
         return this;
     }
@@ -67,6 +71,13 @@ class Stream<Event> implements IStream<Event> {
     @Override
     public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher) {
         return publishWith(publisher, mScheduler);
+    }
+
+    @NonNull
+    @Override
+    public IStream<Event> publishWith(@NonNull IPublish<? extends Event> publisher) {
+        //noinspection unchecked
+        return publishWith((IPublisher) publisher);
     }
 
     @NonNull
@@ -137,8 +148,13 @@ class Stream<Event> implements IStream<Event> {
     public IStream<Event> remove(@NonNull IPublisher<? extends Event> publisher) {
         IScheduler scheduler = mPublishers.get(publisher);
         if (scheduler != null) {
+
             mPublishers.remove(publisher);
-            scheduler.invoke(() -> publisher.onDetached(this));
+
+            if (publisher instanceof IAttached) {
+                //noinspection unchecked
+                scheduler.invoke(() -> ((IAttached) publisher).onDetached(this));
+            }
         }
         return this;
     }

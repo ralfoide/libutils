@@ -12,7 +12,7 @@ import com.alflabs.rx.State;
  * A subscriber adapter that provides default implementations to all the methods from
  * {@link ISubscriber}, including those from the optional {@link IStateChanged} and {@link IAttached} interfaces.
  */
-public class Adapter<Event> implements ISubscriber<Event>, IStateChanged<Event>, IAttached<Event> {
+public class SubAdapter<Event> implements ISubscriber<Event>, IStateChanged<Event>, IAttached<Event> {
     @Override
     public void onStateChanged(@NonNull IStream<? super Event> stream, @NonNull State newState) {}
 

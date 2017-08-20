@@ -1,9 +1,14 @@
 package com.alflabs.rx.publishers;
 
 import com.alflabs.annotations.NonNull;
+import com.alflabs.rx.IAttached;
+import com.alflabs.rx.IPublisher;
 import com.alflabs.rx.IStream;
 
-class Just<E> extends Adapter<E> {
+/**
+ * A simple publisher that publishes all the constructor values when first attached to a stream.
+ */
+class Just<E> implements IPublisher<E>, IAttached<E> {
     private final E[] mValues;
 
     @SafeVarargs
@@ -17,4 +22,7 @@ class Just<E> extends Adapter<E> {
             stream.publish(value);
         }
     }
+
+    @Override
+    public void onDetached(@NonNull IStream<? super E> stream) {}
 }

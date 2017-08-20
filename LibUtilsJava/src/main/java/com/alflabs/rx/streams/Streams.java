@@ -3,7 +3,6 @@ package com.alflabs.rx.streams;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.rx.IScheduler;
 import com.alflabs.rx.IStream;
-import com.alflabs.rx.schedulers.Schedulers;
 
 /**
  * Helper methods and classes for {@link IStream}.
@@ -25,10 +24,10 @@ public class Streams {
      * Changing the stream state is immediate. Consequently, calling publish on the io scheduler followed by
      * a pause/close call may result in the published event happen in any order with regard to the state change.
      * <p/>
-     * The stream uses {@link Schedulers#io()} by default unless changed by {@link IStream#on(IScheduler)}.
+     * The stream uses {@link com.alflabs.rx.schedulers.Schedulers#io()} by default unless changed by {@link IStream#on(IScheduler)}.
      */
     @NonNull
-    public static <Event> IStream<Event> create() {
-        return new Stream<>(Schedulers.io());
+    public static <Event> IStream<Event> stream() {
+        return new Stream<>(com.alflabs.rx.schedulers.Schedulers.io());
     }
 }

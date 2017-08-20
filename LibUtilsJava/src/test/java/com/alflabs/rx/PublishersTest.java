@@ -2,7 +2,7 @@ package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.alflabs.rx.publishers.Adapter;
+import com.alflabs.rx.publishers.PubAdapter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.junit.MockitoJUnit;
@@ -19,10 +19,10 @@ public class PublishersTest {
     @Rule public MockitoRule mRule = MockitoJUnit.rule();
 
     @Test
-    public void testStreamPublishSync() throws Exception {
+    public void testPublishSync() throws Exception {
         ArrayList<Integer> result = new ArrayList<>();
 
-        com.alflabs.rx.streams.Streams.<Integer>create()
+        com.alflabs.rx.streams.Streams.<Integer>stream()
                 .on(com.alflabs.rx.schedulers.Schedulers.sync())
                 .publishWith(com.alflabs.rx.publishers.Publishers.just(42, 43, 44, 45))
                 .subscribe((stream, integer) -> result.add(integer))
@@ -34,13 +34,13 @@ public class PublishersTest {
      * Example of a generator that sends values on a timer forever till the stream is closed.
      */
     @Test
-    public void testStreamPublishGeneratorAsync1() throws Exception {
+    public void testPublishGeneratorAsync1() throws Exception {
         List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
         CountDownLatch latch = new CountDownLatch(1);
 
-        com.alflabs.rx.streams.Streams.<Integer>create()
+        com.alflabs.rx.streams.Streams.<Integer>stream()
                 .on(com.alflabs.rx.schedulers.Schedulers.io())
-                .publishWith(new Adapter<Integer>() {
+                .publishWith(new PubAdapter<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
                         for (int i = 0; !stream.isClosed(); i++) {
@@ -77,13 +77,13 @@ public class PublishersTest {
      * is detached.
      */
     @Test
-    public void testStreamPublishGeneratorAsync2() throws Exception {
+    public void testPublishGeneratorAsync2() throws Exception {
         List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
         CountDownLatch latch = new CountDownLatch(1);
 
-        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>create()
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>stream()
                 .on(com.alflabs.rx.schedulers.Schedulers.io())
-                .publishWith(new Adapter<Integer>() {
+                .publishWith(new PubAdapter<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
                         // Wait for the stream to go from idle to open
@@ -131,4 +131,21 @@ public class PublishersTest {
         latch.await();
         assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45, 46 });
     }
+
+    @Test
+    public void testPublishLatest() throws Exception {
+        ArrayList<Integer> result = new ArrayList<>();
+
+        IPublish<Integer> publisher = com.alflabs.rx.publishers.Publishers.latest();
+        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>stream()
+                .on(com.alflabs.rx.schedulers.Schedulers.sync())
+                .publishWith(publisher);
+        publisher.publish(42)
+                .publish(43);
+
+        stream.subscribe((s, integer) -> result.add(integer));
+        publisher.publish(44);
+
+        stream.close();
+        assertThat(result.toArray()).isEqualTo(new Object[] { 43, 44 });    }
 }
