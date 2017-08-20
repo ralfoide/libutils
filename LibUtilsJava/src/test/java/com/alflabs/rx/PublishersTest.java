@@ -3,6 +3,9 @@ package com.alflabs.rx;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.rx.publishers.PubAdapter;
+import com.alflabs.rx.publishers.Publishers;
+import com.alflabs.rx.schedulers.Schedulers;
+import com.alflabs.rx.streams.Streams;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.junit.MockitoJUnit;
@@ -22,9 +25,9 @@ public class PublishersTest {
     public void testPublishSync() throws Exception {
         ArrayList<Integer> result = new ArrayList<>();
 
-        com.alflabs.rx.streams.Streams.<Integer>stream()
-                .on(com.alflabs.rx.schedulers.Schedulers.sync())
-                .publishWith(com.alflabs.rx.publishers.Publishers.just(42, 43, 44, 45))
+        Streams.<Integer>stream()
+                .on(Schedulers.sync())
+                .publishWith(Publishers.just(42, 43, 44, 45))
                 .subscribe((stream, integer) -> result.add(integer))
                 .close();
         assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45 });
@@ -38,8 +41,8 @@ public class PublishersTest {
         List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
         CountDownLatch latch = new CountDownLatch(1);
 
-        com.alflabs.rx.streams.Streams.<Integer>stream()
-                .on(com.alflabs.rx.schedulers.Schedulers.io())
+        Streams.<Integer>stream()
+                .on(Schedulers.io())
                 .publishWith(new PubAdapter<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
@@ -81,8 +84,8 @@ public class PublishersTest {
         List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
         CountDownLatch latch = new CountDownLatch(1);
 
-        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>stream()
-                .on(com.alflabs.rx.schedulers.Schedulers.io())
+        IStream<Integer> stream = Streams.<Integer>stream()
+                .on(Schedulers.io())
                 .publishWith(new PubAdapter<Integer>() {
                     @Override
                     public void onAttached(@NonNull IStream<? super Integer> stream) {
@@ -136,9 +139,9 @@ public class PublishersTest {
     public void testPublishLatest() throws Exception {
         ArrayList<Integer> result = new ArrayList<>();
 
-        IPublish<Integer> publisher = com.alflabs.rx.publishers.Publishers.latest();
-        IStream<Integer> stream = com.alflabs.rx.streams.Streams.<Integer>stream()
-                .on(com.alflabs.rx.schedulers.Schedulers.sync())
+        IPublish<Integer> publisher = Publishers.latest();
+        IStream<Integer> stream = Streams.<Integer>stream()
+                .on(Schedulers.sync())
                 .publishWith(publisher);
         publisher.publish(42)
                 .publish(43);
