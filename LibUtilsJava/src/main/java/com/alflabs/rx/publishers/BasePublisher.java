@@ -6,9 +6,9 @@ import com.alflabs.rx.IAttached;
 import com.alflabs.rx.IPublish;
 import com.alflabs.rx.IPublisher;
 import com.alflabs.rx.IStream;
-import com.alflabs.rx.State;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,6 +18,10 @@ class BasePublisher<E> implements IPublish<E>, IPublisher<E>, IAttached<E> {
 
     private final Map<IStream<? super E>, Boolean> mStreams = new ConcurrentHashMap<>(1, 0.75f, 1);    // thread-safe
 
+    protected Set<IStream<? super E>> getStreams() {
+        return mStreams.keySet();
+    }
+
     @NonNull
     public IPublish<E> publish(@Null E event) {
         for (IStream<? super E> stream : mStreams.keySet()) {
@@ -26,15 +30,16 @@ class BasePublisher<E> implements IPublish<E>, IPublisher<E>, IAttached<E> {
         return this;
     }
 
-    protected void publishOnStream(@Null E event, IStream<? super E> stream) {
-        if (stream.isOpen()) {
-            stream.publish(event);
-        }
+    void publishOnStream(@Null E event, IStream<? super E> stream) {
+        //noinspection unchecked
+        ((IPublish) stream).publish(event);
     }
 
     @Override
     public void onAttached(@NonNull IStream<? super E> stream) {
-        mStreams.put(stream, Boolean.TRUE);
+        if (stream instanceof IPublish){
+            mStreams.put(stream, Boolean.TRUE);
+        }
     }
 
     @Override

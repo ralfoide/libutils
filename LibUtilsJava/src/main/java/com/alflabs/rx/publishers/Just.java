@@ -2,6 +2,7 @@ package com.alflabs.rx.publishers;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.rx.IAttached;
+import com.alflabs.rx.IPublish;
 import com.alflabs.rx.IPublisher;
 import com.alflabs.rx.IStream;
 
@@ -18,8 +19,11 @@ class Just<E> implements IPublisher<E>, IAttached<E> {
 
     @Override
     public void onAttached(@NonNull IStream<? super E> stream) {
-        for (E value : mValues) {
-            stream.publish(value);
+        if (stream instanceof IPublish) {
+            for (E value : mValues) {
+                //noinspection unchecked
+                ((IPublish) stream).publish(value);
+            }
         }
     }
 

@@ -17,7 +17,11 @@ class Latest<E> extends BasePublisher<E> implements ISubscriberAttached<E> {
     @NonNull
     public IPublish<E> publish(@Null E event) {
         mLastEvent = event;
-        super.publish(event);
+        for (IStream<? super E> stream : getStreams()) {
+            if (stream.isOpen()) {
+                publishOnStream(event, stream);
+            }
+        }
         return this;
     }
 
@@ -29,7 +33,5 @@ class Latest<E> extends BasePublisher<E> implements ISubscriberAttached<E> {
     }
 
     @Override
-    public void onSubscriberDetached(@NonNull IStream<? super E> stream, @NonNull ISubscriber<? super E> subscriber) {
-        // no-op
-    }
+    public void onSubscriberDetached(@NonNull IStream<? super E> stream, @NonNull ISubscriber<? super E> subscriber) {}
 }

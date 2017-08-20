@@ -1,10 +1,10 @@
 package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
-import com.alflabs.rx.publishers.PubAdapter;
 import com.alflabs.rx.schedulers.Schedulers;
 import com.alflabs.rx.streams.Streams;
 import com.alflabs.rx.subscribers.SubAdapter;
+import com.alflabs.rx.publishers.PubAdapter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -25,16 +25,15 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 public class StreamsTest {
     @Rule public MockitoRule mRule = MockitoJUnit.rule();
 
-    @Mock
-    SubAdapter<Integer> mIntSubscriber;
+    @Mock SubAdapter<Integer> mIntSubscriber;
 
     @Test
     public void testStreamPublish1() throws Exception {
         AtomicInteger result = new AtomicInteger(0);
 
-        Streams.<Integer>stream()
+        IStream<Integer> stream = Streams.<Integer>stream()
                 .on(Schedulers.sync())
-                .subscribe((stream, integer) -> result.set(integer))
+                .subscribe((s, integer) -> result.set(integer))
                 .publish(42)
                 .close();
         assertThat(result.get()).isEqualTo(42);

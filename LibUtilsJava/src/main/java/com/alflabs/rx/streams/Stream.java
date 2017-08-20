@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
-class Stream<Event> implements IStream<Event> {
+class Stream<Event> implements IStream<Event>, IPublish<Event> {
 
     private volatile State mState = State.IDLE;
     private volatile boolean mPaused;
@@ -42,6 +42,7 @@ class Stream<Event> implements IStream<Event> {
 
     @NonNull
     @Override
+    @Deprecated
     public IStream<Event> publish(Event event) {
         if (mState != State.CLOSED) {
             synchronized (mEvents) {

@@ -2,7 +2,6 @@ package com.alflabs.rx;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
-import com.alflabs.rx.publishers.PubAdapter;
 import com.alflabs.rx.publishers.Publishers;
 import com.alflabs.rx.schedulers.Schedulers;
 import com.alflabs.rx.streams.Streams;
@@ -33,107 +32,107 @@ public class PublishersTest {
         assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45 });
     }
 
-    /**
-     * Example of a generator that sends values on a timer forever till the stream is closed.
-     */
-    @Test
-    public void testPublishGeneratorAsync1() throws Exception {
-        List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Streams.<Integer>stream()
-                .on(Schedulers.io())
-                .publishWith(new PubAdapter<Integer>() {
-                    @Override
-                    public void onAttached(@NonNull IStream<? super Integer> stream) {
-                        for (int i = 0; !stream.isClosed(); i++) {
-                            stream.publish(42 + i);
-                            try {
-                                Thread.sleep(10);
-                            } catch (InterruptedException ignore) {
-                                break;
-                            }
-                        }
-                        // end the generator and test.
-                        latch.countDown();
-                    }
-                })
-                .subscribe(new ISubscriber<Integer>() {
-                    @Override
-                    public void onReceive(@NonNull IStream<? extends Integer> stream, @Null Integer integer) {
-                        if (integer == null) {
-                            return;
-                        }
-                        result.add(integer);
-                        if (integer == 42 + 5) {
-                            stream.close();
-                        }
-                    }
-                });
-
-        latch.await();
-        assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45, 46, 47 });
-    }
-
-    /**
-     * Example of a generator that sends values on a timer forever till the last subscriber
-     * is detached.
-     */
-    @Test
-    public void testPublishGeneratorAsync2() throws Exception {
-        List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
-        CountDownLatch latch = new CountDownLatch(1);
-
-        IStream<Integer> stream = Streams.<Integer>stream()
-                .on(Schedulers.io())
-                .publishWith(new PubAdapter<Integer>() {
-                    @Override
-                    public void onAttached(@NonNull IStream<? super Integer> stream) {
-                        // Wait for the stream to go from idle to open
-                        while (stream.isIdle()) {
-                            try {
-                                Thread.sleep(10);
-                            } catch (InterruptedException ignore) {
-                                break;
-                            }
-                        }
-
-                        // Once open, generate values till it becomes closed or idle again.
-                        for (int i = 0; !stream.isClosed() && !stream.isIdle(); i++) {
-                            stream.publish(42 + i);
-                            try {
-                                Thread.sleep(10);
-                            } catch (InterruptedException ignore) {
-                                break;
-                            }
-                        }
-
-                        // end the generator and test.
-                        latch.countDown();
-                    }
-                });
-
-        assertThat(stream.isIdle()).isTrue();
-
-        // Once the subscriber is added, the generator will start.
-        stream.subscribe(new ISubscriber<Integer>() {
-                    @Override
-                    public void onReceive(@NonNull IStream<? extends Integer> stream, @Null Integer integer) {
-                        if (integer == null) {
-                            return;
-                        }
-                        result.add(integer);
-                        if (integer == 42 + 4) {
-                            stream.remove(this);
-                        }
-                    }
-                });
-
-        assertThat(stream.isIdle()).isFalse();
-
-        latch.await();
-        assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45, 46 });
-    }
+//    /**
+//     * Example of a generator that sends values on a timer forever till the stream is closed.
+//     */
+//    @Test
+//    public void testPublishGeneratorAsync1() throws Exception {
+//        List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
+//        CountDownLatch latch = new CountDownLatch(1);
+//
+//        Streams.<Integer>stream()
+//                .on(Schedulers.io())
+//                .publishWith(new PubAdapter<Integer>() {
+//                    @Override
+//                    public void onAttached(@NonNull IStream<? super Integer> stream) {
+//                        for (int i = 0; !stream.isClosed(); i++) {
+//                            stream.publish(42 + i);
+//                            try {
+//                                Thread.sleep(10);
+//                            } catch (InterruptedException ignore) {
+//                                break;
+//                            }
+//                        }
+//                        // end the generator and test.
+//                        latch.countDown();
+//                    }
+//                })
+//                .subscribe(new ISubscriber<Integer>() {
+//                    @Override
+//                    public void onReceive(@NonNull IStream<? extends Integer> stream, @Null Integer integer) {
+//                        if (integer == null) {
+//                            return;
+//                        }
+//                        result.add(integer);
+//                        if (integer == 42 + 5) {
+//                            stream.close();
+//                        }
+//                    }
+//                });
+//
+//        latch.await();
+//        assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45, 46, 47 });
+//    }
+//
+//    /**
+//     * Example of a generator that sends values on a timer forever till the last subscriber
+//     * is detached.
+//     */
+//    @Test
+//    public void testPublishGeneratorAsync2() throws Exception {
+//        List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
+//        CountDownLatch latch = new CountDownLatch(1);
+//
+//        IStream<Integer> stream = Streams.<Integer>stream()
+//                .on(Schedulers.io())
+//                .publishWith(new PubAdapter<Integer>() {
+//                    @Override
+//                    public void onAttached(@NonNull IStream<? super Integer> stream) {
+//                        // Wait for the stream to go from idle to open
+//                        while (stream.isIdle()) {
+//                            try {
+//                                Thread.sleep(10);
+//                            } catch (InterruptedException ignore) {
+//                                break;
+//                            }
+//                        }
+//
+//                        // Once open, generate values till it becomes closed or idle again.
+//                        for (int i = 0; !stream.isClosed() && !stream.isIdle(); i++) {
+//                            stream.publish(42 + i);
+//                            try {
+//                                Thread.sleep(10);
+//                            } catch (InterruptedException ignore) {
+//                                break;
+//                            }
+//                        }
+//
+//                        // end the generator and test.
+//                        latch.countDown();
+//                    }
+//                });
+//
+//        assertThat(stream.isIdle()).isTrue();
+//
+//        // Once the subscriber is added, the generator will start.
+//        stream.subscribe(new ISubscriber<Integer>() {
+//                    @Override
+//                    public void onReceive(@NonNull IStream<? extends Integer> stream, @Null Integer integer) {
+//                        if (integer == null) {
+//                            return;
+//                        }
+//                        result.add(integer);
+//                        if (integer == 42 + 4) {
+//                            stream.remove(this);
+//                        }
+//                    }
+//                });
+//
+//        assertThat(stream.isIdle()).isFalse();
+//
+//        latch.await();
+//        assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45, 46 });
+//    }
 
     @Test
     public void testPublishLatest() throws Exception {
