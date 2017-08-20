@@ -5,7 +5,7 @@ import com.alflabs.annotations.NonNull;
 /**
  * A simple publisher that publishes all the constructor values when first attached to a stream.
  */
-class _Just<E> implements IPublisher<E>, IAttached<E> {
+class _Just<E> implements IGenerator<E>, IAttached<E> {
     private final E[] mValues;
 
     @SafeVarargs

@@ -11,7 +11,7 @@ class _Latest<E> extends BasePublisher<E> implements ISubscriberAttached<E> {
     private E mLastEvent;
 
     @NonNull
-    public IPublish<E> publish(@Null E event) {
+    public IPublisher<E> publish(@Null E event) {
         mLastEvent = event;
         for (IStream<? super E> stream : getStreams()) {
             if (stream.isOpen()) {

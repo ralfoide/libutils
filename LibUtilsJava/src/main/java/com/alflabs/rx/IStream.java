@@ -26,11 +26,11 @@ public interface IStream<Event> extends _IPublishOnStream<Event> {
 
     /** Add a publisher to the stream. */
     @NonNull
-    IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher);
+    IStream<Event> publishWith(@NonNull IGenerator<? extends Event> publisher);
 
     /** Add a publisher to the stream, operating on the specified scheduler. */
     @NonNull
-    IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, @NonNull IScheduler scheduler);
+    IStream<Event> publishWith(@NonNull IGenerator<? extends Event> publisher, @NonNull IScheduler scheduler);
 
     /** Add a subscriber to the stream. */
     @NonNull
@@ -50,7 +50,7 @@ public interface IStream<Event> extends _IPublishOnStream<Event> {
 
     /** Removes a previously added publisher. */
     @NonNull
-    IStream<Event> remove(@NonNull IPublisher<? extends Event> publisher);
+    IStream<Event> remove(@NonNull IGenerator<? extends Event> publisher);
 
     /** Removes a previously added subscriber. */
     @NonNull

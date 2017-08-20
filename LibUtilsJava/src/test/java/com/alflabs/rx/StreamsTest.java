@@ -28,7 +28,7 @@ public class StreamsTest {
     public void testStreamPublish1() throws Exception {
         AtomicInteger result = new AtomicInteger(0);
 
-        IPublish<Integer> publisher = Publishers.publisher();
+        IPublisher<Integer> publisher = Publishers.publisher();
         IStream<Integer> stream = Streams.<Integer>stream()
                 .on(Schedulers.sync())
                 .subscribe((strm, integer) -> result.set(integer))
@@ -45,7 +45,7 @@ public class StreamsTest {
         AtomicReference<Object> result = new AtomicReference<>(new Object());
         assertThat(result.get()).isNotNull();
 
-        IPublish<Object> publisher = Publishers.publisher();
+        IPublisher<Object> publisher = Publishers.publisher();
         IStream<Object> stream = Streams.<Object>stream()
                 .on(Schedulers.sync())
                 .subscribe((strm, event) -> result.set(event))
@@ -61,7 +61,7 @@ public class StreamsTest {
         AtomicInteger result = new AtomicInteger(0);
         ISubscriber<Integer> subscriber = (stream, integer) -> result.set(integer);
 
-        IPublish<Integer> publisher = Publishers.publisher();
+        IPublisher<Integer> publisher = Publishers.publisher();
         IStream<Integer> stream = Streams.<Integer>stream().on(Schedulers.sync()).publishWith(publisher);
         assertThat(stream.getState()).isEqualTo(State.IDLE);
         assertThat(stream.isIdle()).isTrue();
@@ -80,7 +80,7 @@ public class StreamsTest {
 
     @Test
     public void testStreamPublish3() throws Exception {
-        IPublish<Integer> publisher = Publishers.publisher();
+        IPublisher<Integer> publisher = Publishers.publisher();
         IStream<Integer> stream = Streams.<Integer>stream()
                 .on(Schedulers.sync())
                 .subscribe(mIntSubscriber)
@@ -99,7 +99,7 @@ public class StreamsTest {
 
     @Test
     public void testStreamPause() throws Exception {
-        IPublish<Integer> publisher = Publishers.publisher();
+        IPublisher<Integer> publisher = Publishers.publisher();
         IStream<Integer> stream = Streams.<Integer>stream()
                 .on(Schedulers.sync())
                 .subscribe(mIntSubscriber)
@@ -153,7 +153,7 @@ public class StreamsTest {
 
     @Test
     public void testStreamIdle() throws Exception {
-        IPublish<Integer> publisher = Publishers.publisher();
+        IPublisher<Integer> publisher = Publishers.publisher();
         IStream<Integer> stream = Streams.<Integer>stream().on(Schedulers.sync()).publishWith(publisher);
 
         assertThat(stream.getState()).isEqualTo(State.IDLE);
@@ -187,7 +187,7 @@ public class StreamsTest {
         CountDownLatch closetLatch = new CountDownLatch(1);
         AtomicInteger result = new AtomicInteger(0);
 
-        IPublish<Integer> publisher = Publishers.publisher();
+        IPublisher<Integer> publisher = Publishers.publisher();
         IStream<Integer> stream = Streams.<Integer>stream().on(Schedulers.io()).publishWith(publisher);
 
         _SubAdapter<Integer> subscriber = new _SubAdapter<Integer>() {
@@ -231,7 +231,7 @@ public class StreamsTest {
                 .<Integer>stream()
                 .on(Schedulers.sync());
 
-        IPublish<Integer> publisher = new BasePublisherWithSubscriberAttached<Integer>() {
+        IPublisher<Integer> publisher = new BasePublisherWithSubscriberAttached<Integer>() {
             @Override
             public void onSubscriberAttached(@NonNull IStream<? super Integer> s, @NonNull ISubscriber<? super Integer> subscriber) {
                 assertThat(s).isSameAs(stream);

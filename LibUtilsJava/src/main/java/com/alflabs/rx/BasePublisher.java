@@ -9,8 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A default publisher that just sends events into its stream.
+ * <p/>
+ * This is a perfect base class for custom publishers/generators.
  */
-class BasePublisher<E> implements IPublish<E>, IAttached<E> {
+public class BasePublisher<E> implements IPublisher<E>, IAttached<E> {
 
     private final Map<IStream<? super E>, Boolean> mStreams = new ConcurrentHashMap<>(1, 0.75f, 1);    // thread-safe
 
@@ -19,7 +21,7 @@ class BasePublisher<E> implements IPublish<E>, IAttached<E> {
     }
 
     @NonNull
-    public IPublish<E> publish(@Null E event) {
+    public IPublisher<E> publish(@Null E event) {
         for (IStream<? super E> stream : mStreams.keySet()) {
             stream._publishOnStream(event);
         }

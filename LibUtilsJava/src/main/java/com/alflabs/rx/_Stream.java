@@ -14,7 +14,7 @@ class _Stream<Event> implements IStream<Event> {
     private volatile boolean mPaused;
 
     private final LinkedList<Event> mEvents = new LinkedList<>();
-    private final Map<IPublisher, IScheduler> mPublishers = new ConcurrentHashMap<>(1, 0.75f, 1);      // thread-safe
+    private final Map<IGenerator, IScheduler> mPublishers = new ConcurrentHashMap<>(1, 0.75f, 1);      // thread-safe
     private final Map<ISubscriber, IScheduler> mSubscribers = new ConcurrentHashMap<>(1, 0.75f, 1);    // thread-safe
     private final Map<IProcessor, IScheduler> mProcessors = new ConcurrentHashMap<>(1, 0.75f, 1);      // thread-safe
     private IScheduler mScheduler;
@@ -43,7 +43,7 @@ class _Stream<Event> implements IStream<Event> {
 
     @NonNull
     @Override
-    public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher, @NonNull IScheduler scheduler) {
+    public IStream<Event> publishWith(@NonNull IGenerator<? extends Event> publisher, @NonNull IScheduler scheduler) {
         if (!mPublishers.containsKey(publisher)) {
             mPublishers.put(publisher, scheduler);
 
@@ -57,7 +57,7 @@ class _Stream<Event> implements IStream<Event> {
 
     @NonNull
     @Override
-    public IStream<Event> publishWith(@NonNull IPublisher<? extends Event> publisher) {
+    public IStream<Event> publishWith(@NonNull IGenerator<? extends Event> publisher) {
         return publishWith(publisher, mScheduler);
     }
 
@@ -126,7 +126,7 @@ class _Stream<Event> implements IStream<Event> {
 
     @NonNull
     @Override
-    public IStream<Event> remove(@NonNull IPublisher<? extends Event> publisher) {
+    public IStream<Event> remove(@NonNull IGenerator<? extends Event> publisher) {
         IScheduler scheduler = mPublishers.get(publisher);
         if (scheduler != null) {
 

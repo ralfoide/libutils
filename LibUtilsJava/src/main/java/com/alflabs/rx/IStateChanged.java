@@ -3,7 +3,7 @@ package com.alflabs.rx;
 import com.alflabs.annotations.NonNull;
 
 /**
- * Optional decorator interface for {@link ISubscriber}, {@link IPublisher}, and {@link IProcessor}
+ * Optional decorator interface for {@link ISubscriber}, {@link IGenerator}, and {@link IProcessor}
  * indicating the object wants to be notified when the stream's {@link State} changes.
  */
 public interface IStateChanged<Event> {

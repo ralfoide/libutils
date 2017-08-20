@@ -1,10 +1,6 @@
 package com.alflabs.rx;
 
-import com.alflabs.annotations.NonNull;
-
 /**
- * A publisher with a {@link #publish(Event)} method.
- * <p/>
  * A publisher and a generator both publish events to a stream.
  * The semantical difference is that a publisher allows its callers to publish on the stream
  * whereas a generator does the publishing and doesn't allow callers to do the publishing directly.
@@ -19,13 +15,5 @@ import com.alflabs.annotations.NonNull;
  * - if the publisher implements {@link IAttached<Event>}, it will be notified when attached to the stream. <br/>
  * - if the publisher implements {@link ISubscriberAttached<Event>}, it will be notified when a subscriber is attached to the stream. <br/>
  */
-public interface IPublisher<Event> extends IGenerator<Event> {
-    /**
-     * Publishes a new event to the stream.
-     * <p/>
-     * Unless a specific stream implementation provides constraints, the publish method should be
-     * treated as thread-safe and asynchronous.
-     */
-    @NonNull
-    IPublisher<Event> publish(Event event);
+public interface IGenerator<Event> {
 }

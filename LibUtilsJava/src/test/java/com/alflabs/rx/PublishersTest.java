@@ -142,7 +142,7 @@ public class PublishersTest {
     public void testPublishLatest() throws Exception {
         ArrayList<Integer> result = new ArrayList<>();
 
-        IPublish<Integer> publisher = Publishers.latest();
+        IPublisher<Integer> publisher = Publishers.latest();
         IStream<Integer> stream = Streams.<Integer>stream()
                 .on(Schedulers.sync())
                 .publishWith(publisher);
