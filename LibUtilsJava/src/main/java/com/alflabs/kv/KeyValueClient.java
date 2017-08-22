@@ -34,7 +34,6 @@ public class KeyValueClient implements IConnection, IKeyValue {
     private static final boolean DEBUG_VERBOSE = true;
 
     public interface IListener {
-
         void addBandwidthTXBytes(int count);
 
         void addBandwidthRXBytes(int count);
@@ -88,118 +87,144 @@ public class KeyValueClient implements IConnection, IKeyValue {
             }
         };
 
-        mSocketThread = new Thread(() -> {
-            while (mIsRunning) {
-                updateCnxMessage("Opening connection...");
+        mSocketThread = new Thread(() -> serverOnThread(address), TAG + "-Thread");
+    }
 
-                Socket socket = null;
-                for (int i = 0; socket == null && mIsRunning && i < 10; i++) {
-                    if (DEBUG) mLogger.d(TAG, "[" + i + "] Trying to connect to " + address);
-                    socket = new Socket();
-                    try {
-                        socket.connect(address, 1000 /*ms*/);
-                    } catch (IOException e) {
-                        socket = null;
-                        if (DEBUG) mLogger.d(TAG, "[" + i + "] Connect failed: " + e.toString());
-                        String a = address.toString();
-                        if (address instanceof InetSocketAddress) {
-                            a = ((InetSocketAddress) address).getAddress().getHostAddress();
-                        }
-                        String d = "";
-                        switch (i % 3) {
-                            case 2: d += ".";
-                            case 1: d += ".";
-                            case 0: d += ".";
-                        }
-                        updateCnxMessage("Trying to connect to " + a + " " + d);
-                    }
-                }
+    private void serverOnThread(@NonNull SocketAddress address) {
+        while (mIsRunning) {
+            updateCnxMessage("Opening connection...");
 
-                if (mStartSyncSuccess != null) {
-                    mStartSyncSuccess.set(socket != null);
-                }
+            Socket socket = createSocket(address);
 
-                if (socket == null) {
-                    mLogger.d(TAG, "Socket null [wait before retrying]");
-                    if (mStartSyncLatch != null) {
-                        mStartSyncLatch.countDown();
-                        return;
-                    }
-
-                    try {
-                        Thread.sleep(1000 /*ms*/);
-                    } catch (InterruptedException e) {
-                        // This should happen when stop() is called.
-                        mLogger.d(TAG, "Socket sleep interrupted: " + e);
-                    }
-
-                } else {
-                    mLogger.d(TAG, "Socket opened [Start read/write threads]");
-                    if (mStartSyncLatch != null) {
-                        mStartSyncLatch.countDown();
-                    }
-
-                    setSocketParams(socket);
-                    Thread reader = readSocket(socket);
-                    Thread writer = writeSocket(socket);
-
-                    try {
-                        updateCnxMessage("Reading server information...");
-
-                        // Once we got connected, wait up to 60 seconds that the reader
-                        // can get and process the init state sent by the server.
-                        int version = 0;
-                        for (int i = 1; i <= 600; i++) {
-                            Thread.sleep(100 /*ms*/);
-                             version = mProtocol.getServerVersion();
-                            if (version != 0) {
-                                mLogger.d(TAG, "Got server version in " + i*100 + " ms");
-                                break;
-                            }
-                        }
-                        mLogger.d(TAG, "Got server version: " + version);
-                        updateCnxMessage("Connected to server v" + version);
-
-                        // heart beat
-                        while (mIsRunning && socket.isConnected() && !socket.isClosed()) {
-                            Thread.sleep(1000 /*ms*/);
-                            sendClientHeartBeat();
-                        }
-
-                        // Just wait for the reader/writer threads to do their work.
-                        reader.join();
-                        writer.join();
-
-                    } catch (InterruptedException e) {
-                        // This should happen when stop() is called.
-                        mLogger.d(TAG, "Read/write thread interrupted: " + e);
-
-                        if (!mIsRunning && socket.isConnected()) {
-                            // This thread got interrupt because we must quit this connection.
-                            // Notify the server we're closing this throttle cleanly.
-                            mSender.sendCnxQuit();
-                            try {
-                                writer.join(250 /*ms*/);
-                            } catch (InterruptedException e1) {
-                                // we'll close everything below.
-                            }
-                        }
-                    } finally {
-                        try {
-                            socket.close();
-                        } catch (IOException e) {
-                            mLogger.d(TAG, "Socket close exception: " + e);
-                        }
-                        reader.interrupt();
-                        writer.interrupt();
-                    }
-
-                    mLogger.d(TAG, "Socket lost: | isRunning=" + mIsRunning);
-                }
+            if (mStartSyncSuccess != null) {
+                mStartSyncSuccess.set(socket != null);
             }
 
-            if (DEBUG) mLogger.d(TAG, "end of SocketThread.");
-        }, TAG + "-Thread");
+            if (socket == null) {
+                mLogger.d(TAG, "Socket null [wait before retrying]");
+                if (mStartSyncLatch != null) {
+                    mStartSyncLatch.countDown();
+                    return;
+                }
+
+                try {
+                    Thread.sleep(1000 /*ms*/);
+                } catch (InterruptedException e) {
+                    // This should happen when stop() is called.
+                    mLogger.d(TAG, "Socket sleep interrupted: " + e);
+                }
+
+            } else {
+                socketConnected(socket);
+            }
+        }
+
+        if (DEBUG) {
+            mLogger.d(TAG, "end of SocketThread.");
+        }
+    }
+
+    private void socketConnected(Socket socket) {
+        mLogger.d(TAG, "Socket opened [Start read/write threads]");
+        if (mStartSyncLatch != null) {
+            mStartSyncLatch.countDown();
+        }
+
+        setSocketParams(socket);
+        Thread reader = readSocket(socket);
+        Thread writer = writeSocket(socket);
+
+        try {
+            initConnection(socket);
+
+            // Just wait for the reader/writer threads to do their work.
+            reader.join();
+            writer.join();
+
+        } catch (InterruptedException e) {
+            // This should happen when stop() is called.
+            mLogger.d(TAG, "Read/write thread interrupted: " + e);
+
+            handleQuit(socket, writer);
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                mLogger.d(TAG, "Socket close exception: " + e);
+            }
+            reader.interrupt();
+            writer.interrupt();
+        }
+
+        mLogger.d(TAG, "Socket lost: | isRunning=" + mIsRunning);
+    }
+
+    @Null
+    private Socket createSocket(@NonNull SocketAddress address) {
+        Socket socket = null;
+        for (int i = 0; socket == null && mIsRunning && i < 10; i++) {
+            if (DEBUG) {
+                mLogger.d(TAG, "[" + i + "] Trying to connect to " + address);
+            }
+            socket = new Socket();
+            try {
+                socket.connect(address, 1000 /*ms*/);
+            } catch (IOException e) {
+                socket = null;
+                if (DEBUG) {
+                    mLogger.d(TAG, "[" + i + "] Connect failed: " + e.toString());
+                }
+                String a = address.toString();
+                if (address instanceof InetSocketAddress) {
+                    a = ((InetSocketAddress) address).getAddress().getHostAddress();
+                }
+                String d = "";
+                switch (i % 3) {
+                    case 2: d += ".";
+                    case 1: d += ".";
+                    case 0: d += ".";
+                }
+                updateCnxMessage("Trying to connect to " + a + " " + d);
+            }
+        }
+        return socket;
+    }
+
+    private void initConnection(Socket socket) throws InterruptedException {
+        updateCnxMessage("Reading server information...");
+
+        // Once we got connected, wait up to 60 seconds that the reader
+        // can get and process the init state sent by the server.
+        int version = 0;
+        for (int i = 1; i <= 600; i++) {
+            Thread.sleep(100 /*ms*/);
+            version = mProtocol.getServerVersion();
+            if (version != 0) {
+                mLogger.d(TAG, "Got server version in " + i*100 + " ms");
+                break;
+            }
+        }
+        mLogger.d(TAG, "Got server version: " + version);
+        updateCnxMessage("Connected to server v" + version);
+
+        // heart beat
+        while (mIsRunning && socket.isConnected() && !socket.isClosed()) {
+            Thread.sleep(1000 /*ms*/);
+            sendClientHeartBeat();
+        }
+    }
+
+    private void handleQuit(Socket socket, Thread writer) {
+        if (!mIsRunning && socket.isConnected()) {
+            // This thread got interrupt because we must quit this connection.
+            // Notify the server we're closing this throttle cleanly.
+            mSender.sendCnxQuit();
+            try {
+                writer.join(250 /*ms*/);
+            } catch (InterruptedException e1) {
+                // we'll close everything below.
+            }
+        }
     }
 
     @Override
@@ -241,7 +266,9 @@ public class KeyValueClient implements IConnection, IKeyValue {
      * The client thread will keep trying to connect as long as possible.
      */
     public void startAsync() {
-        if (DEBUG) mLogger.d(TAG, "start | isRunning=" + mIsRunning);
+        if (DEBUG) {
+            mLogger.d(TAG, "start | isRunning=" + mIsRunning);
+        }
         if (!mIsRunning) {
             mIsRunning = true;
             mSocketThread.start();
@@ -265,7 +292,9 @@ public class KeyValueClient implements IConnection, IKeyValue {
     }
 
     public void stopAsync() {
-        if (DEBUG) mLogger.d(TAG, "stop -| isRunning=" + mIsRunning);
+        if (DEBUG) {
+            mLogger.d(TAG, "stop -| isRunning=" + mIsRunning);
+        }
         if (mIsRunning) {
             mIsRunning = false;
 
@@ -303,28 +332,42 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     private Thread writeSocket(@NonNull final Socket socket) {
         Thread t = new Thread(() -> {
-            if (DEBUG) mLogger.d(TAG, "start of writeSocket thread.");
-            try {
-                PrintWriter out = new PrintWriter(socket.getOutputStream());
-                while (socket.isConnected() &&
-                        !socket.isOutputShutdown() &&
-                        mIsRunning &&
-                        !Thread.interrupted()) {
-                    String line = getNextWriterLine();
-                    if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE << " + line.trim());
-                    out.println(line);
-                    out.flush();
-                    mListener.addBandwidthTXBytes(line.length() + 1);
-                }
-            } catch (IOException e) {
-                if (DEBUG) mLogger.d(TAG, "WRITE failed: " + e);
-            } catch (InterruptedException e) {
-                if (DEBUG) mLogger.d(TAG, "getNextWriterLine interrupted: " + e);
+            if (DEBUG) {
+                mLogger.d(TAG, "start of writeSocket thread.");
             }
-            if (DEBUG) mLogger.d(TAG, "end of writeSocket thread.");
+            try {
+                writeLoop(socket);
+            } catch (IOException e) {
+                if (DEBUG) {
+                    mLogger.d(TAG, "WRITE failed: " + e);
+                }
+            } catch (InterruptedException e) {
+                if (DEBUG) {
+                    mLogger.d(TAG, "getNextWriterLine interrupted: " + e);
+                }
+            }
+            if (DEBUG) {
+                mLogger.d(TAG, "end of writeSocket thread.");
+            }
         }, TAG + "-Writer");
         t.start();
         return t;
+    }
+
+    private void writeLoop(@NonNull Socket socket) throws IOException, InterruptedException {
+        PrintWriter out = new PrintWriter(socket.getOutputStream());
+        while (socket.isConnected() &&
+                !socket.isOutputShutdown() &&
+                mIsRunning &&
+                !Thread.interrupted()) {
+            String line = getNextWriterLine();
+            if (DEBUG_VERBOSE) {
+                mLogger.d(TAG, "WRITE << " + line.trim());
+            }
+            out.println(line);
+            out.flush();
+            mListener.addBandwidthTXBytes(line.length() + 1);
+        }
     }
 
     /**
@@ -339,33 +382,48 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     private Thread readSocket(@NonNull final Socket socket) {
         Thread t = new Thread(() -> {
-            if (DEBUG) mLogger.d(TAG, "start of readSocket thread.");
-            // We've set SO_TIMEOUT to zero meaning reads will block forever.
-            try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                while (socket.isConnected() &&
-                        !socket.isInputShutdown() &&
-                        mIsRunning &&
-                        !Thread.interrupted()) {
-                    try {
-                        String line = in.readLine();
-                        if (line != null) {  // null when readLine is interrupted
-                            mListener.addBandwidthRXBytes(line.length() + 1);
-                            if (DEBUG_VERBOSE) mLogger.d(TAG, "READ >> " + line.trim());
-                            mProtocol.processLine(mSender, line);
-                        }
-                    } catch (SocketTimeoutException expected) {
-                        // We're blocking on input, this should never happen
-                        if (DEBUG_VERBOSE) mLogger.d(TAG, "READ expected: " + expected);
-                    }
-                }
-            } catch (IOException e) {
-                if (DEBUG) mLogger.d(TAG, "READ failed: " + e);
+            if (DEBUG) {
+                mLogger.d(TAG, "start of readSocket thread.");
             }
-            if (DEBUG) mLogger.d(TAG, "end of readSocket thread.");
+            try {
+                // We've set SO_TIMEOUT to zero meaning reads will block forever.
+                readLoop(socket);
+            } catch (IOException e) {
+                if (DEBUG) {
+                    mLogger.d(TAG, "READ failed: " + e);
+                }
+            }
+            if (DEBUG) {
+                mLogger.d(TAG, "end of readSocket thread.");
+            }
         }, TAG + "-Reader");
         t.start();
         return t;
+    }
+
+    private void readLoop(@NonNull Socket socket) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        while (socket.isConnected() &&
+                !socket.isInputShutdown() &&
+                mIsRunning &&
+                !Thread.interrupted()) {
+            try {
+                // We've set SO_TIMEOUT to zero meaning reads will block forever.
+                String line = in.readLine();
+                if (line != null) {  // null when readLine is interrupted
+                    mListener.addBandwidthRXBytes(line.length() + 1);
+                    if (DEBUG_VERBOSE) {
+                        mLogger.d(TAG, "READ >> " + line.trim());
+                    }
+                    mProtocol.processLine(mSender, line);
+                }
+            } catch (SocketTimeoutException expected) {
+                // We're blocking on input, this should never happen
+                if (DEBUG_VERBOSE) {
+                    mLogger.d(TAG, "READ expected: " + expected);
+                }
+            }
+        }
     }
 
     private void updateCnxMessage(@Null String msg) {
@@ -375,7 +433,9 @@ public class KeyValueClient implements IConnection, IKeyValue {
     private void sendClientHeartBeat() {
         synchronized (mListener) {
             if (mHBValue > 0) {
-                if (DEBUG_VERBOSE) mLogger.d(TAG, "HB SEND value " + mHBValue);
+                if (DEBUG_VERBOSE) {
+                    mLogger.d(TAG, "HB SEND value " + mHBValue);
+                }
                 mSender.sendPing(Long.toString(mHBValue));
                 mListener.HBLatencyRequestSent();
                 mHBValue = -mHBValue; // make it negative while waiting for an answer
@@ -388,7 +448,9 @@ public class KeyValueClient implements IConnection, IKeyValue {
             if (mHBValue < 0) {
                 long value = -1 * mHBValue;
                 String expected = "PR" + value;
-                if (DEBUG_VERBOSE) mLogger.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
+                if (DEBUG_VERBOSE) {
+                    mLogger.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
+                }
                 if (expected.equals(line)) {
                     mListener.HBLatencyReplyReceived();
                     mHBValue = 1 + value;
