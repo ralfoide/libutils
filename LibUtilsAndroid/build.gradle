@@ -18,7 +18,7 @@
 
 apply plugin: "com.android.library"
 
-if (!gradle.gradleVersion.startsWith("4")) {
+if (gradle.gradleVersion < "4") {
     // jackOptions { enabled true } is not supported in library projects yet.
     // From http://stackoverflow.com/questions/3797512 :
     // Java8 not fully supported in library projects yet, https://code.google.com/p/android/issues/detail?id=211386
@@ -32,12 +32,7 @@ if (!gradle.gradleVersion.startsWith("4")) {
 
 android {
     compileSdkVersion 26
-
-    if (!gradle.gradleVersion.startsWith("4")) {
-        buildToolsVersion "25.0.2"
-    } else {
-        buildToolsVersion "26.0.0"
-    }
+    buildToolsVersion (gradle.gradleVersion < "4" ? "25.0.2" : "26.0.0")
 
     defaultConfig {
         minSdkVersion 9
