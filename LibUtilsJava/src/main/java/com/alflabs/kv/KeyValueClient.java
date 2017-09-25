@@ -318,6 +318,12 @@ public class KeyValueClient implements IConnection, IKeyValue {
         }
     }
 
+    public void join() throws InterruptedException {
+        if (mIsRunning) {
+            mSocketThread.join();
+        }
+    }
+
     private void setSocketParams(@NonNull Socket socket) {
         // Set initial parameters: Disable nagle algorithm,
         // enable keep alive and allow infinite read timeout.
