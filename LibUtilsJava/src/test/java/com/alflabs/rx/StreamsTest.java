@@ -184,7 +184,7 @@ public class StreamsTest {
     public void testStreamAsync() throws InterruptedException {
 
         CountDownLatch resultLatch = new CountDownLatch(1);
-        CountDownLatch closetLatch = new CountDownLatch(1);
+        CountDownLatch closeLatch = new CountDownLatch(1);
         AtomicInteger result = new AtomicInteger(0);
 
         IPublisher<Integer> publisher = Publishers.publisher();
@@ -200,7 +200,7 @@ public class StreamsTest {
             @Override
             public void onStateChanged(@NonNull IStream<? super Integer> stream, @NonNull State newState) {
                 if (newState == State.CLOSED) {
-                    closetLatch .countDown();
+                    closeLatch .countDown();
                 }
             }
         };
@@ -216,7 +216,7 @@ public class StreamsTest {
         assertThat(result.get()).isEqualTo(42);
 
         stream.close();
-        closetLatch.await(5, TimeUnit.SECONDS);
+        closeLatch.await(5, TimeUnit.SECONDS);
     }
 
     private abstract class BasePublisherWithSubscriberAttached<E>
