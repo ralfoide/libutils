@@ -4,11 +4,9 @@ import com.alflabs.annotations.LargeTest;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.utils.ILogger;
 import com.alflabs.utils.RPair;
-import com.google.common.truth.Truth;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +16,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -120,19 +119,19 @@ public class KeyValueServerTest {
             assertThat(_readAll(in)).isEqualTo("[]");
 
             assertThat(mServer.getValue("foo")).isNull();
-            Truth.assertThat(mLastChanged).isNull();
+            assertThat(mLastChanged).isNull();
 
             _sendLine(out, "  Wfoo:bar  ");
             assertThat(_readAll(in)).isEqualTo("[Wfoo:bar]");
 
             assertThat(mServer.getValue("foo")).isEqualTo("bar");
-            Truth.assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar"));
+            assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar"));
             mLastChanged = null;
 
             // Writing the same value does not trigger a change notification
             _sendLine(out, "  Wfoo:bar  ");
             assertThat(_readAll(in)).isEqualTo("[]");
-            Truth.assertThat(mLastChanged).isNull();
+            assertThat(mLastChanged).isNull();
 
             _sendLine(out, "R*");
             assertThat(_readAll(in)).isEqualTo("[Wfoo:bar]");
@@ -152,7 +151,7 @@ public class KeyValueServerTest {
             _sendLine(out, " W foo : bar : foo : bar  ");
             assertThat(_readAll(in)).isEqualTo("[Wfoo:bar : foo : bar]");
             assertThat(mServer.getValue("foo")).isEqualTo("bar : foo : bar");
-            Truth.assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar : foo : bar"));
+            assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar : foo : bar"));
 
             // send some ill-formatted lines
             _sendLine(out, "R");
@@ -180,6 +179,14 @@ public class KeyValueServerTest {
             assertThat(mServer.getNumConnections()).isEqualTo(0);
             assertThat(mOnConnectedCallCount.get()).isEqualTo(2);
 
+            assertThat(new TreeSet<>(mServer.getKeys()).toArray()).isEqualTo(new String[] {
+                    "foo", "key 1", "key 2"
+            });
+            assertThat(mServer.getValue("bar")).isNull();
+            assertThat(mServer.getValue("foo")).isEqualTo("bar : foo : bar");
+            assertThat(mServer.getValue("key 1")).isEqualTo("value 1");
+            assertThat(mServer.getValue("key 2")).isEqualTo("value 2");
+
         } finally {
             logD(TAG, "KeyValueServerTest_Protocol: finally socket stop");
             socket.close();
@@ -188,6 +195,7 @@ public class KeyValueServerTest {
         // although the canonical implementation of socket.close clearly sets the flag
         // to false. works as expected on emulator. Moving on.
         // assertThat(socket.isConnected()).isFalse();
+
     }
 
     private void _sendLine(@NonNull PrintWriter out, @NonNull String line) {

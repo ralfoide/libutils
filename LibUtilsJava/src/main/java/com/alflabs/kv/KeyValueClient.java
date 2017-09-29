@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -235,6 +236,13 @@ public class KeyValueClient implements IConnection, IKeyValue {
     @NonNull
     public IListener getListener() {
         return mListener;
+    }
+
+    /** Returns all the keys available. */
+    @Override
+    @NonNull
+    public Set<String> getKeys() {
+        return mProtocol.getKeys();
     }
 
     /** Returns the value for the given key or null if it doesn't exist. */

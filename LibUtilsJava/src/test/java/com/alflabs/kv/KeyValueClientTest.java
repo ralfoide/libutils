@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
@@ -141,5 +142,13 @@ public class KeyValueClientTest {
         Thread.sleep(100 /*ms*/);
         assertThat(mServer.isRunning()).isTrue();
         assertThat(mServer.getNumConnections()).isEqualTo(0);
+
+        assertThat(new TreeSet<>(mClient.getKeys()).toArray()).isEqualTo(new String[] {
+                "foo", "key 1", "key 2"
+        });
+        assertThat(mClient.getValue("bar")).isNull();
+        assertThat(mClient.getValue("foo")).isEqualTo("bar2");
+        assertThat(mClient.getValue("key 1")).isEqualTo("value 1");
+        assertThat(mClient.getValue("key 2")).isEqualTo("value 2");
     }
 }

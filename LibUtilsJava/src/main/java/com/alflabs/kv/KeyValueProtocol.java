@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -72,6 +73,12 @@ public class KeyValueProtocol {
         mOnChangeListener = listener;
     }
 
+    /** Returns all the keys available. */
+    @NonNull
+    public Set<String> getKeys() {
+        return Collections.unmodifiableSet(mValues.keySet());
+    }
+
     /** Returns the value for the given key or null if it doesn't exist. */
     @Null
     public String getValue(@NonNull String key) {
@@ -93,10 +100,6 @@ public class KeyValueProtocol {
                 return !value.equals(existing);
             }
         }
-    }
-
-    public Map<String, String> getAllValues() {
-        return mValues;
     }
 
     public int getServerVersion() {

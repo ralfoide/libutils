@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
@@ -157,6 +158,14 @@ public class KeyValueProtocolTest {
         assertThat(got_exception).isTrue();
         assertThat(_readAll()).isEqualTo("[]");
         assertThat(mCounts.toString()).isEqualTo("{Ping=2, Quit=1, Read=5, Write=5}");
+
+        assertThat(new TreeSet<>(mProtocol.getKeys()).toArray()).isEqualTo(new String[] {
+                "foo", "key 1", "key 2"
+        });
+        assertThat(mProtocol.getValue("bar")).isNull();
+        assertThat(mProtocol.getValue("foo")).isEqualTo("bar : foo : bar");
+        assertThat(mProtocol.getValue("key 1")).isEqualTo("value 1");
+        assertThat(mProtocol.getValue("key 2")).isEqualTo("value 2");
     }
 
     /** Read all it can from out till it blocks. */
