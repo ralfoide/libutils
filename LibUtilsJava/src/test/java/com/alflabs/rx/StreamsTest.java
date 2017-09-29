@@ -209,14 +209,14 @@ public class StreamsTest {
         publisher.publish(42);
 
         // Note: calling stream.close() here might close the stream BEFORE the async publish has a chance to
-        // run, in which case it would get cancel since a closed stream does not publish events.
+        // run, in which case it would get cancelled since a closed stream does not publish events.
         // Stream state changes are instant and do not run on the publisher's scheduler thread.
 
-        resultLatch.await(5, TimeUnit.SECONDS);
+        assertThat(resultLatch.await(5, TimeUnit.SECONDS)).named("resultLatch await").isTrue();
         assertThat(result.get()).isEqualTo(42);
 
         stream.close();
-        closeLatch.await(5, TimeUnit.SECONDS);
+        assertThat(closeLatch.await(5, TimeUnit.SECONDS)).named("closeLatch await").isTrue();
     }
 
     private abstract class BasePublisherWithSubscriberAttached<E>
