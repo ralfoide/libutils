@@ -47,15 +47,15 @@ public class KeyValueServer implements IKeyValue {
     private final RSparseArray<Sender> mSenders = new RSparseArray<>();
     private final KeyValueProtocol mProtocol;
     private final ExecutorService mThreadPool = Executors.newCachedThreadPool();
-    private KeyValueProtocol.OnChangeListener mOnChangeListener;
+    private KeyValueProtocol.OnChangeListener mOnWriteChangeListener;
     private Runnable mOnClientConnectedRunnable;
 
     public KeyValueServer(@NonNull ILogger logger) {
         mLogger = logger;
         mProtocol = new KeyValueProtocol(logger);
-        mProtocol.setOnChangeListener((key, value) -> {
+        mProtocol.setOnWriteChangeListener((key, value) -> {
             broadcastChangeViaAllSenders(key, value);
-            KeyValueProtocol.OnChangeListener l = mOnChangeListener;
+            KeyValueProtocol.OnChangeListener l = mOnWriteChangeListener;
             if (l != null) {
                 try {
                     l.onValueChanged(key, value);
@@ -80,8 +80,8 @@ public class KeyValueServer implements IKeyValue {
     }
 
     @Override
-    public void setOnChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
-        mOnChangeListener = listener;
+    public void setOnWriteChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
+        mOnWriteChangeListener = listener;
     }
 
     /** Returns all the keys available. */

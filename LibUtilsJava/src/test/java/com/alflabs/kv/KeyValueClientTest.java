@@ -36,7 +36,7 @@ public class KeyValueClientTest {
         mServerChanges.clear();
         mClient = null;
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.setOnChangeListener((key, value) -> mServerChanges.add(key + "=" + value));
+        mServer.setOnWriteChangeListener((key, value) -> mServerChanges.add(key + "=" + value));
     }
 
     @After
@@ -105,7 +105,7 @@ public class KeyValueClientTest {
 
             }
         });
-        mClient.setOnChangeListener((key, value) -> mClientChanges.add(key + "=" + value));
+        mClient.setOnWriteChangeListener((key, value) -> mClientChanges.add(key + "=" + value));
         mClient.startAsync();
 
         Thread.sleep(100 /*ms*/);

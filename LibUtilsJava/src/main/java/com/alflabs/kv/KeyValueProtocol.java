@@ -16,7 +16,7 @@ import java.util.TreeMap;
  * <pre>
  * All communication should be UTF-8.
  * Server > Client.
- * The server holds key-value pairs. Client can request values and notifies of updates.
+ * The server holds key-value pairs. Clients can request values and be notified of updates.
  * Names and values are simple strings.
  * Names cannot contain the colon (:) character.
  * Values end with any EOL.
@@ -25,8 +25,8 @@ import java.util.TreeMap;
  * </pre><pre>
  * - Server init: "ModelServer:version" with version int >= 1.
  * - Server writes value: "Wname:value".
- * - Client reads all values: "R*" ==> server replies with all known values, one per line.
- * - Client reads value: "Rname" ==> server replies with single value.
+ * - Client reads all values: "R*" ==> server replies with "Wname:value" for all known values, one per line.
+ * - Client reads value: "Rname" ==> server replies with "Wname:value" for a single value.
  * - Client writes value: "Wname:value".
  * - Client ping for keep-alives: "PSstring" (ping send) ==> server replies with PR (ping reply) + rest of the line.
  * - Client close: "Q" ==> server closes this client connection.
@@ -35,11 +35,32 @@ import java.util.TreeMap;
  * It provides the logic to decode command lines received from the network. <br/>
  * The {@link Sender} provides the logic to encode command lines to be sent on the network.
  * Neither the {@link KeyValueProtocol} nor {@link Sender} do any network operations, this is
- * left to the actual client and server implementations. <br/>
+ * left to the actual client and server implementations.
+ * <p/>
  * Since the protocol is symetrical, both the clients and the server use the same protocol encoding
- * and decoding on both sides to communicate. <br/>
- * When the protocol receives a write command, it stores the new value in its key-value map
- * and notifies the {@link OnChangeListener} if the value has changed.
+ * and decoding on both sides to communicate. The notion of "read" and "write" in the protocol description
+ * above is from the <em>sender</em>'s point of view, which can be either a client or the server: when the
+ * program using the library "puts" a new value, it gets "written" (sent) via the network connection:
+ * the server writes to the N clients it is connected to, whereas a client writes to the one server it is connected to.
+ * <p/>
+ * Write scenario: <br/>
+ * Client A calls {@link #putValue} on the KVClient.
+ * KVClient A sends a "Write" command to its server to update the server store.
+ * The server then sends a "Write" command to all its connected clients to notify them that the value has changed.
+ * This does include client A too, the server does not try to guess whether clients need the update or not.
+ * Clients can use {@link #setOnWriteChangeListener} to be notified when that value been updated, whether
+ * the value has actually changed or not.
+ * <p/>
+ * Read scenario: <br/>
+ * Client A calls {@link #getValue} on the KVClient. The client simply returns whatever is in the store's data map,
+ * which will be empty at first. This is by design -- {@link #getValue} is "cheap" and does not generate a network
+ * request, nor does it try to guess whether the value is up to date or even known.
+ * The {@link KeyValueClient} offers 2 different calls that have network impact: {@link KeyValueClient#requestKey}
+ * and {@link KeyValueClient#requestAllKeys}. These work asynchronously -- they trigger the server to send the data
+ * using a "Write" reply. The difference with the write/update scenario above is that the reply is sent just to that
+ * one client that issues the Read request, not to all connected clients.
+ * Clients can use {@link #setOnWriteChangeListener} to be notified when that reply comes in, whether
+ * the value has actually changed or not.
  */
 public class KeyValueProtocol {
     private static final String TAG = KeyValueProtocol.class.getSimpleName();
@@ -54,7 +75,7 @@ public class KeyValueProtocol {
      */
     private final Map<String, String> mValues = Collections.synchronizedMap(new TreeMap<String, String>());
     @NonNull private final ILogger mLogger;
-    @Null private OnChangeListener mOnChangeListener;
+    @Null private OnChangeListener mOnWriteChangeListener;
     private int mServerVersion = 0;
 
     /** Listener used to notify users when a key or value has changed. */
@@ -69,8 +90,8 @@ public class KeyValueProtocol {
     }
 
     /** Sets the unique {@link OnChangeListener}, notified when a write command changed a value. */
-    public void setOnChangeListener(@Null OnChangeListener listener) {
-        mOnChangeListener = listener;
+    public void setOnWriteChangeListener(@Null OnChangeListener writeListener) {
+        mOnWriteChangeListener = writeListener;
     }
 
     /** Returns all the keys available. */
@@ -222,7 +243,7 @@ public class KeyValueProtocol {
             }
         }
         if (changed) {
-            OnChangeListener l = mOnChangeListener;
+            OnChangeListener l = mOnWriteChangeListener;
             if (l != null) {
                 try {
                     l.onValueChanged(key, value);

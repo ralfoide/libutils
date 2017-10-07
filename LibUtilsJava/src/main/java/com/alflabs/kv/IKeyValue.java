@@ -5,8 +5,11 @@ import com.alflabs.annotations.Null;
 
 import java.util.Set;
 
+/**
+ * Interface to the key-value part of a {@link KeyValueClient} or {@link KeyValueServer}.
+ */
 public interface IKeyValue {
-    void setOnChangeListener(@Null KeyValueProtocol.OnChangeListener listener);
+    void setOnWriteChangeListener(@Null KeyValueProtocol.OnChangeListener listener);
 
     /** Returns all the keys available. */
     @NonNull

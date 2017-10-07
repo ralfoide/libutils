@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class KeyValueClient implements IConnection, IKeyValue {
     private static final String TAG = KeyValueClient.class.getSimpleName();
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final boolean DEBUG_VERBOSE = true;
 
     public interface IListener {
@@ -229,8 +229,8 @@ public class KeyValueClient implements IConnection, IKeyValue {
     }
 
     @Override
-    public void setOnChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
-        mProtocol.setOnChangeListener(listener);
+    public void setOnWriteChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
+        mProtocol.setOnWriteChangeListener(listener);
     }
 
     @NonNull
