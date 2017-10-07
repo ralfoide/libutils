@@ -65,7 +65,7 @@ public class KeyValueProtocolTest {
             }
         };
 
-        mProtocol.setOnWriteChangeListener((key, value) -> {
+        mProtocol.setOnUpdateListener((key, value) -> {
             mLastWriteChanged = RPair.create(key, value);
             if (value == null) value = "";
             mSender.sendValue(key, value);

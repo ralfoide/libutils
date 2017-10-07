@@ -39,7 +39,7 @@ public class KeyValueServerTest {
         mLastChanged = null;
         mOnConnectedCallCount.set(0);
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.setOnWriteChangeListener((key, value) -> mLastChanged = RPair.create(key, value));
+        mServer.setOnUpdateListener((key, value) -> mLastChanged = RPair.create(key, value));
         mServer.setOnClientConnected(() -> mOnConnectedCallCount.incrementAndGet());
     }
 

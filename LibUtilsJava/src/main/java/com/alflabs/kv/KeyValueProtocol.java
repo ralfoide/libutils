@@ -2,6 +2,10 @@ package com.alflabs.kv;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
+import com.alflabs.rx.IPublisher;
+import com.alflabs.rx.IStream;
+import com.alflabs.rx.Publishers;
+import com.alflabs.rx.Streams;
 import com.alflabs.utils.ILogger;
 
 import java.io.IOException;
@@ -48,8 +52,7 @@ import java.util.TreeMap;
  * KVClient A sends a "Write" command to its server to update the server store.
  * The server then sends a "Write" command to all its connected clients to notify them that the value has changed.
  * This does include client A too, the server does not try to guess whether clients need the update or not.
- * Clients can use {@link #setOnWriteChangeListener} to be notified when that value been updated, whether
- * the value has actually changed or not.
+ * Clients can subscribe to {@link #getChangedStream} to be notified when that value been updated (see below).
  * <p/>
  * Read scenario: <br/>
  * Client A calls {@link #getValue} on the KVClient. The client simply returns whatever is in the store's data map,
@@ -59,8 +62,13 @@ import java.util.TreeMap;
  * and {@link KeyValueClient#requestAllKeys}. These work asynchronously -- they trigger the server to send the data
  * using a "Write" reply. The difference with the write/update scenario above is that the reply is sent just to that
  * one client that issues the Read request, not to all connected clients.
- * Clients can use {@link #setOnWriteChangeListener} to be notified when that reply comes in, whether
- * the value has actually changed or not.
+ * Clients can subscribe to {@link #getChangedStream} to be notified when that reply comes in (see below).
+ * <p/>
+ * The {@link #getChangedStream} is used to notified client when a value been updated and <em>changed</em>
+ * in the internal data store -- changed means the value is either seen for the first time or different.
+ * The stream now only provides the key that has changed. It used to be a pair of (key, value) but that meant
+ * temporary objects were created even for clients who did not need that data. Most clients will filter on
+ * the key name and if relevant they can use the {@link #getValue(String)} method to retrieve the new value.
  */
 public class KeyValueProtocol {
     private static final String TAG = KeyValueProtocol.class.getSimpleName();
@@ -75,23 +83,25 @@ public class KeyValueProtocol {
      */
     private final Map<String, String> mValues = Collections.synchronizedMap(new TreeMap<String, String>());
     @NonNull private final ILogger mLogger;
-    @Null private OnChangeListener mOnWriteChangeListener;
     private int mServerVersion = 0;
 
-    /** Listener used to notify users when a key or value has changed. */
-    public interface OnChangeListener {
-        /** Notifies the listener that the value for the given key has changed. */
-        void onValueChanged(@NonNull String key, @Null String value);
-    }
+    private final IStream<String> mChangedStream = Streams.stream();
+    private final IPublisher<String> mChangedPublisher = Publishers.publisher();
 
     /** Creates a new {@link KeyValueProtocol} with the specified logger. */
     public KeyValueProtocol(@NonNull ILogger logger) {
         mLogger = logger;
+        mChangedStream.publishWith(mChangedPublisher);
     }
 
-    /** Sets the unique {@link OnChangeListener}, notified when a write command changed a value. */
-    public void setOnWriteChangeListener(@Null OnChangeListener writeListener) {
-        mOnWriteChangeListener = writeListener;
+    /**
+     *  Retrieves the stream notified when a write command updated a key and its value has changed.
+     *  The published string is the name of the key that changed. It is guaranteed to be non-null.
+     *  Clients can call {@link #getValue(String)} with that key if they are interested in the new value.
+     */
+    @NonNull
+    public IStream<String> getChangedStream() {
+        return mChangedStream;
     }
 
     /** Returns all the keys available. */
@@ -234,23 +244,13 @@ public class KeyValueProtocol {
         boolean changed;
         synchronized (mValues) {
             String existing = mValues.get(key);
-            if (existing == null) {
-                existing = "";
-            }
-            changed = !existing.equals(value);
+            changed = existing == null || !existing.equals(value);
             if (changed) {
                 mValues.put(key, value);
             }
         }
         if (changed) {
-            OnChangeListener l = mOnWriteChangeListener;
-            if (l != null) {
-                try {
-                    l.onValueChanged(key, value);
-                } catch (Throwable t) {
-                    if (DEBUG) mLogger.d(TAG, "OnChangeListener failed", t);
-                }
-            }
+            mChangedPublisher.publish(key);
         }
     }
 

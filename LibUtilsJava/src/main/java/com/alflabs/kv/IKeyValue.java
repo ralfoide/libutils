@@ -2,6 +2,7 @@ package com.alflabs.kv;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
+import com.alflabs.rx.IStream;
 
 import java.util.Set;
 
@@ -9,7 +10,13 @@ import java.util.Set;
  * Interface to the key-value part of a {@link KeyValueClient} or {@link KeyValueServer}.
  */
 public interface IKeyValue {
-    void setOnWriteChangeListener(@Null KeyValueProtocol.OnChangeListener listener);
+    /**
+     *  Retrieves the stream notified when a write command updated a key and its value has changed.
+     *  The published string is the name of the key that changed. It is guaranteed to be non-null.
+     *  Clients can call {@link #getValue(String)} with that key if they are interested in the new value.
+     */
+    @NonNull
+    IStream<String> getChangedStream();
 
     /** Returns all the keys available. */
     @NonNull

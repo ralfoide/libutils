@@ -36,7 +36,7 @@ public class KeyValueClientTest {
         mServerChanges.clear();
         mClient = null;
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.setOnWriteChangeListener((key, value) -> mServerChanges.add(key + "=" + value));
+        mServer.setOnUpdateListener((key, value) -> mServerChanges.add(key + "=" + value));
     }
 
     @After
@@ -79,7 +79,7 @@ public class KeyValueClientTest {
         mClient = new KeyValueClient(
                 mock(ILogger.class),
                 address,
-                new KeyValueClient.IListener() {
+                new KeyValueClient.IStatsListener() {
             @Override
             public void addBandwidthTXBytes(int count) {
 
@@ -105,7 +105,7 @@ public class KeyValueClientTest {
 
             }
         });
-        mClient.setOnWriteChangeListener((key, value) -> mClientChanges.add(key + "=" + value));
+        mClient.setOnUpdateListener((key, value) -> mClientChanges.add(key + "=" + value));
         mClient.startAsync();
 
         Thread.sleep(100 /*ms*/);

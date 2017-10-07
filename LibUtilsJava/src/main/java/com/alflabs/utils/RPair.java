@@ -5,7 +5,7 @@ public class RPair<A, B> {
     public final A first;
     public final B second;
 
-    private RPair(A a, B b) {
+    protected RPair(A a, B b) {
         first = a;
         second = b;
     }

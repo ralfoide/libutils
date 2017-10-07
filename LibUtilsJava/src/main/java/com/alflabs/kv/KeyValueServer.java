@@ -2,6 +2,8 @@ package com.alflabs.kv;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
+import com.alflabs.rx.IStream;
+import com.alflabs.rx.ISubscriber;
 import com.alflabs.utils.ILogger;
 import com.alflabs.utils.RSparseArray;
 
@@ -47,20 +49,16 @@ public class KeyValueServer implements IKeyValue {
     private final RSparseArray<Sender> mSenders = new RSparseArray<>();
     private final KeyValueProtocol mProtocol;
     private final ExecutorService mThreadPool = Executors.newCachedThreadPool();
-    private KeyValueProtocol.OnChangeListener mOnWriteChangeListener;
     private Runnable mOnClientConnectedRunnable;
 
     public KeyValueServer(@NonNull ILogger logger) {
         mLogger = logger;
         mProtocol = new KeyValueProtocol(logger);
-        mProtocol.setOnWriteChangeListener((key, value) -> {
+
+        mProtocol.getChangedStream().subscribe((stream, key) -> {
+            assert key != null;
+            String value = mProtocol.getValue(key);
             broadcastChangeViaAllSenders(key, value);
-            KeyValueProtocol.OnChangeListener l = mOnWriteChangeListener;
-            if (l != null) {
-                try {
-                    l.onValueChanged(key, value);
-                } catch (Exception ignore) {}
-            }
         });
     }
 
@@ -79,9 +77,9 @@ public class KeyValueServer implements IKeyValue {
         mOnClientConnectedRunnable = runnable;
     }
 
-    @Override
-    public void setOnWriteChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
-        mOnWriteChangeListener = listener;
+    @NonNull
+    public IStream<String> getChangedStream() {
+        return mProtocol.getChangedStream();
     }
 
     /** Returns all the keys available. */

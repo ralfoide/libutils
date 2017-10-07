@@ -2,6 +2,7 @@ package com.alflabs.kv;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
+import com.alflabs.rx.IStream;
 import com.alflabs.utils.ILogger;
 
 import java.io.BufferedReader;
@@ -34,7 +35,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
     private static final boolean DEBUG = true;
     private static final boolean DEBUG_VERBOSE = true;
 
-    public interface IListener {
+    public interface IStatsListener {
         void addBandwidthTXBytes(int count);
 
         void addBandwidthRXBytes(int count);
@@ -48,7 +49,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     @NonNull private final Thread mSocketThread;
     @NonNull private final ILogger mLogger;
-    @NonNull private final IListener mListener;
+    @NonNull private final IStatsListener mStatsListener;
     @NonNull private final KeyValueProtocol mProtocol;
     private volatile long mHBValue = 1;
     private volatile boolean mIsRunning;
@@ -76,9 +77,9 @@ public class KeyValueClient implements IConnection, IKeyValue {
     public KeyValueClient(
             @NonNull ILogger logger,
             @NonNull final SocketAddress address,
-            @NonNull IListener listener) {
+            @NonNull IStatsListener statsListener) {
         mLogger = logger;
-        mListener = listener;
+        mStatsListener = statsListener;
 
         mProtocol = new KeyValueProtocol(mLogger) {
             @Override
@@ -228,14 +229,14 @@ public class KeyValueClient implements IConnection, IKeyValue {
         }
     }
 
-    @Override
-    public void setOnWriteChangeListener(@Null KeyValueProtocol.OnChangeListener listener) {
-        mProtocol.setOnWriteChangeListener(listener);
+    @NonNull
+    public IStream<String> getChangedStream() {
+        return mProtocol.getChangedStream();
     }
 
     @NonNull
-    public IListener getListener() {
-        return mListener;
+    public IStatsListener getStatsListener() {
+        return mStatsListener;
     }
 
     /** Returns all the keys available. */
@@ -380,7 +381,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
             }
             out.println(line);
             out.flush();
-            mListener.addBandwidthTXBytes(line.length() + 1);
+            mStatsListener.addBandwidthTXBytes(line.length() + 1);
         }
     }
 
@@ -425,7 +426,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
                 // We've set SO_TIMEOUT to zero meaning reads will block forever.
                 String line = in.readLine();
                 if (line != null) {  // null when readLine is interrupted
-                    mListener.addBandwidthRXBytes(line.length() + 1);
+                    mStatsListener.addBandwidthRXBytes(line.length() + 1);
                     if (DEBUG_VERBOSE) {
                         mLogger.d(TAG, "READ >> " + line.trim());
                     }
@@ -441,24 +442,24 @@ public class KeyValueClient implements IConnection, IKeyValue {
     }
 
     private void updateCnxMessage(@Null String msg) {
-        mListener.setMessage(msg);
+        mStatsListener.setMessage(msg);
     }
 
     private void sendClientHeartBeat() {
-        synchronized (mListener) {
+        synchronized (mStatsListener) {
             if (mHBValue > 0) {
                 if (DEBUG_VERBOSE) {
                     mLogger.d(TAG, "HB SEND value " + mHBValue);
                 }
                 mSender.sendPing(Long.toString(mHBValue));
-                mListener.HBLatencyRequestSent();
+                mStatsListener.HBLatencyRequestSent();
                 mHBValue = -mHBValue; // make it negative while waiting for an answer
             }
         }
     }
 
     private void onReceiveClientHeartBeat(String line) {
-        synchronized (mListener) {
+        synchronized (mStatsListener) {
             if (mHBValue < 0) {
                 long value = -1 * mHBValue;
                 String expected = "PR" + value;
@@ -466,9 +467,9 @@ public class KeyValueClient implements IConnection, IKeyValue {
                     mLogger.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
                 }
                 if (expected.equals(line)) {
-                    mListener.HBLatencyReplyReceived();
+                    mStatsListener.HBLatencyReplyReceived();
                     mHBValue = 1 + value;
-                    mListener.setMessage(null);
+                    mStatsListener.setMessage(null);
                 }
             }
         }
