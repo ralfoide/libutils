@@ -3,7 +3,6 @@ package com.alflabs.kv;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.rx.IStream;
-import com.alflabs.rx.ISubscriber;
 import com.alflabs.utils.ILogger;
 import com.alflabs.utils.RSparseArray;
 

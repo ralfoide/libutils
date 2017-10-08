@@ -3,6 +3,7 @@ package com.alflabs.kv;
 import com.alflabs.annotations.LargeTest;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
+import com.alflabs.rx.Schedulers;
 import com.alflabs.utils.ILogger;
 import org.junit.After;
 import org.junit.Before;
@@ -36,7 +37,10 @@ public class KeyValueClientTest {
         mServerChanges.clear();
         mClient = null;
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.setOnUpdateListener((key, value) -> mServerChanges.add(key + "=" + value));
+        mServer.getChangedStream().subscribe((stream, key) -> {
+            assert key != null;
+            mServerChanges.add(key + "=" + mServer.getValue(key));
+        }, Schedulers.sync());
     }
 
     @After
@@ -105,7 +109,10 @@ public class KeyValueClientTest {
 
             }
         });
-        mClient.setOnUpdateListener((key, value) -> mClientChanges.add(key + "=" + value));
+        mClient.getChangedStream().subscribe((stream, key) -> {
+            assert key != null;
+            mClientChanges.add(key + "=" + mClient.getValue(key));
+        }, Schedulers.sync());
         mClient.startAsync();
 
         Thread.sleep(100 /*ms*/);

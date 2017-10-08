@@ -8,6 +8,7 @@ public class AndroidSchedulers {
 
     private static MainThreadHandler sHandler;
 
+    /** Scheduler that executes operations on the Android main thread. */
     public static IScheduler mainThread() {
         if (sHandler == null) {
             sHandler = new MainThreadHandler();

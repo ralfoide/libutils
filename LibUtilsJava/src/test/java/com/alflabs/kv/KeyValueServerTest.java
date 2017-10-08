@@ -2,6 +2,7 @@ package com.alflabs.kv;
 
 import com.alflabs.annotations.LargeTest;
 import com.alflabs.annotations.NonNull;
+import com.alflabs.rx.Schedulers;
 import com.alflabs.utils.ILogger;
 import com.alflabs.utils.RPair;
 import org.junit.After;
@@ -39,8 +40,11 @@ public class KeyValueServerTest {
         mLastChanged = null;
         mOnConnectedCallCount.set(0);
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.setOnUpdateListener((key, value) -> mLastChanged = RPair.create(key, value));
-        mServer.setOnClientConnected(() -> mOnConnectedCallCount.incrementAndGet());
+        mServer.getChangedStream().subscribe((stream, key) -> {
+            assert key != null;
+            mLastChanged = RPair.create(key, mServer.getValue(key));
+        }, Schedulers.sync());
+        mServer.setOnClientConnected(mOnConnectedCallCount::incrementAndGet);
     }
 
     @After

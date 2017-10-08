@@ -1,6 +1,7 @@
 package com.alflabs.kv;
 
 import com.alflabs.annotations.NonNull;
+import com.alflabs.rx.Schedulers;
 import com.alflabs.utils.ILogger;
 import com.alflabs.utils.RPair;
 import com.google.common.truth.Truth;
@@ -21,14 +22,14 @@ public class KeyValueProtocolTest {
     private static final String TAG = KeyValueProtocolTest.class.getSimpleName();
 
     private KeyValueProtocol mProtocol;
-    private RPair<String, String> mLastWriteChanged;
+    private RPair<String, String> mLastChanged;
     private KeyValueProtocol.Sender mSender;
     private final Map<String, Integer> mCounts = new TreeMap<>();
     private final List<String> mSent = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
-        mLastWriteChanged = null;
+        mLastChanged = null;
         mSent.clear();
         mCounts.clear();
         mCounts.put("Ping", 0);
@@ -65,11 +66,13 @@ public class KeyValueProtocolTest {
             }
         };
 
-        mProtocol.setOnUpdateListener((key, value) -> {
-            mLastWriteChanged = RPair.create(key, value);
+        mProtocol.getChangedStream().subscribe((stream, key) -> {
+            assert key != null;
+            String value = mProtocol.getValue(key);
+            mLastChanged = RPair.create(key, value);
             if (value == null) value = "";
             mSender.sendValue(key, value);
-        });
+        }, Schedulers.sync());
 
         mSender = new KeyValueProtocol.Sender() {
             @Override
@@ -88,20 +91,20 @@ public class KeyValueProtocolTest {
         assertThat(mCounts.toString()).isEqualTo("{Ping=0, Quit=0, Read=1, Write=0}");
 
         assertThat(mProtocol.getValue("foo")).isNull();
-        Truth.assertThat(mLastWriteChanged).isNull();
+        Truth.assertThat(mLastChanged).isNull();
 
         mProtocol.processLine(mSender, "  Wfoo:bar  ");
         assertThat(_readAll()).isEqualTo("[Wfoo:bar]");
         assertThat(mCounts.toString()).isEqualTo("{Ping=0, Quit=0, Read=1, Write=1}");
 
         assertThat(mProtocol.getValue("foo")).isEqualTo("bar");
-        Truth.assertThat(mLastWriteChanged).isEqualTo(RPair.create("foo", "bar"));
-        mLastWriteChanged = null;
+        Truth.assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar"));
+        mLastChanged = null;
 
         // Writing the same value does not trigger a change notification
         mProtocol.processLine(mSender, "  Wfoo:bar  ");
         assertThat(_readAll()).isEqualTo("[]");
-        Truth.assertThat(mLastWriteChanged).isNull();
+        Truth.assertThat(mLastChanged).isNull();
         assertThat(mCounts.toString()).isEqualTo("{Ping=0, Quit=0, Read=1, Write=2}");
 
         mProtocol.processLine(mSender, "R*");
@@ -129,7 +132,7 @@ public class KeyValueProtocolTest {
         mProtocol.processLine(mSender, " W foo : bar : foo : bar  ");
         assertThat(_readAll()).isEqualTo("[Wfoo:bar : foo : bar]");
         assertThat(mProtocol.getValue("foo")).isEqualTo("bar : foo : bar");
-        Truth.assertThat(mLastWriteChanged).isEqualTo(RPair.create("foo", "bar : foo : bar"));
+        Truth.assertThat(mLastChanged).isEqualTo(RPair.create("foo", "bar : foo : bar"));
         assertThat(mCounts.toString()).isEqualTo("{Ping=2, Quit=0, Read=3, Write=3}");
 
         // send some ill-formatted lines

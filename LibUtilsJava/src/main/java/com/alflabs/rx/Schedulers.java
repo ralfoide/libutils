@@ -6,6 +6,7 @@ public class Schedulers {
     private static _Sync sSync;
     private static _Worker sWorker;
 
+    /** Scheduler that makes direct immediate calls to execute operations. */
     @NonNull
     public static IScheduler sync() {
         if (sSync == null) {
@@ -14,6 +15,7 @@ public class Schedulers {
         return sSync;
     }
 
+    /** Scheduler that uses a pool of cached worker threads to execute operations. */
     @NonNull
     public static IScheduler io() {
         if (sWorker == null) {

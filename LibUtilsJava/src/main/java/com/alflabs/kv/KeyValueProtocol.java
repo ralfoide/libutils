@@ -5,6 +5,7 @@ import com.alflabs.annotations.Null;
 import com.alflabs.rx.IPublisher;
 import com.alflabs.rx.IStream;
 import com.alflabs.rx.Publishers;
+import com.alflabs.rx.Schedulers;
 import com.alflabs.rx.Streams;
 import com.alflabs.utils.ILogger;
 
@@ -91,7 +92,9 @@ public class KeyValueProtocol {
     /** Creates a new {@link KeyValueProtocol} with the specified logger. */
     public KeyValueProtocol(@NonNull ILogger logger) {
         mLogger = logger;
-        mChangedStream.publishWith(mChangedPublisher);
+        mChangedStream
+                .on(Schedulers.sync())
+                .publishWith(mChangedPublisher);
     }
 
     /**
@@ -250,7 +253,11 @@ public class KeyValueProtocol {
             }
         }
         if (changed) {
-            mChangedPublisher.publish(key);
+            try {
+                mChangedPublisher.publish(key);
+            } catch (Exception e) {
+                mLogger.d(TAG, "Exception during publish(" + key + "): " + e);
+            }
         }
     }
 

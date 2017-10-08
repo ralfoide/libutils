@@ -7,6 +7,7 @@ import com.alflabs.func.RConsumer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/** Scheduler that uses a pool of cached worker threads to execute operations. */
 class _Worker implements IScheduler {
     private static ExecutorService sWorkerPool = Executors.newCachedThreadPool();
 
