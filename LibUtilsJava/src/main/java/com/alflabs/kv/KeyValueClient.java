@@ -144,6 +144,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
         Thread writer = writeSocket(socket, readWriteLatch);
 
         try {
+            mHeartBeatTimestamp = 0;
             initConnection();
 
             // Just wait for the reader/writer threads to do their work.
@@ -357,24 +358,21 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     private Thread writeSocket(@NonNull Socket socket, @NonNull CountDownLatch readWriteLatch) {
         Thread t = new Thread(() -> {
-            if (DEBUG) {
-                mLogger.d(TAG, "start of writeSocket thread.");
-            }
+            if (DEBUG) mLogger.d(TAG, "start of writeSocket thread.");
             try {
                 writeLoop(socket);
             } catch (IOException e) {
-                if (DEBUG) {
-                    mLogger.d(TAG, "WRITE failed: " + e);
-                }
+                if (DEBUG) mLogger.d(TAG, "WRITE failed: " + e);
             } catch (InterruptedException e) {
-                if (DEBUG) {
-                    mLogger.d(TAG, "writeLoop interrupted: " + e);
-                }
+                if (DEBUG) mLogger.d(TAG, "writeLoop interrupted: " + e);
             }
-            if (DEBUG) {
-                mLogger.d(TAG, "end of writeSocket thread.");
+            try {
+                socket.close();
+            } catch (IOException e) {
+                if (DEBUG) mLogger.d(TAG, "writeSocket socket.close: " + e);
             }
             readWriteLatch.countDown();
+            if (DEBUG) mLogger.d(TAG, "end of writeSocket thread.");
         }, TAG + "-Writer");
         t.start();
         return t;
@@ -383,7 +381,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
     private void writeLoop(@NonNull Socket socket) throws IOException, InterruptedException {
         PrintWriter out = new PrintWriter(socket.getOutputStream());
         while (mIsRunning &&
-                !socket.isOutputShutdown() &&
+                !socket.isClosed() &&
                 !Thread.interrupted()) {
             String line = getNextWriterLine();
             if (line == null) {
@@ -412,21 +410,20 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     private Thread readSocket(@NonNull Socket socket, @NonNull CountDownLatch readWriteLatch) {
         Thread t = new Thread(() -> {
-            if (DEBUG) {
-                mLogger.d(TAG, "start of readSocket thread.");
-            }
+            if (DEBUG) mLogger.d(TAG, "start of readSocket thread.");
             try {
                 // We've set SO_TIMEOUT to zero meaning reads will block forever.
                 readLoop(socket);
             } catch (IOException e) {
-                if (DEBUG) {
-                    mLogger.d(TAG, "READ failed: " + e);
-                }
+                if (DEBUG) mLogger.d(TAG, "READ failed: " + e);
             }
-            if (DEBUG) {
-                mLogger.d(TAG, "end of readSocket thread.");
+            try {
+                socket.close();
+            } catch (IOException e) {
+                if (DEBUG) mLogger.d(TAG, "writeSocket socket.close: " + e);
             }
             readWriteLatch.countDown();
+            if (DEBUG) mLogger.d(TAG, "end of readSocket thread.");
         }, TAG + "-Reader");
         t.start();
         return t;
@@ -435,7 +432,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
     private void readLoop(@NonNull Socket socket) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         while (mIsRunning &&
-                !socket.isInputShutdown() &&
+                !socket.isClosed() &&
                 !Thread.interrupted()) {
             try {
                 // We've set SO_TIMEOUT to zero meaning reads will block forever.

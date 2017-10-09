@@ -155,7 +155,7 @@ public class KeyValueServer implements IKeyValue {
                 latch.countDown();
 
                 while (mIsRunning && !Thread.interrupted()) {
-                    if (DEBUG) mLogger.d(TAG, "socket-thread [accept] ");
+                    if (DEBUG) mLogger.d(TAG, "socket-thread [accept] (waiting)");
                     final Socket socket = mServerSocket.accept();
                     if (DEBUG) mLogger.d(TAG, "socket-thread [accept] " + socket);
                     mThreadPool.execute(() -> {
@@ -288,9 +288,10 @@ public class KeyValueServer implements IKeyValue {
 
             mThreadPool.execute(() -> {
                 if (DEBUG) mLogger.d(TAG, "Writer thread started");
-                while (socket.isConnected() && !socket.isClosed() && mIsRunning) {
+                while (mIsRunning && !socket.isClosed() && !Thread.interrupted()) {
                     try {
-                        String line = outCommands.takeFirst();
+                        // Loop trying to grab commands. Returns null when timeout expired.
+                        String line = outCommands.pollFirst(1, TimeUnit.SECONDS);
                         if (line != null) {
                             if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE >> " + line.trim());
                             out_.println(line);
@@ -305,8 +306,13 @@ public class KeyValueServer implements IKeyValue {
 
             sender.sendInit();
 
-            while (socket.isConnected() && mIsRunning && !Thread.interrupted()) {
+            while (mIsRunning && !socket.isClosed() && !Thread.interrupted()) {
                 String line = in.readLine();
+                if (line == null) {
+                    // BufferedReader.readLine returns null when the socket is dead.
+                    if (DEBUG) mLogger.d(TAG, "READ NULL");
+                    break;
+                }
                 try {
                     mProtocol.processLine(sender, line);
                 } catch (KeyValueProtocol.QCloseRequestException e) {
@@ -341,6 +347,7 @@ public class KeyValueServer implements IKeyValue {
                 socket.close();
             } catch (IOException ignore) {}
         }
+        if (DEBUG) mLogger.d(TAG, "processConnection ended for sender " + senderIndex);
     }
 
     private void broadcastChangeViaAllSenders(@NonNull String key, @Null String value) {
