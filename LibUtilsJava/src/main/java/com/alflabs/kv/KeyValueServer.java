@@ -36,8 +36,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class KeyValueServer implements IKeyValue {
     private static final String TAG = KeyValueServer.class.getSimpleName();
-    private static final boolean DEBUG = false;
-    private static final boolean DEBUG_VERBOSE = false;
+    private static final boolean DEBUG = true;
+    private static final boolean DEBUG_VERBOSE = true;
 
     @NonNull private final ILogger mLogger;
 
@@ -292,7 +292,7 @@ public class KeyValueServer implements IKeyValue {
                     try {
                         String line = outCommands.takeFirst();
                         if (line != null) {
-                            if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE << " + line.trim());
+                            if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE >> " + line.trim());
                             out_.println(line);
                             out_.flush();
                         }

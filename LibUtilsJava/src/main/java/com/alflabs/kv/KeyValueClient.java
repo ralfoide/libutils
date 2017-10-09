@@ -17,6 +17,7 @@ import java.net.SocketTimeoutException;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -133,21 +134,24 @@ public class KeyValueClient implements IConnection, IKeyValue {
         }
 
         setSocketParams(socket);
-        Thread reader = readSocket(socket);
-        Thread writer = writeSocket(socket);
+        CountDownLatch readWriteLatch = new CountDownLatch(1);
+        Thread reader = readSocket(socket, readWriteLatch);
+        Thread writer = writeSocket(socket, readWriteLatch);
 
         try {
-            initConnection(socket);
+            initConnection();
 
             // Just wait for the reader/writer threads to do their work.
-            reader.join();
-            writer.join();
+            // Send the heart beat as long as the reader/writer threads have not finished.
+            while (mIsRunning && !socket.isClosed() && !readWriteLatch.await(1, TimeUnit.SECONDS)) {
+                sendClientHeartBeat();
+            }
 
         } catch (InterruptedException e) {
             // This should happen when stop() is called.
             mLogger.d(TAG, "Read/write thread interrupted: " + e);
 
-            handleQuit(socket, writer);
+            handleQuit(writer);
         } finally {
             try {
                 socket.close();
@@ -192,7 +196,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
         return socket;
     }
 
-    private void initConnection(Socket socket) throws InterruptedException {
+    private void initConnection() throws InterruptedException {
         updateCnxMessage("Reading server information...");
 
         // Once we got connected, wait up to 60 seconds that the reader
@@ -208,16 +212,10 @@ public class KeyValueClient implements IConnection, IKeyValue {
         }
         mLogger.d(TAG, "Got server version: " + version);
         updateCnxMessage("Connected to server v" + version);
-
-        // heart beat
-        while (mIsRunning && socket.isConnected() && !socket.isClosed()) {
-            Thread.sleep(1000 /*ms*/);
-            sendClientHeartBeat();
-        }
     }
 
-    private void handleQuit(Socket socket, Thread writer) {
-        if (!mIsRunning && socket.isConnected()) {
+    private void handleQuit(Thread writer) {
+        if (!mIsRunning) {
             // This thread got interrupt because we must quit this connection.
             // Notify the server we're closing this throttle cleanly.
             mSender.sendCnxQuit();
@@ -345,7 +343,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
         }
     }
 
-    private Thread writeSocket(@NonNull final Socket socket) {
+    private Thread writeSocket(@NonNull Socket socket, @NonNull CountDownLatch readWriteLatch) {
         Thread t = new Thread(() -> {
             if (DEBUG) {
                 mLogger.d(TAG, "start of writeSocket thread.");
@@ -358,12 +356,13 @@ public class KeyValueClient implements IConnection, IKeyValue {
                 }
             } catch (InterruptedException e) {
                 if (DEBUG) {
-                    mLogger.d(TAG, "getNextWriterLine interrupted: " + e);
+                    mLogger.d(TAG, "writeLoop interrupted: " + e);
                 }
             }
             if (DEBUG) {
                 mLogger.d(TAG, "end of writeSocket thread.");
             }
+            readWriteLatch.countDown();
         }, TAG + "-Writer");
         t.start();
         return t;
@@ -371,14 +370,15 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     private void writeLoop(@NonNull Socket socket) throws IOException, InterruptedException {
         PrintWriter out = new PrintWriter(socket.getOutputStream());
-        while (socket.isConnected() &&
+        while (mIsRunning &&
                 !socket.isOutputShutdown() &&
-                mIsRunning &&
                 !Thread.interrupted()) {
             String line = getNextWriterLine();
-            if (DEBUG_VERBOSE) {
-                mLogger.d(TAG, "WRITE << " + line.trim());
+            if (line == null) {
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE NULL");
+                continue;
             }
+            if (DEBUG_VERBOSE) mLogger.d(TAG, "WRITE >> " + line.trim());
             out.println(line);
             out.flush();
             mStatsListener.addBandwidthTXBytes(line.length() + 1);
@@ -387,15 +387,18 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     /**
      * Returns the next line to write to the output stream/socket.
-     * This call will block till there's something to return or
-     * when the thread is interrupted.
+     * <p/>
+     * This call will partially block:
+     * - After a timeout, null is returned to indicate the timeout expired.
+     * - It can throw InterruptedException.
+     * - Otherwise it returns a non-null value immediately when available.
      */
-    @NonNull
-    protected String getNextWriterLine() throws InterruptedException {
-        return mOutCommands.takeFirst();
+    @Null
+    private String getNextWriterLine() throws InterruptedException {
+        return mOutCommands.pollFirst(1, TimeUnit.SECONDS);
     }
 
-    private Thread readSocket(@NonNull final Socket socket) {
+    private Thread readSocket(@NonNull Socket socket, @NonNull CountDownLatch readWriteLatch) {
         Thread t = new Thread(() -> {
             if (DEBUG) {
                 mLogger.d(TAG, "start of readSocket thread.");
@@ -411,6 +414,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
             if (DEBUG) {
                 mLogger.d(TAG, "end of readSocket thread.");
             }
+            readWriteLatch.countDown();
         }, TAG + "-Reader");
         t.start();
         return t;
@@ -418,25 +422,24 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
     private void readLoop(@NonNull Socket socket) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        while (socket.isConnected() &&
+        while (mIsRunning &&
                 !socket.isInputShutdown() &&
-                mIsRunning &&
                 !Thread.interrupted()) {
             try {
                 // We've set SO_TIMEOUT to zero meaning reads will block forever.
                 String line = in.readLine();
-                if (line != null) {  // null when readLine is interrupted
-                    mStatsListener.addBandwidthRXBytes(line.length() + 1);
-                    if (DEBUG_VERBOSE) {
-                        mLogger.d(TAG, "READ >> " + line.trim());
-                    }
-                    mProtocol.processLine(mSender, line);
+                if (line == null) {
+                    // readLine returns "null if the end of the stream has been reached"
+                    // or in this case when the connection is gone or it has been interrupted.
+                    if (DEBUG) mLogger.d(TAG, "readLoop end");
+                    return;
                 }
-            } catch (SocketTimeoutException expected) {
+                mStatsListener.addBandwidthRXBytes(line.length() + 1);
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "READ << " + line.trim());
+                mProtocol.processLine(mSender, line);
+            } catch (SocketTimeoutException e) {
                 // We're blocking on input, this should never happen
-                if (DEBUG_VERBOSE) {
-                    mLogger.d(TAG, "READ expected: " + expected);
-                }
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "READ SO Timeout Exception: " + e);
             }
         }
     }
@@ -448,9 +451,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
     private void sendClientHeartBeat() {
         synchronized (mStatsListener) {
             if (mHBValue > 0) {
-                if (DEBUG_VERBOSE) {
-                    mLogger.d(TAG, "HB SEND value " + mHBValue);
-                }
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "HB SEND value " + mHBValue);
                 mSender.sendPing(Long.toString(mHBValue));
                 mStatsListener.HBLatencyRequestSent();
                 mHBValue = -mHBValue; // make it negative while waiting for an answer
@@ -463,9 +464,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
             if (mHBValue < 0) {
                 long value = -1 * mHBValue;
                 String expected = "PR" + value;
-                if (DEBUG_VERBOSE) {
-                    mLogger.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
-                }
+                if (DEBUG_VERBOSE) mLogger.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
                 if (expected.equals(line)) {
                     mStatsListener.HBLatencyReplyReceived();
                     mHBValue = 1 + value;
