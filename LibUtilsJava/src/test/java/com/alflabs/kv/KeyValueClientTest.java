@@ -5,6 +5,7 @@ import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.rx.Schedulers;
 import com.alflabs.utils.ILogger;
+import com.alflabs.utils.JavaClock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,33 +82,24 @@ public class KeyValueClientTest {
         assertThat(address).isNotNull();
 
         mClient = new KeyValueClient(
+                new JavaClock(),
                 mock(ILogger.class),
                 address,
                 new KeyValueClient.IStatsListener() {
             @Override
-            public void addBandwidthTXBytes(int count) {
-
-            }
+            public void addBandwidthTXBytes(int count) {}
 
             @Override
-            public void addBandwidthRXBytes(int count) {
-
-            }
+            public void addBandwidthRXBytes(int count) {}
 
             @Override
-            public void setMessage(@Null String msg) {
-
-            }
+            public void setMessage(@Null String msg) {}
 
             @Override
-            public void HBLatencyRequestSent() {
-
-            }
+            public void HBLatencyRequestSent() {}
 
             @Override
-            public void HBLatencyReplyReceived() {
-
-            }
+            public void HBLatencyReplyReceived() {}
         });
         mClient.getChangedStream().subscribe((stream, key) -> {
             assert key != null;

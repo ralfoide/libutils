@@ -3,6 +3,7 @@ package com.alflabs.kv;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 import com.alflabs.rx.IStream;
+import com.alflabs.utils.IClock;
 import com.alflabs.utils.ILogger;
 
 import java.io.BufferedReader;
@@ -49,6 +50,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
     }
 
     @NonNull private final Thread mSocketThread;
+    @NonNull private final IClock mClock;
     @NonNull private final ILogger mLogger;
     @NonNull private final IStatsListener mStatsListener;
     @NonNull private final KeyValueProtocol mProtocol;
@@ -56,6 +58,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
     private volatile boolean mIsRunning;
     private AtomicBoolean mStartSyncSuccess;
     private CountDownLatch mStartSyncLatch;
+    private long mHeartBeatTimestamp;
 
     /**
      * A dequeue (double-queue, can add/remove from head or tail) that is
@@ -76,9 +79,11 @@ public class KeyValueClient implements IConnection, IKeyValue {
     };
 
     public KeyValueClient(
+            @NonNull IClock clock,
             @NonNull ILogger logger,
             @NonNull final SocketAddress address,
             @NonNull IStatsListener statsListener) {
+        mClock = clock;
         mLogger = logger;
         mStatsListener = statsListener;
 
@@ -111,7 +116,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
                 }
 
                 try {
-                    Thread.sleep(1000 /*ms*/);
+                    mClock.sleep(1000 /*ms*/);
                 } catch (InterruptedException e) {
                     // This should happen when stop() is called.
                     mLogger.d(TAG, "Socket sleep interrupted: " + e);
@@ -144,14 +149,21 @@ public class KeyValueClient implements IConnection, IKeyValue {
             // Just wait for the reader/writer threads to do their work.
             // Send the heart beat as long as the reader/writer threads have not finished.
             while (mIsRunning && !socket.isClosed() && !readWriteLatch.await(1, TimeUnit.SECONDS)) {
+                if (mHeartBeatTimestamp > 0) {
+                    long delay = mClock.elapsedRealtime() - mHeartBeatTimestamp;
+                    if (delay > 5000 /*ms*/) {
+                        mLogger.d(TAG, "Heartbeat reply delay exceeded 5 seconds.");
+                        break;
+                    }
+                }
                 sendClientHeartBeat();
             }
 
         } catch (InterruptedException e) {
             // This should happen when stop() is called.
             mLogger.d(TAG, "Read/write thread interrupted: " + e);
-
             handleQuit(writer);
+
         } finally {
             try {
                 socket.close();
@@ -203,7 +215,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
         // can get and process the init state sent by the server.
         int version = 0;
         for (int i = 1; i <= 600; i++) {
-            Thread.sleep(100 /*ms*/);
+            mClock.sleep(100 /*ms*/);
             version = mProtocol.getServerVersion();
             if (version != 0) {
                 mLogger.d(TAG, "Got server version in " + i*100 + " ms");
@@ -307,7 +319,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
 
             mSender.sendCnxQuit();
             try {
-                Thread.sleep(250 /*ms*/);
+                mClock.sleep(250 /*ms*/);
             } catch (InterruptedException ignore) {}
 
             mSocketThread.interrupt();
@@ -460,6 +472,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
     }
 
     private void onReceiveClientHeartBeat(String line) {
+        mHeartBeatTimestamp = mClock.elapsedRealtime();
         synchronized (mStatsListener) {
             if (mHBValue < 0) {
                 long value = -1 * mHBValue;
@@ -467,7 +480,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
                 if (DEBUG_VERBOSE) mLogger.d(TAG, "HB RECEIVE, expected '" + expected + "', got '" + line + "'");
                 if (expected.equals(line)) {
                     mStatsListener.HBLatencyReplyReceived();
-                    mHBValue = 1 + value;
+                    mHBValue = (1 + value) % Integer.MAX_VALUE;
                     mStatsListener.setMessage(null);
                 }
             }
