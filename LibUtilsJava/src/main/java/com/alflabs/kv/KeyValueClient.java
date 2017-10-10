@@ -274,10 +274,21 @@ public class KeyValueClient implements IConnection, IKeyValue {
     public void putValue(@NonNull String key, @Null String value, boolean broadcast) {
         if (mProtocol.putValue(key, value)) {
             if (broadcast) {
-                if (value == null) value = "";
-                mSender.sendValue(key, value);
+                broadcastValue(key, value);
             }
         }
+    }
+
+    /**
+     * Broadcasts a key/value change to the server but does NOT update the local store.
+     * <p/>
+     * The client will be notified when the server sends back the value and will trigger the
+     * change listener if the value has actually changed. This is useful when the client wants
+     * to make sure a local action really reflects the server's state.
+     */
+    public void broadcastValue(@NonNull String key, @Null String value) {
+        if (value == null) value = "";
+        mSender.sendValue(key, value);
     }
 
     /**
