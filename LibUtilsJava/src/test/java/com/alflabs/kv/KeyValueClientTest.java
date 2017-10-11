@@ -128,10 +128,26 @@ public class KeyValueClientTest {
         mClient.requestKey("foo");
         assertThat(_clientChanges()).isEqualTo("[]"); // value has not changed, so callback not invoked
 
+        // putValue updates both the client's store and the server so it does not invoke the callback when
+        // the server "repeats" the same value back to the client.
         mClient.putValue("foo", "bar2", true /*broadcast*/);
+        assertThat(mClient.getValue("foo")).isEqualTo("bar2");
         Thread.sleep(100 /*ms*/);
         assertThat(_serverChanges()).isEqualTo("[foo=bar2]");
         assertThat(mServer.getValue("foo")).isEqualTo("bar2");
+        assertThat(_clientChanges()).isEqualTo("[]"); // callback not invoked
+
+        // broadcastValue send the value to the server without updating the client.
+        // When the server repeats the value back to the client, this is seen as a change and invokes
+        // the callback. This can be used by the client to make sure the server knows about the value
+        // before using it for itself.
+        mClient.broadcastValue("foo", "broadcast3");
+        assertThat(mClient.getValue("foo")).isEqualTo("bar2"); // client value has not changed yet
+        Thread.sleep(100 /*ms*/);
+        assertThat(_serverChanges()).isEqualTo("[foo=broadcast3]");
+        assertThat(mServer.getValue("foo")).isEqualTo("broadcast3");
+        assertThat(_clientChanges()).isEqualTo("[foo=broadcast3]"); // callback is invoked now
+        assertThat(mClient.getValue("foo")).isEqualTo("broadcast3"); // client value has changed now
 
         // Q closes the connection but not the server
         logD(TAG, "KeyValueServerTest_Protocol: start Q request");
@@ -146,7 +162,7 @@ public class KeyValueClientTest {
                 "foo", "key 1", "key 2"
         });
         assertThat(mClient.getValue("bar")).isNull();
-        assertThat(mClient.getValue("foo")).isEqualTo("bar2");
+        assertThat(mClient.getValue("foo")).isEqualTo("broadcast3");
         assertThat(mClient.getValue("key 1")).isEqualTo("value 1");
         assertThat(mClient.getValue("key 2")).isEqualTo("value 2");
     }
