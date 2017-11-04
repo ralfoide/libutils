@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 public class KeyValueServer implements IKeyValue {
     private static final String TAG = KeyValueServer.class.getSimpleName();
     private static final boolean DEBUG = true;
-    private static final boolean DEBUG_VERBOSE = true;
+    private static final boolean DEBUG_VERBOSE = false;
 
     @NonNull private final ILogger mLogger;
 

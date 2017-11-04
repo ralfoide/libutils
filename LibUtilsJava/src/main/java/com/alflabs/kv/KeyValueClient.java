@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KeyValueClient implements IConnection, IKeyValue {
     private static final String TAG = KeyValueClient.class.getSimpleName();
     private static final boolean DEBUG = true;
-    private static final boolean DEBUG_VERBOSE = true;
+    private static final boolean DEBUG_VERBOSE = false;
 
     public interface IStatsListener {
         void addBandwidthTXBytes(int count);
