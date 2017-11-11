@@ -1,6 +1,6 @@
 /*
- * Project: AndroidAppLib
- * Copyright (C) 2010 ralfoide gmail com,
+ * Project: Lib Utils
+ * Copyright (C) 2010 alf.labs gmail com,
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
