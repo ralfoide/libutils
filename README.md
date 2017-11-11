@@ -34,7 +34,7 @@ __android-lib-v2__ branch:
    Java projects and Android projects.
 
 * __com.alflabs.kv__: A key-value network server/client. The server
-    publishes simple key/value pairs and automatically synchronize
+    publishes simple key/value pairs and automatically synchronizes
     changed values between the server and all clients.
 
 * __com.alflabs.serial__: A simplified object serialization mechanism
@@ -57,9 +57,30 @@ __android-lib-v2__ branch:
     common to many of my Android apps. Generally very ad-hoc and not
     designed to be commonly reused by other projects.
 
-* __com.alflabs.app.v1.Bus__: An event bus implementation.
+* __com.alflabs.app.v1.Bus__: An event bus implementation, deprecated
+    in favor of my RX stream implementation.
 
 * __com.alflabs.utils__: Various utilities (network, logging) common
     to several projects. Also contains Android __ApiHelper__
-    compatibility stubs to backwork from API 19 back to API 9.
+    compatibility stubs to backport from API 19 back to API 9.
 
+## License
+
+LibUtils is licensed under the __GNU GPL v3 license__.
+
+    Copyright (C) 2008-2017 alf.labs gmail com,
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+The full GPL license is available in the file "LICENSE-gpl-3.0.txt".
