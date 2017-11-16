@@ -33,9 +33,18 @@ public interface IClock {
     long uptimeMillis();
 
     /**
-     * Calls {@link Thread#sleep(long)}.
+     * Calls {@link Thread#sleep(long)}, ignoring interrupted exceptions
+     * (if you really need the interrupted state, then use {@link #sleepWithInterrupt(long)}).
      *
      * @see Thread#sleep(long)
      */
-    void sleep(long ms) throws InterruptedException;
+    void sleep(long sleepTimeMs);
+
+    /**
+     * Calls {@link Thread#sleep(long)}.
+     * This passed the {@link InterruptedException} along as needed.
+     *
+     * @see Thread#sleep(long)
+     */
+    void sleepWithInterrupt(long sleepTimeMs) throws InterruptedException;
 }

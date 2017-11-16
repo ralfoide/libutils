@@ -134,7 +134,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
                 }
 
                 try {
-                    mClock.sleep(1000 /*ms*/);
+                    mClock.sleepWithInterrupt(1000 /*ms*/);
                 } catch (InterruptedException e) {
                     // This should happen when stop() is called.
                     mLogger.d(TAG, "Socket sleep interrupted: " + e);
@@ -348,9 +348,7 @@ public class KeyValueClient implements IConnection, IKeyValue {
             mIsRunning = false;
 
             mSender.sendCnxQuit();
-            try {
-                mClock.sleep(250 /*ms*/);
-            } catch (InterruptedException ignore) {}
+            mClock.sleep(250 /*ms*/);
 
             mSocketThread.interrupt();
         }

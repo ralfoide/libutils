@@ -30,7 +30,14 @@ public class JavaClock implements IClock {
     }
 
     @Override
-    public void sleep(long ms) throws InterruptedException {
-        Thread.sleep(ms);
+    public void sleep(long sleepTimeMs) {
+        try {
+            sleepWithInterrupt(sleepTimeMs);
+        } catch (InterruptedException ignore) {}
+    }
+
+    @Override
+    public void sleepWithInterrupt(long sleepTimeMs) throws InterruptedException {
+        Thread.sleep(sleepTimeMs);
     }
 }

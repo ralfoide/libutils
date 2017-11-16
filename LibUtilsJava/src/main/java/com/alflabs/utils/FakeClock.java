@@ -18,29 +18,36 @@
 
 package com.alflabs.utils;
 
-public class MockClock implements IClock {
-    long mElapsedRealtime;
-    long mUptimeMillis;
+public class FakeClock implements IClock {
+    private long mNow;
 
-    public MockClock() {
-        mUptimeMillis = 1000;
-        mElapsedRealtime = 2000;
+    public FakeClock(long now) {
+        mNow = now;
+    }
+
+    public void setNow(long now) {
+        mNow = now;
+    }
+
+    public void add(long now) {
+        mNow += now;
     }
 
     @Override
     public long elapsedRealtime() {
-        return mElapsedRealtime;
+        return mNow;
     }
 
     @Override
     public long uptimeMillis() {
-        return mUptimeMillis;
+        return mNow;
     }
 
     @Override
-    public void sleep(long ms) {
-        mUptimeMillis += ms;
-        mElapsedRealtime += ms;
+    public void sleep(long sleepTimeMs) {
+        if (sleepTimeMs > 0) {
+            add(sleepTimeMs);
+        }
     }
 
     @Override
