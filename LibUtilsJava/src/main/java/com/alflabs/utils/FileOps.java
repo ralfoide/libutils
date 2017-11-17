@@ -23,9 +23,12 @@ import com.alflabs.annotations.Null;
 import com.google.common.io.Files;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 /**
  * Utility class that executes methods from Java's {@link File} or Gauva's {@link Files}
@@ -56,14 +59,28 @@ public class FileOps {
     /**
      * Reads all characters from a file into a {@link String}, using the given character set.
      *
-     * @param file the file to read from
-     * @param charset the charset used to decode the input stream; see {@link StandardCharsets} for
-     *     helpful predefined constants
-     * @return a string containing all the characters from the file
-     * @throws IOException if an I/O error occurs
+     * @param file The file to read from.
+     * @param charset The charset used to decode the input stream; see {@link StandardCharsets} for
+     *     helpful predefined constants.
+     * @return a string containing all the characters from the file.
+     * @throws IOException if an I/O error occurs.
      */
     @NonNull
     public String toString(@NonNull File file, @NonNull Charset charset) throws IOException {
         return Files.toString(file, charset);
+    }
+
+    /**
+     * Reads a Java properties file.
+     *
+     * @param file The file to read from
+     * @return A non-null {@link Properties} object.
+     * @throws FileNotFoundException if the file does not exist.
+     * @throws IOException if the file cannot be parsed into properties.
+     */
+    public Properties getProperties(File file) throws IOException {
+        Properties props = new Properties();
+        props.load(new FileInputStream(file));
+        return props;
     }
 }

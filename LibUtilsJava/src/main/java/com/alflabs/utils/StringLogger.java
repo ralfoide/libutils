@@ -22,16 +22,27 @@ import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 
 /**
- * Implementation of {@link ILogger} that outputs to Java {@link System#out}.
+ * Implementation of {@link ILogger} that outputs to a string.
  */
-public class JavaLogger implements ILogger {
+public class StringLogger implements ILogger {
+
+    private final StringBuilder mStringBuilder = new StringBuilder();
+
     @Override
     public void d(@NonNull String tag, @NonNull String message) {
-        System.out.println(tag + ": " + message);
+        mStringBuilder.append(tag).append(": ").append(message).append('\n');
     }
 
     @Override
     public void d(@NonNull String tag, @NonNull String message, @Null Throwable tr) {
-        System.out.println(tag + ": " + message + ": " + tr);
+        mStringBuilder.append(tag).append(": ").append(message).append(": ").append(tr).append('\n');
+    }
+
+    public String getString() {
+        return mStringBuilder.toString();
+    }
+
+    public void clear() {
+        mStringBuilder.setLength(0);
     }
 }
