@@ -21,6 +21,8 @@ package com.alflabs.utils;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 
+import java.io.File;
+
 public class StringUtils {
 
     @NonNull
@@ -30,6 +32,20 @@ public class StringUtils {
         }
 
         return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
+    }
+
+    @NonNull
+    public static String expandUserHome(@Null String filePath) {
+        if (filePath == null || filePath.isEmpty()) {
+            return "";
+        }
+
+        if (filePath.startsWith("~")) {
+            File file = new File(System.getProperty("user.home"), filePath.substring(1));
+            filePath = file.getPath();
+        }
+
+        return filePath;
     }
 
 }

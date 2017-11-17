@@ -20,6 +20,8 @@ package com.alflabs.utils;
 
 import org.junit.Test;
 
+import java.io.File;
+
 import static com.google.common.truth.Truth.assertThat;
 
 public class StringUtilsTest {
@@ -35,5 +37,16 @@ public class StringUtilsTest {
         assertThat(StringUtils.capitalize("ab")).isEqualTo("Ab");
         assertThat(StringUtils.capitalize("AB")).isEqualTo("Ab");
         assertThat(StringUtils.capitalize("Hello World")).isEqualTo("Hello world");
+    }
+
+    @Test
+    public void testExpandUserHome() throws Exception {
+        assertThat(StringUtils.expandUserHome(null)).isEmpty();
+        assertThat(StringUtils.expandUserHome("")).isEmpty();
+
+        assertThat(StringUtils.expandUserHome("/some/path")).isEqualTo("/some/path");
+
+        assertThat(StringUtils.expandUserHome("~/some/path")).isNotEqualTo("~/some/path");
+        assertThat(StringUtils.expandUserHome("~/some/path").replace(File.separatorChar, '/')).endsWith("some/path");
     }
 }
