@@ -78,9 +78,41 @@ public class FileOps {
      * @throws FileNotFoundException if the file does not exist.
      * @throws IOException if the file cannot be parsed into properties.
      */
-    public Properties getProperties(File file) throws IOException {
+    @NonNull
+    public Properties getProperties(@NonNull File file) throws IOException {
         Properties props = new Properties();
         props.load(new FileInputStream(file));
         return props;
+    }
+
+    /**
+     * Creates any necessary but nonexistent parent directories of the specified file.
+     *
+     * @throws IOException if an I/O error occurs
+     * @see Files#createParentDirs(File)
+     */
+    public void createParentDirs(@NonNull File file) throws IOException {
+        Files.createParentDirs(file);
+    }
+
+    /**
+     * Overwrites a file with the contents of a byte array.
+     *
+     * @throws IOException if an I/O error occurs
+     * @see Files#write(byte[], File)
+     */
+    public void writeBytes(byte[] bytes, File file) throws IOException {
+        Files.write(bytes, file);
+    }
+
+    /**
+     * Reads all bytes from file as a byte array.
+     *
+     * @throws IOException if an I/O error occurs
+     * @throws IllegalArgumentException if the file is bigger than MAX_INT (2^31-1)
+     * @see Files#toByteArray(File)
+     */
+    public byte[] readBytes(File file) throws IOException {
+        return Files.toByteArray(file);
     }
 }
