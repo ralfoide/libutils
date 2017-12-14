@@ -18,21 +18,8 @@
 
 apply plugin: "com.android.library"
 
-if (gradle.gradleVersion < "4") {
-    // jackOptions { enabled true } is not supported in library projects yet.
-    // From http://stackoverflow.com/questions/3797512 :
-    // Java8 not fully supported in library projects yet, https://code.google.com/p/android/issues/detail?id=211386
-    // this is a temporary workaround to get at least lambdas compiling.
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << "-Xbootclasspath/a:" + System.properties.get("java.home") + "/lib/rt.jar"
-        }
-    }
-}
-
 android {
     compileSdkVersion 26
-    buildToolsVersion (gradle.gradleVersion < "4" ? "25.0.2" : "26.0.0")
 
     defaultConfig {
         minSdkVersion 9
@@ -65,12 +52,6 @@ android {
 
     lintOptions {
         abortOnError false
-    }
-
-    if (!gradle.gradleVersion.startsWith("4")) {
-        dexOptions {
-            incremental true
-        }
     }
 }
 
