@@ -50,7 +50,19 @@ public class AndroidClock implements IClock {
      * @see Thread#sleep(long)
      */
     @Override
-    public void sleep(long ms) throws InterruptedException {
+    public void sleep(long ms) {
+        try {
+            sleepWithInterrupt(ms);
+        } catch (InterruptedException ignore) {}
+    }
+
+    /**
+     * Calls {@link Thread#sleep(long)}.
+     *
+     * @see Thread#sleep(long)
+     */
+    @Override
+    public void sleepWithInterrupt(long ms) throws InterruptedException {
         Thread.sleep(ms);
     }
 }
