@@ -27,6 +27,8 @@ import java.lang.annotation.Target;
 
 /**
  * Marker annotation indicating that this parameter can be null.
+ * <p/>
+ * The reverse of the @{@link NonNull} annotation.
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD, ElementType.LOCAL_VARIABLE })
