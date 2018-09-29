@@ -25,17 +25,20 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 /**
- * Utility class that executes methods from Java's {@link File} or Gauva's {@link Files}
+ * Utility class that executes methods from Java's {@link File} or Guava's {@link Files}
  * in a way that is easy to mock.
  * <p/>
  * This does not have an automatic dagger inject constructor. Instead it would typically
- * provided explicitely in a module, which allows unit tests to override it easily:
+ * provided explicitly in a module, which allows unit tests to override it easily:
  * <pre>
  *     \@Singleton
  *     \@Provides
@@ -54,6 +57,16 @@ public class FileOps {
      */
     public boolean isFile(@Null File file) {
         return file != null && file.isFile();
+    }
+
+    /**
+     * Returns true if the directory path points to a real directory (and not a file).
+     *
+     * @param directory A {@link File} path, possibly null.
+     * @return True if it points to a directory; false if null.
+     */
+    public boolean isDir(@Null File directory) {
+        return directory != null && directory.isDirectory();
     }
 
     /**
@@ -115,4 +128,21 @@ public class FileOps {
     public byte[] readBytes(File file) throws IOException {
         return Files.toByteArray(file);
     }
+
+    /**
+     * Returns a new {@link FileWriter} that can create or append characters to the given file.
+     * <p/>
+     * Tip: Use this in a Java-7 style resource block, e.g. {@code try(openFileWriter(...))} to
+     * get the file closed automatically.
+     * <p/>
+     * This returns a {@link Writer} so that mocks/fakes can use {@link StringWriter} instead of
+     * an actual file.
+     *
+     * @throws IOException if an I/O error occurs
+     * @see FileWriter
+     */
+    public Writer openFileWriter(File file, boolean append) throws IOException {
+        return new FileWriter(file, append);
+    }
+
 }

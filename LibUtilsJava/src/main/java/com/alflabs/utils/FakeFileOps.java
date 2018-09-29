@@ -44,11 +44,11 @@ public class FakeFileOps extends FileOps {
     /**
      * Returns true if the file path points to a real file (and not a directory).
      *
-     * @param file A {@link File} path, possibly null.
+     * @param directory A {@link File} path, possibly null.
      * @return True if it points to a file; false if null.
      */
-    public boolean isFile(@Null File file) {
-        return file != null && mPathContentMap.containsKey(file.getPath());
+    public boolean isFile(@Null File directory) {
+        return directory != null && mPathContentMap.containsKey(directory.getPath());
     }
 
     /**
