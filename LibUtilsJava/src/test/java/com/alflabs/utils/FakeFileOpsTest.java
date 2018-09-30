@@ -24,6 +24,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Writer;
 
 import static com.alflabs.utils.AssertException.assertException;
 import static com.google.common.truth.Truth.assertThat;
@@ -67,5 +69,26 @@ public class FakeFileOpsTest {
         assertThat(mOps.toString(f, Charsets.UTF_8)).isEqualTo("File=Content");
         assertThat(mOps.readBytes(f)).isEqualTo(actual);
         assertThat(mOps.getProperties(f)).containsExactly("File", "Content");
+    }
+
+    @Test
+    public void testOpenFileWriter() throws IOException {
+        File f = new File("some_file");
+
+        mOps.writeBytes("First part ".getBytes(Charsets.UTF_8), f);
+
+        // Write-append
+        try (Writer writer1 = mOps.openFileWriter(f, true /* append */)) {
+            writer1.write("Second part");
+        }
+
+        assertThat(mOps.readBytes(f)).isEqualTo("First part Second part".getBytes(Charsets.UTF_8));
+
+        // Write-replace
+        try (Writer writer2 = mOps.openFileWriter(f, false /* append */)) {
+            writer2.write("Third part");
+        }
+
+        assertThat(mOps.readBytes(f)).isEqualTo("Third part".getBytes(Charsets.UTF_8));
     }
 }
