@@ -20,12 +20,16 @@ package com.alflabs.utils;
 
 import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
+import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -42,13 +46,30 @@ public class FakeFileOps extends FileOps {
     private final Map<String, byte[]> mPathContentMap = new HashMap<>();
 
     /**
-     * Returns true if the file path points to a real file (and not a directory).
+     * Returns true if the file path points to a file that was previously written.
      *
-     * @param directory A {@link File} path, possibly null.
+     * @param file A {@link File} path, possibly null.
      * @return True if it points to a file; false if null.
      */
-    public boolean isFile(@Null File directory) {
-        return directory != null && mPathContentMap.containsKey(directory.getPath());
+    public boolean isFile(@Null File file) {
+        return file != null && mPathContentMap.containsKey(file.getPath());
+    }
+
+    /**
+     * Returns true if the directory path points to a file that was previously written.
+     *
+     * @param directory A {@link File} path, possibly null.
+     * @return True if it points to a directory; false if null.
+     */
+    public boolean isDir(@Null File directory) {
+        if (directory != null) {
+            for (String path : mPathContentMap.keySet()) {
+                if (path.startsWith(directory.getPath())) {
+                    return true;
+                }
+            }
+        }
+        return  false;
     }
 
     /**
@@ -106,6 +127,48 @@ public class FakeFileOps extends FileOps {
      */
     public void writeBytes(@NonNull byte[] bytes, @NonNull File file) throws IOException {
         mPathContentMap.put(file.getPath(), bytes);
+    }
+
+    /**
+     * Returns a new {@link FileWriter} that can create or append characters to the given file.
+     * <p/>
+     * Tip: Use this in a Java-7 style resource block, e.g. {@code try(openFileWriter(...))} to
+     * get the file closed automatically.
+     * <p/>
+     * This returns a {@link Writer} so that mocks/fakes can use {@link StringWriter} instead of
+     * an actual file.
+     *
+     * @throws IOException if an I/O error occurs
+     * @see FileWriter
+     */
+    public Writer openFileWriter(File file, boolean append) throws IOException {
+        String key = file.getPath();
+
+        StringWriter writer = new StringWriter() {
+            @Override
+            public void write(String s) {
+                super.write(s);
+                flush();
+            }
+
+            @Override
+            public void close() throws IOException {
+                flush();
+                super.close();
+            }
+
+            @Override
+            public void flush() {
+                super.flush();
+                mPathContentMap.put(key, this.toString().getBytes(Charsets.UTF_8));
+            }
+        };
+
+        if (append && mPathContentMap.containsKey(key)) {
+            writer.write(new String(mPathContentMap.get(key), Charsets.UTF_8));
+        }
+
+        return writer;
     }
 
     /**
