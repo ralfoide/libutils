@@ -18,8 +18,6 @@
 
 package com.alflabs.utils;
 
-import android.os.Build;
-import androidx.annotation.RequiresApi;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,8 +34,7 @@ public class InjectionValidatorTest {
     }
 
     @Test
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public void testFailure() {
+    public void testFailure() throws Exception {
         thrown.expect(AssertionError.class);
         thrown.expectMessage("['field2' is a null reference]");
         InjectionValidator.check(new NotAllInjectedSub());
