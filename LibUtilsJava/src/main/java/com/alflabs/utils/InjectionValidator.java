@@ -18,10 +18,6 @@
 
 package com.alflabs.utils;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.os.Build;
-
 import javax.inject.Inject;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -29,10 +25,8 @@ import java.util.Arrays;
 import static com.google.common.truth.Truth.assertThat;
 
 @SuppressWarnings("WeakerAccess")
-@TargetApi(Build.VERSION_CODES.KITKAT)
 public class InjectionValidator {
 
-    @SuppressLint("NewApi")
     public static void check(final Object instance) {
         assertThat(instance).isNotNull();
 
