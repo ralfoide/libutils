@@ -25,7 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class RPairTest {
 
     @Test
-    public void testCreate() throws Exception {
+    public void testCreate() {
         RPair<String, String> p1 = RPair.create("First", "Second");
         assertThat(p1).isNotNull();
         assertThat(p1.first).isEqualTo("First");
@@ -34,7 +34,7 @@ public class RPairTest {
 
         RPair<String, String> p2 = RPair.create("First", "Second");
         assertThat(p1).isEqualTo(p2);
-        assertThat(p1).isNotSameAs(p2);
+        assertThat(p1).isNotSameInstanceAs(p2);
 
         RPair<String, String> p3 = RPair.create("First", "Third");
         assertThat(p1).isNotEqualTo(p3);

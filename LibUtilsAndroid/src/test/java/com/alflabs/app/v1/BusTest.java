@@ -37,7 +37,7 @@ public class BusTest {
     private IBusListener strings;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         b = Buses.newBus();
 
         all = new IBusListener() {
@@ -55,9 +55,9 @@ public class BusTest {
         };
     }
 
-    @SuppressWarnings("UnnecessaryBoxing")
     @Test
-    public void testRegister() throws Exception {
+    @SuppressWarnings("UnnecessaryBoxing")
+    public void testRegister() {
         assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[]");
         assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[]");
 
@@ -67,7 +67,7 @@ public class BusTest {
         Bus.Sender sender = b.getSender();
         assertThat(sender).isNotNull();
         assertThat(sender.getBus()).isNotNull();
-        assertThat(sender.getBus()).isSameAs(b);
+        assertThat(sender.getBus()).isSameInstanceAs(b);
 
         sender.safeSend(42);
         sender.safeSend(43, "some strings");
@@ -93,9 +93,9 @@ public class BusTest {
                 "[43: some strings, -1: moar strings]");
     }
 
-    @SuppressWarnings("UnnecessaryBoxing")
     @Test
-    public void testUnregister() throws Exception {
+    @SuppressWarnings("UnnecessaryBoxing")
+    public void testUnregister() {
         assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[]");
         assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[]");
 
@@ -105,7 +105,7 @@ public class BusTest {
         Bus.Sender sender = b.getSender();
         assertThat(sender).isNotNull();
         assertThat(sender.getBus()).isNotNull();
-        assertThat(sender.getBus()).isSameAs(b);
+        assertThat(sender.getBus()).isSameInstanceAs(b);
 
         sender.safeSend(42);
         sender.safeSend(43, "some strings");
@@ -134,9 +134,8 @@ public class BusTest {
                 "[43: some strings, -1: moar strings, 45: unregister all]");
     }
 
-    @SuppressWarnings("UnnecessaryBoxing")
     @Test
-    public void testReentrant() throws Exception {
+    public void testReentrant() {
         assertThat(Arrays.toString(allReceived.toArray())).isEqualTo("[]");
         assertThat(Arrays.toString(stringsReceived.toArray())).isEqualTo("[]");
 
@@ -157,7 +156,7 @@ public class BusTest {
         Bus.Sender sender = b.getSender();
         assertThat(sender).isNotNull();
         assertThat(sender.getBus()).isNotNull();
-        assertThat(sender.getBus()).isSameAs(b);
+        assertThat(sender.getBus()).isSameInstanceAs(b);
 
         // This calls the first listener which itself registers the string listener.
         // That means there's a race condition but the sender is designed to allow for

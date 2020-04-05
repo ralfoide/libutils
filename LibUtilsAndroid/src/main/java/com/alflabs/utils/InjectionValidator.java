@@ -21,12 +21,14 @@ package com.alflabs.utils;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.Build;
+import com.google.common.truth.Subject;
 
 import javax.inject.Inject;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 @SuppressWarnings("WeakerAccess")
 @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -39,7 +41,7 @@ public class InjectionValidator {
         for (Class<?> clazz = instance.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
             Arrays.stream(clazz.getDeclaredFields())
                     .filter(field -> field.getDeclaredAnnotation(Inject.class) != null)
-                    .forEach(field -> assertThat(getTarget(instance, field)).named(field.getName()).isNotNull());
+                    .forEach(field -> assertWithMessage("['%s' is a null reference]", field.getName()).that(getTarget(instance, field)).isNotNull());
         }
     }
 

@@ -34,25 +34,25 @@ public class UtilsTest {
     @Rule public final Expect expect = Expect.create();
 
     @Test
-    public void testGetApiLevel() throws Exception {
+    public void testGetApiLevel() {
         assertThat(Utils.getApiLevel()).isGreaterThan(0);
     }
 
     @Test
-    public void testCheckMinApiLevel() throws Exception {
+    public void testCheckMinApiLevel() {
         assertThat(Utils.checkMinApiLevel( 0)).isTrue();
         assertThat(Utils.checkMinApiLevel( 1)).isTrue();
         assertThat(Utils.checkMinApiLevel(42)).isFalse();
     }
 
     @Test
-    public void testIsEmulator() throws Exception {
+    public void testIsEmulator() {
         // The fake Build from these test can't satisfy the emulator check
         assertThat(Utils.isEmulator()).isFalse();
     }
 
     @Test
-    public void testIsUsingDebugKey() throws Exception {
+    public void testIsUsingDebugKey() {
         // The fake mock overrides from these test can't satisfy the check.
         // It will probably generate an NPE which gets catched and returns false.
         assertThat(Utils.isUsingDebugKey(null, null)).isFalse();
@@ -78,8 +78,7 @@ public class UtilsTest {
         Object r2 = Utils.deserializeFromString(s1);
         assertThat(r2).isNotNull();
         assertThat(r2).isInstanceOf(JavaSerializableClass.class);
-        assertThat(r2).isNotSameAs(r1);
-        //noinspection ConstantConditions
+        assertThat(r2).isNotSameInstanceAs(r1);
         ((JavaSerializableClass) r2).isEqualTo(true, 42, 3141592, "some serializable object");
     }
 

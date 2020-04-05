@@ -17,15 +17,15 @@
  */
 
 group "com.alflabs.libutilsjava"
-version "1.0-SNAPSHOT"
+version "1.3-SNAPSHOT"
 
 // Note:
 // - Android Studio generates a plugin: "java-library" line.
 // - IntellJ (non Android) generates a plugin: "java" line.
 apply plugin: "java"
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
@@ -40,10 +40,10 @@ sourceSets {
 }
 
 dependencies {
-    compile "com.google.guava:guava:19.0"
+    implementation "com.google.guava:guava:28.1-jre"
 
     // Testing: Mockito and Truth
-    testCompile "org.mockito:mockito-core:2.2.9"
-    testCompile "com.google.truth:truth:0.34"     // to match hamcrest 1.3 from Robolectric
-    testCompile "junit:junit:4.12"                // to match hamcrest 1.3 from Robolectric
+    testImplementation "org.mockito:mockito-core:3.0.0"
+    testImplementation "com.google.truth:truth:1.0"
+    testImplementation "junit:junit:4.12"
 }

@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -230,18 +231,18 @@ public class StreamsTest {
         // run, in which case it would get cancelled since a closed stream does not publish events.
         // Stream state changes are instant and do not run on the publisher's scheduler thread.
 
-        assertThat(resultLatch.await(5, TimeUnit.SECONDS)).named("resultLatch await").isTrue();
+        assertWithMessage("[resultLatch await]").that(resultLatch.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(result.get()).isEqualTo(42);
 
         stream.close();
-        assertThat(closeLatch.await(5, TimeUnit.SECONDS)).named("closeLatch await").isTrue();
+        assertWithMessage("[closeLatch await]").that(closeLatch.await(5, TimeUnit.SECONDS)).isTrue();
     }
 
     private abstract class BasePublisherWithSubscriberAttached<E>
             extends BasePublisher<E> implements ISubscriberAttached<E> {}
 
     @Test
-    public void testSubscriberAttached() throws Exception {
+    public void testSubscriberAttached() {
         AtomicInteger result = new AtomicInteger(0);
         AtomicBoolean subscriberAttached = new AtomicBoolean();
 
@@ -252,13 +253,13 @@ public class StreamsTest {
         IPublisher<Integer> publisher = new BasePublisherWithSubscriberAttached<Integer>() {
             @Override
             public void onSubscriberAttached(@NonNull IStream<? super Integer> s, @NonNull ISubscriber<? super Integer> subscriber) {
-                assertThat(s).isSameAs(stream);
+                assertThat(s).isSameInstanceAs(stream);
                 subscriberAttached.set(true);
             }
 
             @Override
             public void onSubscriberDetached(@NonNull IStream<? super Integer> s, @NonNull ISubscriber<? super Integer> subscriber) {
-                assertThat(s).isSameAs(stream);
+                assertThat(s).isSameInstanceAs(stream);
                 subscriberAttached.set(false);
             }
         };
