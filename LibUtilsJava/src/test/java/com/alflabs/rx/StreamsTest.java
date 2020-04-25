@@ -85,7 +85,7 @@ public class StreamsTest {
         assertThat(stream.getState()).isEqualTo(State.IDLE);
         assertThat(stream.isIdle()).isTrue();
 
-        stream.subscribe(subscriber, Schedulers.sync());
+        stream.subscribe(Schedulers.sync(), subscriber);
         assertThat(stream.getState()).isEqualTo(State.OPEN);
         assertThat(stream.isOpen()).isTrue();
         assertThat(stream.isIdle()).isFalse();
@@ -224,7 +224,7 @@ public class StreamsTest {
             }
         };
 
-        stream.subscribe(subscriber, Schedulers.io());
+        stream.subscribe(Schedulers.io(), subscriber);
         publisher.publish(42);
 
         // Note: calling stream.close() here might close the stream BEFORE the async publish has a chance to

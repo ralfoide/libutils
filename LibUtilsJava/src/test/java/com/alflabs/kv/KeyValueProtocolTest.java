@@ -84,13 +84,14 @@ public class KeyValueProtocolTest {
             }
         };
 
-        mProtocol.getChangedStream().subscribe((stream, key) -> {
-            assert key != null;
-            String value = mProtocol.getValue(key);
-            mLastChanged = RPair.create(key, value);
-            if (value == null) value = "";
-            mSender.sendValue(key, value);
-        }, Schedulers.sync());
+        mProtocol.getChangedStream().subscribe(Schedulers.sync(),
+                (stream, key) -> {
+                    assert key != null;
+                    String value = mProtocol.getValue(key);
+                    mLastChanged = RPair.create(key, value);
+                    if (value == null) value = "";
+                    mSender.sendValue(key, value);
+                });
 
         mSender = new KeyValueProtocol.Sender() {
             @Override

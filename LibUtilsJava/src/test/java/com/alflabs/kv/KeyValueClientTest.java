@@ -56,10 +56,11 @@ public class KeyValueClientTest {
         mServerChanges.clear();
         mClient = null;
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.getChangedStream().subscribe((stream, key) -> {
-            assert key != null;
-            mServerChanges.add(key + "=" + mServer.getValue(key));
-        }, Schedulers.sync());
+        mServer.getChangedStream().subscribe(Schedulers.sync(),
+                (stream, key) -> {
+                    assert key != null;
+                    mServerChanges.add(key + "=" + mServer.getValue(key));
+                });
     }
 
     @After
@@ -119,10 +120,11 @@ public class KeyValueClientTest {
             @Override
             public void HBLatencyReplyReceived() {}
         });
-        mClient.getChangedStream().subscribe((stream, key) -> {
-            assert key != null;
-            mClientChanges.add(key + "=" + mClient.getValue(key));
-        }, Schedulers.sync());
+        mClient.getChangedStream().subscribe(Schedulers.sync(),
+                (stream, key) -> {
+                    assert key != null;
+                    mClientChanges.add(key + "=" + mClient.getValue(key));
+                });
         mClient.startAsync();
 
         Thread.sleep(100 /*ms*/);

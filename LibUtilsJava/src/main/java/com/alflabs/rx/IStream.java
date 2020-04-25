@@ -38,6 +38,10 @@ public interface IStream<Event> extends _IPublishOnStream<Event> {
     /**
      * Sets the default scheduler on which the stream will operate.
      * Unless specified, publishers, subscribers and processors added after will also use that scheduler.
+     * <p/>
+     * For a more deterministic API to set schedules for each publishers/subscribers, consider using
+     * the {@link #publishWith(IScheduler, IGenerator)} and {@link #subscribe(IScheduler, ISubscriber)}
+     * methods.
      */
     @NonNull
     IStream<Event> on(@NonNull IScheduler scheduler);
@@ -48,7 +52,7 @@ public interface IStream<Event> extends _IPublishOnStream<Event> {
 
     /** Add a publisher to the stream, operating on the specified scheduler. */
     @NonNull
-    IStream<Event> publishWith(@NonNull IGenerator<? extends Event> publisher, @NonNull IScheduler scheduler);
+    IStream<Event> publishWith(@NonNull IScheduler scheduler, @NonNull IGenerator<? extends Event> publisher);
 
     /** Add a subscriber to the stream. */
     @NonNull
@@ -56,7 +60,7 @@ public interface IStream<Event> extends _IPublishOnStream<Event> {
 
     /** Add a subscriber to the stream, operating on the specified scheduler. */
     @NonNull
-    IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber, @NonNull IScheduler scheduler);
+    IStream<Event> subscribe(@NonNull IScheduler scheduler, @NonNull ISubscriber<? super Event> subscriber);
 
     /** Add a processor to the stream. */
     @NonNull

@@ -58,10 +58,11 @@ public class KeyValueServerTest {
         mLastChanged = null;
         mOnConnectedCallCount.set(0);
         mServer = new KeyValueServer(mock(ILogger.class));
-        mServer.getChangedStream().subscribe((stream, key) -> {
-            assert key != null;
-            mLastChanged = RPair.create(key, mServer.getValue(key));
-        }, Schedulers.sync());
+        mServer.getChangedStream().subscribe(Schedulers.sync(),
+                (stream, key) -> {
+                    assert key != null;
+                    mLastChanged = RPair.create(key, mServer.getValue(key));
+                });
         mServer.setOnClientConnected(mOnConnectedCallCount::incrementAndGet);
     }
 
