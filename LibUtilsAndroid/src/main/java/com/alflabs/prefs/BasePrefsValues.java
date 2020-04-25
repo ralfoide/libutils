@@ -32,7 +32,7 @@ public class BasePrefsValues {
     protected final SharedPreferences mPrefs;
 
     public BasePrefsValues(@NonNull Context context) {
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
     }
 
     public BasePrefsValues(@NonNull SharedPreferences prefs) {
