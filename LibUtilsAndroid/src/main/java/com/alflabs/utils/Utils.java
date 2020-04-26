@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
 
 public class Utils {
@@ -72,21 +73,25 @@ public class Utils {
      */
     public static boolean isEmulator() {
         // On the emulator:
-        // Build.BRAND = generic
-        // Build.DEVICE = generic
+        // Build.BRAND = generic | generic_x86 | google
+        // Build.DEVICE = generic | generix_x86
         // Build.MODEL = sdk
         // Build.PRODUCT = sdk or google_sdk (for the addon)
         // Build.MANUFACTURER = unknown -- API 4+
         // Build.HARDWARE = goldfish -- API 8+
 
-        String b = Build.BRAND;     // "generic" or "generic_x86"
+        String b = Build.BRAND;     // "generic" or "generic_x86" or "google"
         String d = Build.DEVICE;    // "generic" or "generic_x86"
-        String p = Build.PRODUCT;   // "sdk_phone", "google_sdk", "sdk_phone_x86", "google_sdk_x86"
+        String p = Build.PRODUCT;   // "sdk_phone", "google_sdk", "sdk_phone_x86", "google_sdk_x86", "sdk_gphone_x86"
+
+        final String[] blist = new String[] { "generic", "generic_x86", "google" };
+        final String[] dlist = new String[] { "generic", "generic_x86" };
+        final String[] plist = new String[] { "sdk_phone", "google_sdk", "sdk_phone_x86", "google_sdk_x86", "sdk_gphone_x86" };
 
         //noinspection RedundantIfStatement
-        if (b != null && b.contains("generic") &&
-                d != null && d.contains("generic") &&
-                p != null && p.contains("sdk")) {
+        if (Arrays.asList(blist).contains(b) &&
+                Arrays.asList(dlist).contains(d) &&
+                Arrays.asList(plist).contains(p)) {
             // Most likely an emulator
             return true;
         }
