@@ -331,7 +331,9 @@ class _Stream<Event> implements IStream<Event> {
             return;
         }
         for (Map.Entry<? extends T, IScheduler> entry : map.entrySet()) {
-            entry.getValue().invoke(consumer, entry.getKey());
+            final IScheduler scheduler = entry.getValue();
+            final T value = entry.getKey();
+            scheduler.invoke(consumer, value);
         }
     }
 }

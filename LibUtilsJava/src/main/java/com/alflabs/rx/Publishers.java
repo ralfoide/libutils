@@ -18,6 +18,8 @@
 
 package com.alflabs.rx;
 
+import com.alflabs.annotations.NonNull;
+
 /**
  * Helper methods and classes for {@link IGenerator}.
  */
@@ -31,6 +33,13 @@ public class Publishers {
     }
 
     /**
+     * Returns a simple publisher that repeats the latest value when a new subscriber is added.
+     */
+    public static <E> IPublisher<E> latest() {
+        return new _Latest<>();
+    }
+
+    /**
      * Returns a simple publisher that publishes all the given values when first attached to a stream.
      */
     @SafeVarargs
@@ -39,9 +48,18 @@ public class Publishers {
     }
 
     /**
-     * Returns a simple publisher that repeats the latest value when a new subscriber is added.
+     * A helper variant for {@link #just}: a temporary publisher is created, attached to the given
+     * given stream, and promptly removed as soon as all the values have been published.
      */
-    public static <E> IPublisher<E> latest() {
-        return new _Latest<>();
+    @SafeVarargs
+    public static <E> void publishOnStream(IStream<E> stream, E...values) {
+        IGenerator<E> publisher = new _Just<E>(values) {
+            @Override
+            public void onAttached(@NonNull IStream<? super E> stream) {
+                super.onAttached(stream);
+                stream.remove(this);
+            }
+        };
+        stream.publishWith(publisher);
     }
 }
