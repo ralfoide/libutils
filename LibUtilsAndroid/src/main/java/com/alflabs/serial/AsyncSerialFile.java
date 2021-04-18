@@ -56,6 +56,7 @@ import com.alflabs.utils.RSparseArray;
 public class AsyncSerialFile {
 
     private static final boolean DEBUG = BuildConfig.DEBUG;
+    private static final boolean DEBUG_VERBOSE = DEBUG;
     public static final String TAG = AsyncSerialFile.class.getSimpleName();
 
     /**
@@ -78,7 +79,7 @@ public class AsyncSerialFile {
     private final SerialKey mKeyer = new SerialKey();
     private final RSparseArray<Object> mData = new RSparseArray<Object>();
     private final @NonNull String mFilename;
-    private boolean mDataChanged;
+    private volatile boolean mDataChanged;
     private volatile Thread mLoadThread;
     private volatile Thread mSaveThread;
     private volatile boolean mLoadResult;
@@ -151,6 +152,7 @@ public class AsyncSerialFile {
             public void run() {
                 FileInputStream fis = null;
                 try {
+                    if (DEBUG_VERBOSE) Log.d(TAG, "beginReadAsync fopen " + mFilename);
                     fis = appContext.openFileInput(mFilename);
                     mLoadResult = loadChannel(fis.getChannel());
                 } catch (FileNotFoundException e) {
@@ -234,26 +236,59 @@ public class AsyncSerialFile {
         Thread t = new Thread() {
             @Override
             public void run() {
-                FileOutputStream fos = null;
+                final int NUM_RETRIES = 10;
                 try {
-                    fos = appContext.openFileOutput(mFilename, Context.MODE_PRIVATE);
-                    synchronized(mData) {
-                        saveChannel(fos.getChannel());
-                        mDataChanged = false;
+                    for (int attempts = 0; attempts < NUM_RETRIES; attempts++) {
+                        if (DEBUG_VERBOSE) Log.d(TAG, "beginWriteAsync attempt " + attempts);
+                        doSave();
+                        if (!mDataChanged) {
+                            break;
+                        } else {
+                            // Data has changed again or save as failed... retry
+                            try {
+                                Thread.sleep(1 /*ms*/);
+                            } catch (InterruptedException ignore) {}
+                        }
                     }
-                    postWriteAsync(appContext);
-                    mSaveResult = true;
-                } catch (Throwable t) {
-                    mSaveResult = false;
-                    if (DEBUG) Log.e(TAG, "flushSync failed", t);                       //NLS
-                    if (THROW_EXCEPTIONS_WHEN_TESTING) throw new RuntimeException(t);
                 } finally {
                     synchronized(AsyncSerialFile.this) {
                         mSaveThread = null;
                     }
-                    try {
-                        if (fos != null) fos.close();
-                    } catch (IOException ignore) {}
+                }
+            }
+
+            private void doSave() {
+                FileOutputStream fos = null;
+                try {
+                    if (DEBUG_VERBOSE) Log.d(TAG, "beginWriteAsync mkbuf " + mFilename);
+                    ByteBuffer buffer;
+                    synchronized(mData) {
+                        buffer = saveToBuffer();
+                        mDataChanged = false;
+                    }
+                    if (DEBUG_VERBOSE) Log.d(TAG, "beginWriteAsync GEN cap " + buffer.capacity()
+                            + ", limit " + buffer.limit()
+                            + ", pos " + buffer.position());
+
+                    if (DEBUG_VERBOSE) Log.d(TAG, "beginWriteAsync fopen " + mFilename);
+                    fos = appContext.openFileOutput(mFilename, Context.MODE_PRIVATE);
+                    FileChannel fileChannel = fos.getChannel();
+                    buffer.rewind();
+                    fileChannel.write(buffer);
+                    if (DEBUG_VERBOSE) Log.d(TAG, "beginWriteAsync WRITE cap " + buffer.capacity()
+                            + ", limit " + buffer.limit()
+                            + ", pos " + buffer.position());
+                    fileChannel.force(true);
+                    fos.close();
+                    if (DEBUG_VERBOSE) Log.d(TAG, "beginWriteAsync post-write " + mFilename);
+                    postWriteAsync(appContext);
+                    mSaveResult = true;
+                } catch (Throwable t) {
+                    mSaveResult = false;
+                    if (DEBUG) Log.e(TAG, "writeAsync failed", t);                       //NLS
+                    if (THROW_EXCEPTIONS_WHEN_TESTING) throw new RuntimeException(t);
+                } finally {
+                    if (DEBUG_VERBOSE) Log.d(TAG, "beginWriteAsync completed " + mFilename);
                 }
             }
         };
@@ -512,6 +547,7 @@ public class AsyncSerialFile {
         // Size should be a multiple of 4. Always.
         // assert (Integer.SIZE / 8) == 4;
         long n = fileChannel.size();
+        if (DEBUG_VERBOSE) Log.d(TAG, "beginReadAsync size " + n);
         final byte[] headerConstant = getHeader();
         if (n < headerConstant.length || (n & 0x03) != 0) {
             Log.d(TAG, "Invalid file size, should be multiple of 4.");                  //NLS
@@ -562,18 +598,10 @@ public class AsyncSerialFile {
         return true;
     }
 
-    @SuppressWarnings("UnnecessaryUnboxing")
-    @PublicForTesting
-    protected void saveChannel(FileChannel fileChannel) throws IOException {
-        final byte[] headerConstant = getHeader();
-        ByteBuffer header = ByteBuffer.wrap(headerConstant);
-        header.order(ByteOrder.LITTLE_ENDIAN);
-        if (fileChannel.write(header) != headerConstant.length) {
-            throw new IOException("Failed to write header.");                           //NLS
-        }
+    private ByteBuffer saveToBuffer() {
+        final byte[] header = getHeader();
 
         SerialWriter sw = new SerialWriter();
-
         for (int n = mData.size(), i = 0; i < n; i++) {
             int key = mData.keyAt(i);
             Object value = mData.valueAt(i);
@@ -594,16 +622,17 @@ public class AsyncSerialFile {
             } else {
                 throw new UnsupportedOperationException(
                         this.getClass().getSimpleName() +
-                        " does not support type " +                                     //NLS
-                        value.getClass().getSimpleName());
+                                " does not support type " +                                     //NLS
+                                value.getClass().getSimpleName());
             }
         }
 
         int[] data = sw.encodeAsArray();
-        ByteBuffer bytes = ByteBuffer.allocateDirect(data.length * 4);
+        ByteBuffer bytes = ByteBuffer.allocateDirect(header.length + data.length * 4);
         bytes.order(ByteOrder.LITTLE_ENDIAN);
+        bytes.put(header);
         bytes.asIntBuffer().put(data);
-        fileChannel.write(bytes);
+        return bytes;
     }
 
     public static class TypeMismatchException extends RuntimeException {
