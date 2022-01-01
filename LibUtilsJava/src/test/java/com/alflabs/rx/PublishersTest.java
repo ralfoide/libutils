@@ -37,7 +37,7 @@ public class PublishersTest {
     @Rule public MockitoRule mRule = MockitoJUnit.rule();
 
     @Test
-    public void testPublishSync() throws Exception {
+    public void testPublishSync() {
         ArrayList<Integer> result = new ArrayList<>();
 
         Streams.<Integer>stream()
@@ -49,7 +49,7 @@ public class PublishersTest {
     }
 
     @Test
-    public void testPublishSingleAttach() throws Exception {
+    public void testPublishSingleAttach() {
         IPublisher<Integer> publisher = Publishers.latest();
 
         IStream<Integer> stream1 = Streams.<Integer>stream().on(Schedulers.sync());
@@ -99,21 +99,18 @@ public class PublishersTest {
                         latch.countDown();
                     }
                 })
-                .subscribe(new ISubscriber<Integer>() {
-                    @Override
-                    public void onReceive(@NonNull IStream<? extends Integer> stream, @Null Integer integer) {
-                        if (integer == null) {
-                            return;
-                        }
-                        result.add(integer);
-                        if (integer == 42 + 5) {
-                            stream.close();
-                        }
+                .subscribe((stream, integer) -> {
+                    if (integer == null) {
+                        return;
+                    }
+                    result.add(integer);
+                    if (integer == 42 + 5) {
+                        stream.close();
                     }
                 });
 
         latch.await(5, TimeUnit.SECONDS);
-        assertThat(result.toArray()).isEqualTo(new Object[] { 42, 43, 44, 45, 46, 47 });
+        assertThat(result.stream().sorted().toArray()).isEqualTo(new Object[] { 42, 43, 44, 45, 46, 47 });
     }
 
     /**
@@ -180,7 +177,7 @@ public class PublishersTest {
     }
 
     @Test
-    public void testPublishLatest() throws Exception {
+    public void testPublishLatest() {
         ArrayList<Integer> result = new ArrayList<>();
 
         IPublisher<Integer> publisher = Publishers.latest();
