@@ -18,9 +18,10 @@
 
 package com.alflabs.utils;
 
-import com.alflabs.utils.FakeClock;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -34,7 +35,7 @@ public class FakeClockTest {
     }
 
     @Test
-    public void testSetNow() throws Exception {
+    public void testSetNow() {
         assertThat(mClock.elapsedRealtime()).isEqualTo(1000);
 
         mClock.setNow(2000);
@@ -42,7 +43,7 @@ public class FakeClockTest {
     }
 
     @Test
-    public void testAdd() throws Exception {
+    public void testAdd() {
         assertThat(mClock.elapsedRealtime()).isEqualTo(1000);
 
         mClock.add(2000);
@@ -50,7 +51,7 @@ public class FakeClockTest {
     }
 
     @Test
-    public void testSleep() throws Exception {
+    public void testSleep() {
         assertThat(mClock.elapsedRealtime()).isEqualTo(1000);
 
         mClock.sleep(2000);
@@ -58,6 +59,24 @@ public class FakeClockTest {
 
         mClock.sleep(-500);
         assertThat(mClock.elapsedRealtime()).isEqualTo(3000);
+    }
+
+    @Test
+    public void testSleepCallback() {
+        ArrayList<Long> invocations = new ArrayList<>();
+
+        assertThat(mClock.elapsedRealtime()).isEqualTo(1000);
+
+        mClock.sleep(500);
+
+        mClock.setSleepCallback(invocations::add);
+        mClock.sleep(600);
+        mClock.sleep(400);
+
+        mClock.setSleepCallback(null);
+        mClock.sleep(1000);
+        assertThat(invocations.toArray()).isEqualTo(new Object[] { 600L, 400L });
+        assertThat(mClock.elapsedRealtime()).isEqualTo(3500);
     }
 
 }

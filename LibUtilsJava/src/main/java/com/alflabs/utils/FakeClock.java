@@ -18,8 +18,12 @@
 
 package com.alflabs.utils;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+
 public class FakeClock implements IClock {
     private long mNow;
+    private final AtomicReference<Consumer<Long>> mSleepCallback = new AtomicReference<>(null);
 
     public FakeClock(long now) {
         mNow = now;
@@ -48,10 +52,23 @@ public class FakeClock implements IClock {
         if (sleepTimeMs > 0) {
             add(sleepTimeMs);
         }
+        Consumer<Long> callback = mSleepCallback.get();
+        if (callback != null) {
+            callback.accept(sleepTimeMs);
+        }
     }
 
     @Override
     public void sleepWithInterrupt(long sleepTimeMs) throws InterruptedException {
         sleep(sleepTimeMs);
+    }
+
+    /**
+     * Sets a callback to be called when {@link #sleep(long)} or {@link #sleepWithInterrupt(long)}
+     * are invoked. The argument to the callback is the sleepTimeMs. Use null to remove any
+     * current callback.
+     */
+    public void setSleepCallback(Consumer<Long> sleepCallback) {
+        mSleepCallback.set(sleepCallback);
     }
 }
