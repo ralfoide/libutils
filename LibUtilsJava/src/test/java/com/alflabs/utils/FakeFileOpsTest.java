@@ -91,4 +91,11 @@ public class FakeFileOpsTest {
 
         assertThat(mOps.readBytes(f)).isEqualTo("Third part".getBytes(Charsets.UTF_8));
     }
+
+    @Test
+    public void testToFile() {
+        assertThat(mOps.toFile("name")).isEqualTo(new File("name"));
+        assertThat(mOps.toFile("path1", "path2", "path3", "name")).isEqualTo(
+                new File(new File(new File("path1", "path2"), "path3"), "name"));
+    }
 }

@@ -145,4 +145,13 @@ public class FileOps {
         return new FileWriter(file, append);
     }
 
+    /** Utility method that converts a list of "folder1/...folderN/leafName" to a File. */
+    @NonNull
+    public File toFile(@NonNull String...names) {
+        File f = null;
+        for (String name : names) {
+            f = f == null ? new File(name) : new File(f, name);
+        }
+        return f;
+    }
 }
