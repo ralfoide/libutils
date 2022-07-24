@@ -22,20 +22,40 @@ import com.alflabs.annotations.NonNull;
 import com.alflabs.annotations.Null;
 
 /**
- * Implementation of {@link ILogger} that outputs to a string.
+ * Implementation of {@link ILogger} that outputs to a string and optionally also outputs to
+ * {@link System#out}.
  */
 public class StringLogger implements ILogger {
 
+    private final boolean mSysOut;
     private final StringBuilder mStringBuilder = new StringBuilder();
+
+    /** Default constructor that does not enable the {@link System#out output. */
+    public StringLogger() {
+        mSysOut = false;
+    }
+
+    /** Secondary constructor that enables the {@link System#out output. */
+    public StringLogger(boolean useSysOut) {
+        mSysOut = useSysOut;
+    }
 
     @Override
     public void d(@NonNull String tag, @NonNull String message) {
-        mStringBuilder.append(tag).append(": ").append(message).append('\n');
+        String s = tag + ": " + message;
+        mStringBuilder.append(s).append('\n');
+        if (mSysOut) {
+            System.out.println(s);
+        }
     }
 
     @Override
     public void d(@NonNull String tag, @NonNull String message, @Null Throwable tr) {
-        mStringBuilder.append(tag).append(": ").append(message).append(": ").append(tr).append('\n');
+        String s = tag + ": " + message + ": " + tr;
+        mStringBuilder.append(s).append('\n');
+        if (mSysOut) {
+            System.out.println(s);
+        }
     }
 
     public String getString() {
