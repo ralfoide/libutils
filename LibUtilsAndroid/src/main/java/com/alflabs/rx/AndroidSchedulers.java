@@ -36,7 +36,7 @@ public class AndroidSchedulers {
     }
 
     static class MainThreadHandler implements IScheduler {
-        private Handler mHandler = new Handler();
+        private final Handler mHandler = new Handler();
 
         @Override
         public void invoke(@NonNull Runnable runnable) {
