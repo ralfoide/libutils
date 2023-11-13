@@ -19,6 +19,8 @@
 apply plugin: "com.android.library"
 
 android {
+    namespace "com.alflabs.libutils"
+
     compileSdkVersion 32
 
     defaultConfig {
@@ -35,6 +37,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     compileOptions {

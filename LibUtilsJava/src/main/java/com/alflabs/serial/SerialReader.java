@@ -325,7 +325,7 @@ public class SerialReader implements Iterable<SerialReader.Entry> {
                 L |= L2 & 0x0FFFFFFFFL;
 
                 if (type == TYPE_LONG) {
-                    mData.put(id, new Long(L));
+                    mData.put(id, Long.valueOf(L));
                 } else {
                     double d = Double.longBitsToDouble(L);
                     mData.put(id, Double.valueOf(d));
