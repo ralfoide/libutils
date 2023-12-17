@@ -43,8 +43,8 @@ dependencies {
     implementation "com.google.guava:guava:32.0.1-jre"
 
     // Used by InjectionValidator
-    implementation "com.google.truth:truth:1.1.3"
-    def dagger_version = "2.41"
+    implementation "com.google.truth:truth:1.1.5"
+    def dagger_version = "2.49"
     implementation "com.google.dagger:dagger:$dagger_version"
 
     // Testing: Mockito and Truth
