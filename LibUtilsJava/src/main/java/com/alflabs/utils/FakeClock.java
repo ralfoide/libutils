@@ -48,6 +48,11 @@ public class FakeClock implements IClock {
     }
 
     @Override
+    public long nanoTime() {
+        return elapsedRealtime() * 1000 * 1000; // millis to nanos
+    }
+
+    @Override
     public void sleep(long sleepTimeMs) {
         if (sleepTimeMs > 0) {
             add(sleepTimeMs);

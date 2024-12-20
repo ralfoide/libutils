@@ -38,6 +38,11 @@ public class MockClock implements IClock {
     }
 
     @Override
+    public long nanoTime() {
+        return elapsedRealtime() * 1000 * 1000; // millis to nanos
+    }
+
+    @Override
     public void sleep(long ms) {
         mUptimeMillis += ms;
         mElapsedRealtime += ms;

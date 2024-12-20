@@ -30,6 +30,11 @@ public class JavaClock implements IClock {
     }
 
     @Override
+    public long nanoTime() {
+        return System.nanoTime();
+    }
+
+    @Override
     public void sleep(long sleepTimeMs) {
         try {
             sleepWithInterrupt(sleepTimeMs);

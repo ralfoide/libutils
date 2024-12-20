@@ -33,6 +33,16 @@ public interface IClock {
     long uptimeMillis();
 
     /**
+     * Returns {@code System#nanoTime()}:
+     * This method provides nanosecond precision, but not necessarily nanosecond resolution
+     * (that is, how frequently the value changes) - no guarantees are made except that the
+     * resolution is at least as good as that of currentTimeMillis().
+     * <p/>
+     * The values wrap approximately 292 years and are not related to wall clock time.
+     */
+    long nanoTime();
+
+    /**
      * Calls {@link Thread#sleep(long)}, ignoring interrupted exceptions
      * (if you really need the interrupted state, then use {@link #sleepWithInterrupt(long)}).
      *
