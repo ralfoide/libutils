@@ -8,11 +8,14 @@ __LibUtils__ is collection of utilities used by all my projects.
 
 The git repo is organized using branches:
 
-* __android-lib-v2__ is the latest branch.
+* __android-lib-v3__ is the latest branch.
     This collection of utility classes is split int a plain Java
     library and an Android library.
     It relies on Gradle and is designed to be integrated into Android
     Studio or IJ Community projects using a simple git submodule import.
+
+* __android-lib-v2__ is very close to v3. It keeps compatibility with
+    older versions of Java and Android (mostly before streams).
 
 * __android-lib-v1__ and __android-lib__ are obsolete versions of the
     Android library. The plain Java library had not been extracted yet.
@@ -27,17 +30,20 @@ The git repo is organized using branches:
 ## Content
 
 Here's a non-exhaustive list of goodies available in the current
-__android-lib-v2__ branch:
+__android-lib-v3__ branch:
 
- * __com.alflabs.rx__: A simplified, lightweight implementation of
+ * [__com.alflabs.rx__](LibUtilsJava/src/main/java/com/alflabs/rx):
+   A simplified, lightweight implementation of
    __Reactive Streams__. It is not RxJava compatible. Exists both for
    Java projects and Android projects.
 
-* __com.alflabs.kv__: A key-value network server/client. The server
+* [__com.alflabs.kv__](LibUtilsJava/src/main/java/com/alflabs/kv):
+    A key-value network server/client. The server
     publishes simple key/value pairs and automatically synchronizes
     changed values between the server and all clients.
 
-* __com.alflabs.serial__: A simplified object serialization mechanism
+* [__com.alflabs.serial__](LibUtilsJava/src/main/java/com/alflabs/serial): 
+    A simplified object serialization mechanism
     to encode plain Java objects into strings or integer arrays and
     later deserialize them. It is platform independent.
     Comes with an Android specific async file writer/reader.
