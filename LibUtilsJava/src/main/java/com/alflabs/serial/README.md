@@ -13,7 +13,7 @@ It comes with an Android specific async file writer/reader.
 ## Distribution
 
 __LibUtils Serial__ is bundled as part of the
-[https://bitbucket.org/ralfoide/libutils](LibUtils project).
+[LibUtils project](https://bitbucket.org/ralfoide/libutils).
 
 
 ## License

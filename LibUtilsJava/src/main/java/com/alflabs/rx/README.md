@@ -9,7 +9,7 @@ Java projects and Android projects.
 ## Rationale
 
 If you are not familiar with the concept of __Reactive Streams__,
-consider reading http://reactivex.io/ to get an introduction on the concept,
+consider reading https://reactivex.io to get an introduction on the concept,
 and https://github.com/ReactiveX/RxJava to understand the popular RxJava
 implementation.
 
