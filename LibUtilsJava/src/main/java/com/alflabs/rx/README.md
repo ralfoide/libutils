@@ -76,7 +76,7 @@ A processor processes data from an input stream and sends it to an output stream
 ## Distribution
 
 __LibUtils RX Java__ is bundled as part of the
-[https://bitbucket.org/ralfoide/libutils](LibUtils project).
+[LibUtils project](https://bitbucket.org/ralfoide/libutils).
 
 
 ## License
