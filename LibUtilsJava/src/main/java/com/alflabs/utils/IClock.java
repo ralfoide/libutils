@@ -33,10 +33,12 @@ public interface IClock {
     long uptimeMillis();
 
     /**
-     * Returns {@code System#nanoTime()}:
+     * Returns {@code SystemClock#elapsedRealtimeNanos()} or {@code System#nanoTime()}:
      * This method provides nanosecond precision, but not necessarily nanosecond resolution
      * (that is, how frequently the value changes) - no guarantees are made except that the
      * resolution is at least as good as that of currentTimeMillis().
+     * <p/>
+     * On Android, returns nanoseconds since boot, including time spent in sleep.
      * <p/>
      * The values wrap approximately 292 years and are not related to wall clock time.
      */

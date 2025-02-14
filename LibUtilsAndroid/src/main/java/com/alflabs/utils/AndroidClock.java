@@ -45,6 +45,17 @@ public class AndroidClock implements IClock {
     }
 
     /**
+     * Returns {@link SystemClock#elapsedRealtimeNanos()}:
+     * Returns nanoseconds since boot, including time spent in sleep.
+     *
+     * @see SystemClock#elapsedRealtimeNanos()
+     */
+    @Override
+    public long nanoTime() {
+        return SystemClock.elapsedRealtimeNanos();
+    }
+
+    /**
      * Calls {@link Thread#sleep(long)}.
      *
      * @see Thread#sleep(long)
