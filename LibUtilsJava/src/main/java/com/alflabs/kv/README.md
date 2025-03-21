@@ -15,7 +15,7 @@ It's designed to run on a trusted local closed network.
 ## Distribution
 
 __LibUtils KV__ is bundled as part of the
-[LibUtils project](https://bitbucket.org/ralfoide/libutils).
+[LibUtils project](https://github.com/ralfoide/libutils).
 
 
 ## License
