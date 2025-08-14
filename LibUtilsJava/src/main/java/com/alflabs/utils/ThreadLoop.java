@@ -20,9 +20,13 @@ package com.alflabs.utils;
 
 import com.google.common.base.Strings;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 public abstract class ThreadLoop implements IStartStop {
     protected Thread mThread;
     protected volatile boolean mQuit;
+    private final CountDownLatch mLatchEndLoop = new CountDownLatch(1);
 
     @Override
     public void start() throws Exception {
@@ -41,12 +45,37 @@ public abstract class ThreadLoop implements IStartStop {
         }
     }
 
+    /**
+     * Stops the thread if running.
+     * This sets the 'mQuit' flag, interrupts the thread, and joins it.
+     */
     @Override
     public void stop() throws Exception {
         if (mThread != null) {
             Thread t = mThread;
             mThread = null;
             mQuit = true;
+            t.interrupt();
+            t.join();
+        }
+    }
+
+    /**
+     * Stops the thread if running but give the thread a preemtive warning with
+     * a timeout to give it a chance to quit before being interrupted.
+     * This sets the 'mQuit' flag, waits the given timeout, and only then interrupts the thread,
+     * and joins it.
+     * This gives a chance to the running thread to finish pending operations as soon as the
+     * 'mQuit' flag is set and before the thread is interrupted. This can help finalize any pending
+     * IOs instead of interrupting them immediately.
+     */
+    public void stopWithPreTimeout(long timeout, TimeUnit unit) throws Exception {
+        if (mThread != null) {
+            Thread t = mThread;
+            mThread = null;
+            mQuit = true;
+            //noinspection ResultOfMethodCallIgnored
+            mLatchEndLoop.await(timeout, unit);
             t.interrupt();
             t.join();
         }
@@ -66,6 +95,7 @@ public abstract class ThreadLoop implements IStartStop {
                             "] unhandled exception: " + t);
         } finally {
             _afterThreadLoop();
+            mLatchEndLoop.countDown();
         }
     }
 
@@ -79,5 +109,4 @@ public abstract class ThreadLoop implements IStartStop {
 
     /** Called once after the last {@code _runInThreadLoop} call. */
     protected void _afterThreadLoop() {}
-
 }
