@@ -32,13 +32,17 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A "fake" version of FileOps for testing that keeps all files generated in memory and
- * only can only read from files that were previous written (into memory).
+ * can only read from files that were previous written (into memory).
  */
 public class FakeFileOps extends FileOps {
 
@@ -184,5 +188,59 @@ public class FakeFileOps extends FileOps {
             throw new FileNotFoundException(file.getPath());
         }
         return content;
+    }
+
+    /**
+     * Lists the content of the given directory, non-recursively.
+     * <br/>
+     * In this unit-test fake utility, this will only list files that have been
+     * previously created in-memory (only files are kept, so no directories are returned).
+     *
+     * @param directory       The source directory to list. It must exist.
+     * @param globPattern     A non-null pattern to select content to list.
+     *                        An empty string returns everything.
+     * @param listFiles       Whether to include files in the result.
+     * @param listDirectories Whether to include directories in the result.
+     * @return A non-null, possibly empty, list of files or directories in the source directory.
+     * @throws IOException if the input is not a directory or there's an error reading it.
+     */
+    public List<File> listDirectory(
+            @NonNull File directory,
+            @NonNull String globPattern,
+            boolean listFiles,
+            boolean listDirectories) throws IOException {
+        List<File> result = new ArrayList<>();
+
+        String dirPath = directory.getPath();
+        if (!isDir(directory)) {
+            throw new IOException("Input is not a directory: " + dirPath);
+        }
+
+        if (globPattern == null || globPattern.isEmpty()) {
+            globPattern = "*";
+        }
+
+        // Transform the globPattern into a regex that can be used with the file map.
+        if (globPattern.charAt(0) != '/' && globPattern.charAt(0) != '\\') {
+            globPattern = File.separator + globPattern;
+        }
+        globPattern = globPattern
+                .replace("\\", "\\\\")
+                .replace(".", "\\.")
+                .replace("?", ".")
+                .replace("*", "[^/\\\\]+")
+                + "$";
+        Pattern pattern = Pattern.compile(globPattern);
+
+        for (String path : mPathContentMap.keySet()) {
+            if (path.startsWith(dirPath)) {
+                Matcher m = pattern.matcher(path.substring(dirPath.length()));
+                if (m.matches()) {
+                    result.add(new File(path));
+                }
+            }
+        }
+
+        return result;
     }
 }

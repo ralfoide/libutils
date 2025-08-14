@@ -31,6 +31,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -72,9 +76,9 @@ public class FileOps {
     /**
      * Reads all characters from a file into a {@link String}, using the given character set.
      *
-     * @param file The file to read from.
+     * @param file    The file to read from.
      * @param charset The charset used to decode the input stream; see {@link StandardCharsets} for
-     *     helpful predefined constants.
+     *                helpful predefined constants.
      * @return a string containing all the characters from the file.
      * @throws IOException if an I/O error occurs.
      */
@@ -89,7 +93,7 @@ public class FileOps {
      * @param file The file to read from
      * @return A non-null {@link Properties} object.
      * @throws FileNotFoundException if the file does not exist.
-     * @throws IOException if the file cannot be parsed into properties.
+     * @throws IOException           if the file cannot be parsed into properties.
      */
     @NonNull
     public Properties getProperties(@NonNull File file) throws IOException {
@@ -121,7 +125,7 @@ public class FileOps {
     /**
      * Reads all bytes from file as a byte array.
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException              if an I/O error occurs
      * @throws IllegalArgumentException if the file is bigger than MAX_INT (2^31-1)
      * @see Files#toByteArray(File)
      */
@@ -145,13 +149,75 @@ public class FileOps {
         return new FileWriter(file, append);
     }
 
-    /** Utility method that converts a list of "folder1/...folderN/leafName" to a File. */
+    /**
+     * Utility method that converts a list of "folder1/...folderN/leafName" to a File.
+     */
     @NonNull
-    public File toFile(@NonNull String...names) {
+    public File toFile(@NonNull String... names) {
         File f = null;
         for (String name : names) {
             f = f == null ? new File(name) : new File(f, name);
         }
         return f;
+    }
+
+    /**
+     * Lists the content of the given directory, non-recursively.
+     *
+     * @param directory       The source directory to list. It must exist.
+     * @param globPattern     A non-null pattern to select content to list.
+     *                        An empty string returns everything.
+     * @param listFiles       Whether to include files in the result.
+     * @param listDirectories Whether to include directories in the result.
+     * @return A non-null, possibly empty, list of files or directories in the source directory.
+     * @throws IOException if the input is not a directory or there's an error reading it.
+     */
+    public List<File> listDirectory(
+            @NonNull File directory,
+            @NonNull String globPattern,
+            boolean listFiles,
+            boolean listDirectories) throws IOException {
+        List<File> result = new ArrayList<>();
+
+        if (!isDir(directory)) {
+            throw new IOException("Input is not a directory: " + directory.getPath());
+        }
+
+        if (globPattern == null || globPattern.isEmpty()) {
+            globPattern = "*";
+        }
+
+        // Do this using nio
+        try (DirectoryStream<Path> stream =
+                     java.nio.file.Files.newDirectoryStream(directory.toPath(), globPattern)) {
+            for (Path path : stream) {
+                File file = path.toFile();
+                if ((listFiles && isFile(file)) || (listDirectories && isDir(file))) {
+                    result.add(file);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Lists the content of the given directory, non-recursively.
+     * <br/>
+     * This version includes all files and directories in the listing.
+     *
+     * @param directory The source directory to list. It must exist.
+     * @param globPattern A non-null pattern to select content to list.
+     *                    An empty string returns everything.
+     * @return A non-null, possibly empty, list of files or directories in the source directory.
+     * @throws IOException if the input is not a directory or there's an error reading it.
+     */
+    public List<File> listDirectory(
+            @NonNull File directory,
+            @NonNull String globPattern) throws IOException {
+        return listDirectory(
+                directory,
+                globPattern,
+                /*listFiles=*/ true,
+                /*listDirectories=*/ true);
     }
 }

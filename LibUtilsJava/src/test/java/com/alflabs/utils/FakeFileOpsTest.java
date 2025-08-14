@@ -98,4 +98,27 @@ public class FakeFileOpsTest {
         assertThat(mOps.toFile("path1", "path2", "path3", "name")).isEqualTo(
                 new File(new File(new File("path1", "path2"), "path3"), "name"));
     }
+
+    @Test
+    public void testListDirectory() throws IOException {
+        byte[] content = "File-Content".getBytes(Charsets.UTF_8);
+        mOps.writeBytes(content, mOps.toFile("root", "dirA", "fileA1.txt"));
+        mOps.writeBytes(content, mOps.toFile("root", "dirA", "fileA2.tga"));
+        mOps.writeBytes(content, mOps.toFile("root", "dirA", "fileA3.txt"));
+        mOps.writeBytes(content, mOps.toFile("root", "dirA", "dirC", "fileC1.avi"));
+        mOps.writeBytes(content, mOps.toFile("root", "dirA", "dirC", "fileC2.iva"));
+        mOps.writeBytes(content, mOps.toFile("root", "dirB", "fileB1.jpg"));
+        mOps.writeBytes(content, mOps.toFile("root", "dirB", "fileB2.png"));
+
+        assertThat(mOps.listDirectory(mOps.toFile("root", "dirA"), "")).containsExactly(
+                new File(new File("root", "dirA"), "fileA1.txt"),
+                new File(new File("root", "dirA"), "fileA2.tga"),
+                new File(new File("root", "dirA"), "fileA3.txt")
+        );
+
+        assertThat(mOps.listDirectory(mOps.toFile("root", "dirA"), "*.?x?")).containsExactly(
+                new File(new File("root", "dirA"), "fileA1.txt"),
+                new File(new File("root", "dirA"), "fileA3.txt")
+        );
+    }
 }
