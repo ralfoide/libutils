@@ -22,12 +22,14 @@ public interface IClock {
 
     /**
      * Returns {@code SystemClock#elapsedRealtime()}:
+     * On JVM, returns the current time in milliseconds since the unix epoch.
      * On Android, returns milliseconds since boot, including time spent in sleep.
      */
     long elapsedRealtime();
 
     /**
      * Returns {@code SystemClock#uptimeMillis()}:
+     * On JVM, returns the current time in milliseconds since the unix epoch.
      * On Android, returns milliseconds since boot, not counting time spent in deep sleep.
      */
     long uptimeMillis();
