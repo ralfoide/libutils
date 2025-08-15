@@ -40,9 +40,9 @@ import java.util.Properties;
 /**
  * Utility class that executes methods from Java's {@link File} or Guava's {@link Files}
  * in a way that is easy to mock.
- * <p/>
- * This does not have an automatic dagger inject constructor. Instead it would typically
- * provided explicitly in a module, which allows unit tests to override it easily:
+ * <br/>
+ * This does not have an automatic dagger inject constructor. Instead, it would typically
+ * be provided explicitly by a module, which allows unit tests to override it easily:
  * <pre>
  *     \@Singleton
  *     \@Provides
@@ -50,6 +50,12 @@ import java.util.Properties;
  *         return new FileOps();
  *     }
  * </pre>
+ * Dagger test modules will likely want to inject the {@link FakeFileOps} class instead.
+ * <br/>
+ * Deprecation warnings: This class uses a number of now-deprecated Java IO APIs, most of which
+ * have NIO replacements. The class needs to have source compatibility with old pre-Java 8 and old
+ * Android projects. As such shall continue using the deprecated yet perfectly functional APIs as
+ * long as possible.
  */
 public class FileOps {
 
@@ -84,6 +90,7 @@ public class FileOps {
      */
     @NonNull
     public String toString(@NonNull File file, @NonNull Charset charset) throws IOException {
+        //noinspection deprecation
         return Files.toString(file, charset);
     }
 
@@ -98,6 +105,7 @@ public class FileOps {
     @NonNull
     public Properties getProperties(@NonNull File file) throws IOException {
         Properties props = new Properties();
+        //noinspection IOStreamConstructor
         props.load(new FileInputStream(file));
         return props;
     }
