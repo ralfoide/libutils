@@ -19,6 +19,8 @@
 package com.alflabs.rx;
 
 import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import com.alflabs.annotations.NonNull;
 import com.alflabs.func.RConsumer;
 
@@ -29,14 +31,27 @@ public class AndroidSchedulers {
     /** Scheduler that executes operations on the Android main thread. */
     public static IScheduler mainThread() {
         if (sHandler == null) {
-            sHandler = new MainThreadHandler();
+            sHandler = new MainThreadHandler(Looper.getMainLooper());
         }
 
         return sHandler;
     }
 
-    static class MainThreadHandler implements IScheduler {
-        private final Handler mHandler = new Handler();
+    /** Scheduler that executes operations on the Android current local thread. */
+    public static IScheduler localThread() {
+        if (sHandler == null) {
+            sHandler = new MainThreadHandler(Looper.myLooper());
+        }
+
+        return sHandler;
+    }
+
+    private static class MainThreadHandler implements IScheduler {
+        private final Handler mHandler;
+
+        public MainThreadHandler(@NonNull Looper looper) {
+            mHandler = new Handler(looper);
+        }
 
         @Override
         public void invoke(@NonNull Runnable runnable) {
@@ -45,7 +60,13 @@ public class AndroidSchedulers {
 
         @Override
         public <T> void invoke(@NonNull RConsumer<? super T> consumer, T value) {
-            mHandler.post(() -> consumer.accept(value));
+            mHandler.post(() -> {
+                try {
+                    consumer.accept(value);
+                } catch (Exception e) {
+                    Log.e("RX MainThreadHandler", "Invoke exception", e);
+                }
+            });
         }
     }
 }

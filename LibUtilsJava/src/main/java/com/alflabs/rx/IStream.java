@@ -54,11 +54,15 @@ public interface IStream<Event> extends _IPublishOnStream<Event> {
     @NonNull
     IStream<Event> publishWith(@NonNull IScheduler scheduler, @NonNull IGenerator<? extends Event> publisher);
 
-    /** Add a subscriber to the stream. */
+    /** Add a subscriber to the stream.
+     *  The subscriber is not added if already present.
+     */
     @NonNull
     IStream<Event> subscribe(@NonNull ISubscriber<? super Event> subscriber);
 
-    /** Add a subscriber to the stream, operating on the specified scheduler. */
+    /** Add a subscriber to the stream, operating on the specified scheduler.
+     *  The subscriber is not added if already present.
+     */
     @NonNull
     IStream<Event> subscribe(@NonNull IScheduler scheduler, @NonNull ISubscriber<? super Event> subscriber);
 
