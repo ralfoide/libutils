@@ -295,12 +295,17 @@ class _Stream<Event> implements IStream<Event> {
     }
 
     private void send() {
-        if (mState == State.CLOSED || mEvents.isEmpty()) {
+        if (mState == State.CLOSED) {
             return;
+        }
+        synchronized (mEvents) {
+            if (mEvents.isEmpty()) {
+                return;
+            }
         }
 
         mScheduler.invoke(() -> {
-            for(; !mEvents.isEmpty(); ) {
+            while (true) {
                 if (mState == State.IDLE || mState == State.PAUSED || mState == State.CLOSED) {
                     return;
                 }
@@ -308,7 +313,10 @@ class _Stream<Event> implements IStream<Event> {
                 Event e;
                 try {
                     synchronized (mEvents) {
-                         e = mEvents.removeFirst();
+                        if (mEvents.isEmpty()) {
+                            return;
+                        }
+                        e = mEvents.removeFirst();
                     }
                 } catch (NoSuchElementException ignore) {
                     break;
