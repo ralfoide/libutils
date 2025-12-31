@@ -46,11 +46,23 @@ public interface IStream<Event> extends _IPublishOnStream<Event> {
     @NonNull
     IStream<Event> on(@NonNull IScheduler scheduler);
 
-    /** Add a publisher to the stream. */
+    /** Add a publisher to the stream.
+     * <p/>
+     * This is a no-op if the publisher has already been added.
+     * <p/>
+     * The publisher is added by the scheduler. If the scheduler is asynchronous,
+     * publish calls will be no-op until the publisher is added.
+     */
     @NonNull
     IStream<Event> publishWith(@NonNull IGenerator<? extends Event> publisher);
 
-    /** Add a publisher to the stream, operating on the specified scheduler. */
+    /** Add a publisher to the stream, operating on the specified scheduler.
+     * <p/>
+     * This is a no-op if the publisher has already been added.
+     * <p/>
+     * The publisher is added by the scheduler. If the scheduler is asynchronous,
+     * publish calls will be no-op until the publisher is added.
+     */
     @NonNull
     IStream<Event> publishWith(@NonNull IScheduler scheduler, @NonNull IGenerator<? extends Event> publisher);
 
