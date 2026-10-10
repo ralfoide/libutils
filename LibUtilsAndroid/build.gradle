@@ -21,11 +21,11 @@ apply plugin: "com.android.library"
 android {
     namespace "com.alflabs.libutils"
 
-    compileSdkVersion 36
+    compileSdkVersion 37
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 36
+        targetSdkVersion 37
         versionCode 1
         versionName "1.0"
 
