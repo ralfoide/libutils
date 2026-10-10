@@ -90,8 +90,7 @@ public class FileOps {
      */
     @NonNull
     public String toString(@NonNull File file, @NonNull Charset charset) throws IOException {
-        //noinspection deprecation
-        return Files.toString(file, charset);
+        return Files.asCharSource(file, charset).read();
     }
 
     /**
