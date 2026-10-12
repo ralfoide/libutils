@@ -23,6 +23,8 @@ android {
 
     compileSdkVersion 37
 
+    enableKotlin = false
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 37
