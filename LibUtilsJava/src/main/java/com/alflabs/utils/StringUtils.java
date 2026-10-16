@@ -48,4 +48,13 @@ public class StringUtils {
         return filePath;
     }
 
+    public static boolean isNullOrEmpty(@Null String str) {
+        return str == null || str.length() == 0;
+    }
+
+    @NonNull
+    public static String nullToEmpty(@Null String str) {
+        return str == null ? "" : str;
+    }
+
 }
