@@ -4,6 +4,7 @@
 
 __LibUtils__ is collection of utilities used by all my projects.
 
+
 ## Versions
 
 The git repo is organized using branches:
@@ -27,6 +28,7 @@ The git repo is organized using branches:
     them to get app projects up and running quickly back in the days.)
     This repo is now considered obsolete.
 
+
 ## Content
 
 Here's a non-exhaustive list of goodies available in the current
@@ -42,7 +44,7 @@ __android-lib-v3__ branch:
     publishes simple key/value pairs and automatically synchronizes
     changed values between the server and all clients.
 
-* [__com.alflabs.serial__](LibUtilsJava/src/main/java/com/alflabs/serial): 
+* [__com.alflabs.serial__](LibUtilsJava/src/main/java/com/alflabs/serial):
     A simplified object serialization mechanism
     to encode plain Java objects into strings or integer arrays and
     later deserialize them. It is platform independent.
@@ -70,6 +72,45 @@ __android-lib-v3__ branch:
     to several projects. Also contains Android __ApiHelper__
     compatibility stubs to backport from API 19 back to API 9.
 
+
+## Gradle Usage
+
+This library is not exported to Maven Central
+(I'm not familiar enough with publishing Maven artifacts and CI/Travis testing... contributions welcome).
+
+To use it, get the source via a Git Submodule as well as its dependencies:
+
+```shell
+$ git submodule add "https://github.com/ralfoide/libutils.git" LibUtils
+```
+
+`settings.gradle.kts`:
+```
+include(":LibUtilsJava")
+project(":LibUtilsJava").projectDir = File(rootProject.projectDir, "LibUtils/LibUtilsJava")
+include(":LibUtilsAndroid")
+project(":LibUtilsAndroid").projectDir = File(rootProject.projectDir, "LibUtils/LibUtilsAndroid")
+
+```
+
+`build.gradle.kts`:
+```
+dependencies {
+    implementation(project(":LibUtilsJava"))
+    implementation(project(":LibUtilsAndroid"))
+}
+```
+
+If you prefer, you can also build a JAR and an AAR library directly:
+
+```shell
+$ cd LibUtils
+$ ./_gradlew.sh assemble test
+$ ls LibUtilsJava/build/libs/*.jar
+$ ls LibUtilsAndroid/build/outputs/aar/*.aar
+```
+
+
 ## License
 
 LibUtils is licensed under the __GNU GPL v3 license__.
@@ -90,3 +131,5 @@ LibUtils is licensed under the __GNU GPL v3 license__.
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 The full GPL license is available in the file "LICENSE-gpl-3.0.txt".
+
+~~
