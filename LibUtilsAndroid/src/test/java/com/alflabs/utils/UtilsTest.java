@@ -29,7 +29,7 @@ import org.robolectric.annotation.Config;
 import java.io.Serializable;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 16)
+@Config(manifest = Config.NONE, sdk = 23)
 public class UtilsTest {
     @Rule public final Expect expect = Expect.create();
 
