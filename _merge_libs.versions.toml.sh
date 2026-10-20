@@ -7,27 +7,38 @@ SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 SRC="${SCRIPT_DIR}/gradle/libs.versions.toml"
 
 DRY="echo"
-if [[ "$1" == "-f" ]]; then
-  DRY=""
-  shift
-fi
+DST=""
 
-DST="$1" ; shift
+# Parse flags
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -f)
+        DRY=""
+        shift
+        ;;
+    *)
+        DST="$1"
+        shift
+        ;;
+  esac
+done
+
+
 NEW="${DST}.new"
-if [[ ! -f "$DST" || ! "$DST"  =~ libs.versions.toml$ ]]; then
+if [[ -z "$DST" || ! -f "$DST" || ! "$DST"  =~ libs.versions.toml$ ]]; then
   echo "Usage: $0 [-f] top-level-project/gradle/libs.versions.toml"
+  echo "  -f : Apply changes to file (default is dry-run mode)"
   echo
   echo "This populates the target libs.versions.toml with all entries needed"
-  echo "by LibUtils if not already defined"
-  echo
-  echo "Default is a dry-mode. Use -f to actual modify target libs.versions.toml file."
+  echo "by LibUtils if not already defined."
   echo
   exit 1
 fi
 
-if [[ "$1" == "-f" ]]; then
-  DRY=""
-  shift
+if [[ ! -f "$SRC" ]]; then
+  echo "Error: Source not found at $SRC"
+  echo
+  exit 1
 fi
 
 
@@ -38,12 +49,14 @@ function read_keys() {
   local LINE
   local KEY
   local SECTION=""
+  local SECTION_FOUND=""
 
   while IFS= read -r LINE || [[ -n "$LINE" ]]; do
     if [[ "$LINE" =~ [^[:space:]] ]]; then
-      if [[ "$LINE" =~ .*\[ ]]; then
+      if [[ "$LINE" =~ ^[^#]*\[ ]]; then
         SECTION="${LINE//[ \[\]]/}"
       elif [[ "$SECTION" == "$NAME" ]]; then
+        SECTION_FOUND="1"
         KEY="${LINE%%=*}"   # get first word
         KEY="${KEY// /}"    # strip spaces
         # echo "$NAME: [$KEY] = $LINE"
@@ -51,6 +64,11 @@ function read_keys() {
       fi
     fi
   done < "$FILE"
+
+  if [[ -z "$SECTION_FOUND" ]]; then
+    echo "Error: Section [$NAME] not found in $FILE"
+    exit 1
+  fi
 }
 
 function find_missing_keys() {
